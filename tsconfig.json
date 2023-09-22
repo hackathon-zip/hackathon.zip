@@ -13,8 +13,10 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "db": ["lib/prisma"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
