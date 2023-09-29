@@ -26,18 +26,18 @@ export default function Index({ hackathons }: { hackathons: Hackathon[] }): any 
         <h2>Hackathon Thing</h2>
 
         <style>{`
-        body {
-          overflow-y: hidden;
-        }
+          body {
+            overflow-y: hidden;
+          }
 
-        .project-card {
-            cursor: pointer;
-        }
+          .project-card {
+              cursor: pointer;
+          }
 
-        .project-card:hover {
-            border-color: white!important;
-        }
-      `}</style>
+          .project-card:hover {
+              border-color: white!important;
+          }
+        `}</style>
 
         <Drawer visible={drawerState} onClose={() => setDrawerState(false)} placement="right" style={{
                 textAlign: 'left',
