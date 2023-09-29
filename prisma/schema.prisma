@@ -7,5 +7,57 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("POSTGRES_URL")
+  url      = env("POSTGRES_PRISMA_URL")
+}
+
+model Hackathon {
+  id        String     @id @default(uuid())
+  slug      String     @unique
+  name      String
+  attendees Attendee[]
+
+  attendeeAttributes AttendeeAttribute[]
+
+  location  String?
+  startDate DateTime?
+  endDate   DateTime?
+
+  website String?
+
+  ownerId         String
+  collaboratorIds String[]
+}
+
+model AttendeeAttribute {
+  id          String    @id @default(uuid())
+  name        String
+  type        String
+  options     String[]
+  required    Boolean
+  hackathonId String
+  hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
+
+  values AttendeeAttributeValue[]
+}
+
+model AttendeeAttributeValue {
+  id          String            @id @default(uuid())
+  attendeeId  String
+  attendee    Attendee          @relation(fields: [attendeeId], references: [id])
+  formFieldId String
+  formField   AttendeeAttribute @relation(fields: [formFieldId], references: [id])
+}
+
+model Attendee {
+  id   String @id @default(uuid())
+  name String
+
+  attributeValues AttendeeAttributeValue[]
+  email           String                   @unique
+
+  checkedIn Boolean @default(false)
+  checkInKey String @unique
+
+  hackathonId String
+  hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
 }
