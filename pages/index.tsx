@@ -6,7 +6,7 @@ import prisma from "@/lib/prisma";
 import { NextApiRequest } from "next";
 import { NextServerOptions } from "next/dist/server/next";
  
-import { Hackathon } from "@prisma/client";
+import type { Hackathon } from "@prisma/client";
 import { PlusCircle } from "@geist-ui/react-icons";
 import { useState } from "react";
 import { Form } from "@/components/Form";
