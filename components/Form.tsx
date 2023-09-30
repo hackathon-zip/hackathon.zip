@@ -22,12 +22,12 @@ function InputTuple ({ disabled, getValue, updateValue, label, mb, inputs, requi
       `}</style>
       <div style={{ display: 'flex', flexDirection: 'row', gap: 0 }}>
         <div className="input-wrapper-1">
-          <Input crossOrigin disabled={disabled} label={inputs[0].label} value={getValue(inputs[0].name)} onChange={e => updateValue(inputs[0].name, e.target.value)} name={inputs[0].name} width="100%" mb={mb ?? 1} placeholder={inputs[0].placeholder} htmlType={inputs[0].type}>
+          <Input crossOrigin aria-disabled={disabled} label={inputs[0].label} value={getValue(inputs[0].name)} onChange={e => updateValue(inputs[0].name, e.target.value)} name={inputs[0].name} width="100%" mb={mb ?? 1} placeholder={inputs[0].placeholder} htmlType={inputs[0].type}>
             {label && <Text h5>{label}{required && <Required />}</Text>}
           </Input>
         </div>
         <div className="input-wrapper-2" style={{ transform: 'translateX(-1px)', clipPath: 'polygon(calc(0% + 1px) 0%, 100% 0%, 100% 100%, calc(0% + 1px) 100%)' }}>
-          <Input crossOrigin disabled={disabled} label={inputs[1].label} value={getValue(inputs[1].name)} onChange={e => updateValue(inputs[1].name, e.target.value)} name={inputs[1].name} width="100%" mb={mb ?? 1} placeholder={inputs[1].placeholder} htmlType={inputs[1].type}>
+          <Input crossOrigin aria-disabled={disabled} label={inputs[1].label} value={getValue(inputs[1].name)} onChange={e => updateValue(inputs[1].name, e.target.value)} name={inputs[1].name} width="100%" mb={mb ?? 1} placeholder={inputs[1].placeholder} htmlType={inputs[1].type}>
             {label && <Text h5>​</Text>}
           </Input>
         </div>
@@ -166,7 +166,7 @@ export function Form({ schema, submission }: { schema: FormSchema, submission: F
         onSubmit: async (e) => {
           e.preventDefault();
           setLoading(true);
-          await submission.onSubmit(values);
+          await submission.onSubmit(Object.fromEntries(Object.entries(values).map(([name, value]) => [name, (value as any).value])));
           setLoading(false);
         }
       })}>
@@ -174,7 +174,7 @@ export function Form({ schema, submission }: { schema: FormSchema, submission: F
           if ('date text email password number'.split(' ').includes(formElement.type)) {
             const element = formElement as FormTextInput;
             return (
-              <Input disabled={loading} type={getWarningStatus(element.name) ? 'error' : 'default'} value={getValue(element.name)} onChange={e => updateValue(element.name, e.target.value)} crossOrigin label={element.inlineLabel} name={element.name} width="100%" mb={1} placeholder={element.placeholder} htmlType={(element as FormTextInput).type}>
+              <Input aria-disabled={loading} type={getWarningStatus(element.name) ? 'error' : 'default'} value={getValue(element.name)} onChange={e => updateValue(element.name, e.target.value)} crossOrigin label={element.inlineLabel} name={element.name} width="100%" mb={1} placeholder={element.placeholder} htmlType={(element as FormTextInput).type}>
                 {element.label && (
                   <Text h5>{element.label}{element.required && <Required />}</Text>
                 )}

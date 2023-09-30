@@ -14,9 +14,7 @@ import { delay } from "@/lib/utils";
 import Debug from "@/components/Debug";
 import Link from "next/link";
 
-export default function Index({ hackathons }: { hackathons: Hackathon[] }): any {
-  const [drawerState, setDrawerState] = useState(false);
-  const [data, setData] = useState({});
+export default function Hackathon({ hackathon }: { hackathon: Hackathon }): any {
 
   return (
     <>
@@ -25,9 +23,6 @@ export default function Index({ hackathons }: { hackathons: Hackathon[] }): any 
           <UserButton afterSignOutUrl="/" />
         </Page.Header>
         <h2>Hackathon Thing</h2>
-        <Debug data={{ data: {
-          hello: 'world'
-        } }} />
         <SignedIn>
           <Link href="/dashboard">
             <Button>Dashboard</Button>
@@ -46,17 +41,17 @@ export default function Index({ hackathons }: { hackathons: Hackathon[] }): any 
 export const getServerSideProps = (async (context) => {
   const { userId } = getAuth(context.req);
 
-  const hackathons = await prisma.hackathon.findMany({
+  const hackathon = await prisma.hackathon.findUnique({
     where: {
-      ownerId: userId ?? undefined
+      slug: context.params?.slug
     }
   });
 
   return {
     props: {
-      hackathons
+      hackathon
     },
   };
 }) satisfies GetServerSideProps<{
-  hackathons: Hackathon[]
+  hackathon: Hackathon
 }>;

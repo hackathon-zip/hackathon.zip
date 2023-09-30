@@ -14,30 +14,26 @@ import { delay } from "@/lib/utils";
 import Debug from "@/components/Debug";
 import Link from "next/link";
 
-export default function Index({ hackathons }: { hackathons: Hackathon[] }): any {
-  const [drawerState, setDrawerState] = useState(false);
-  const [data, setData] = useState({});
+export default function Hackathon({ hackathon }: { hackathon: Hackathon | null }): any {
+  if (!hackathon){
+    return (
+      <>
+        <Page>
+          404: Not Found!
+        </Page>
+      </>
+    );
+  }
 
   return (
     <>
 			<Page>
-        <Page.Header>
-          <UserButton afterSignOutUrl="/" />
-        </Page.Header>
-        <h2>Hackathon Thing</h2>
-        <Debug data={{ data: {
-          hello: 'world'
-        } }} />
-        <SignedIn>
-          <Link href="/dashboard">
-            <Button>Dashboard</Button>
-          </Link>
-        </SignedIn>
-        <SignedOut>
-          <Link href="/sign-in/">
-            <Button>Sign In</Button>
-          </Link>
-        </SignedOut>
+        <h1>{hackathon?.name}</h1>
+        <h3>
+          {hackathon.startDate && new Date(hackathon.startDate).toLocaleString()}{' to '}
+          {hackathon.endDate && new Date(hackathon.endDate).toLocaleString()} at {hackathon?.location}
+        </h3>
+        <code>/{hackathon?.slug}</code>
       </Page>
     </>
   );
@@ -45,18 +41,27 @@ export default function Index({ hackathons }: { hackathons: Hackathon[] }): any 
 
 export const getServerSideProps = (async (context) => {
   const { userId } = getAuth(context.req);
+  if(context.params?.slug){
+    const hackathon = await prisma.hackathon.findUnique({
+      where: {
+        slug: context.params?.slug.toString() // this is very jank because Next.js types
+      }
+    });
+    return {
+      props: {
+        hackathon
+      },
+    };
+  }
+  else {
+    return {
+      props: {
+        hackathon: null
+      },
+    };
+  }
 
-  const hackathons = await prisma.hackathon.findMany({
-    where: {
-      ownerId: userId ?? undefined
-    }
-  });
-
-  return {
-    props: {
-      hackathons
-    },
-  };
+  
 }) satisfies GetServerSideProps<{
-  hackathons: Hackathon[]
+  hackathon: Hackathon | null
 }>;
