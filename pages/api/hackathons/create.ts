@@ -21,9 +21,9 @@ export default async function handler (req: NextApiRequest, res: NextApiResponse
             }
         });
 
-        console.log(hackathon);
+        console.log({ hackathon });
         
-        return res.json({ hackathon });
+        res.redirect(`/${hackathon.slug}`)
     } catch (error) {
         console.error(error);
         return res.status(400).json({error})

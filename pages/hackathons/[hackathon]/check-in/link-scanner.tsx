@@ -16,8 +16,8 @@ export default function LinkScanner () {
                 scale: 4,
                 width: 500,
                 color: {
-                dark: '#000000FF',
-                light: '#FFFFFFFF',
+                    dark: '#000000FF',
+                    light: '#FFFFFFFF',
                 },
             }}
         />

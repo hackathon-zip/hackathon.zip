@@ -5,14 +5,17 @@ import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import prisma from "@/lib/prisma";
 import { NextApiRequest } from "next";
 import { NextServerOptions } from "next/dist/server/next";
+
  
 import type { Hackathon } from "@prisma/client";
 import { PlusCircle } from "@geist-ui/react-icons";
-import { useState } from "react";
+import React, { useState } from "react";
+import type { ReactElement } from "react";
 import { Form } from "@/components/Form";
 import { delay } from "@/lib/utils";
 import Debug from "@/components/Debug";
 import Link from "next/link";
+import HackathonLayout from "@/components/HackathonLayout";
 
 export default function Hackathon({ hackathon }: { hackathon: Hackathon | null }): any {
   if (!hackathon){
@@ -25,9 +28,11 @@ export default function Hackathon({ hackathon }: { hackathon: Hackathon | null }
     );
   }
 
+  console.log('hi');
+
   return (
     <>
-			<Page>
+      <Page>
         <h1>{hackathon?.name}</h1>
         <h3>
           {hackathon.startDate && new Date(hackathon.startDate).toLocaleString()}{' to '}
@@ -39,13 +44,34 @@ export default function Hackathon({ hackathon }: { hackathon: Hackathon | null }
   );
 }
 
+Hackathon.getLayout = function getLayout(page: ReactElement) {
+    return (
+      <HackathonLayout>
+        {page}
+      </HackathonLayout>
+    )
+  }
+  
 export const getServerSideProps = (async (context) => {
   const { userId } = getAuth(context.req);
+
+  console.log({ userId })
+
   if(context.params?.slug){
     const hackathon = await prisma.hackathon.findUnique({
-      where: {
-        slug: context.params?.slug.toString() // this is very jank because Next.js types
-      }
+        where: {
+            slug: context.params?.slug.toString(),
+            OR: [
+                {
+                    ownerId: userId ?? undefined,
+                },
+                {
+                    collaboratorIds: {
+                        has: userId
+                    }
+                }
+            ]
+        }
     });
     return {
       props: {

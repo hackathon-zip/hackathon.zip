@@ -17,7 +17,7 @@ export default function Navbar ({ breadcrumbs }: { breadcrumbs: any }) {
       }}>
   
         <Breadcrumbs>
-          <Breadcrumbs.Item href="/dashboard"><HomeIcon /></Breadcrumbs.Item>
+          <Breadcrumbs.Item nextLink href="/dashboard"><HomeIcon /></Breadcrumbs.Item>
           {breadcrumbs}
           {/* <Breadcrumbs.Item href=""><Inbox /> Inbox</Breadcrumbs.Item>
           <Breadcrumbs.Item>Page</Breadcrumbs.Item> */}
@@ -30,4 +30,4 @@ export default function Navbar ({ breadcrumbs }: { breadcrumbs: any }) {
   
       </nav>
     )
-  }
+}

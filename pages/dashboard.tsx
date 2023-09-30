@@ -13,6 +13,7 @@ import { Form } from "@/components/Form";
 import { delay } from "@/lib/utils";
 import Debug from "@/components/Debug";
 import Navbar from "@/components/Navbar";
+import Link from "next/link";
 
 export default function Index({ hackathons }: { hackathons: Hackathon[] }): any {
   const [drawerState, setDrawerState] = useState(false);
@@ -68,12 +69,12 @@ export default function Index({ hackathons }: { hackathons: Hackathon[] }): any 
             <Grid.Container gap={3} className="hackathons">
                 {hackathons.map(hackathon => (
                     <Grid xs={24} sm={12} md={8} lg={6} xl={4}>
-                        <a style={{ width: '100%' }} href={`/${hackathon.slug}`}>
+                        <Link style={{ width: '100%' }} href={`/${hackathon.slug}`}>
                             <Card hoverable style={{ width: '100%', border: '1px solid #343434' }} className="project-card">
                                 <Fieldset.Title>{hackathon.name}</Fieldset.Title>
                                 <Fieldset.Subtitle>{hackathon.slug}</Fieldset.Subtitle>
                             </Card>
-                        </a>
+                        </Link>
                     </Grid>
                 ))}
                 <Grid xs={24} sm={12} md={8} lg={6} xl={4}>
