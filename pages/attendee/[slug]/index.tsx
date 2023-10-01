@@ -1,22 +1,33 @@
-import { Button, Card, Drawer, Fieldset, Grid, Input, Page, Text } from "@geist-ui/core"
-import type { InferGetServerSidePropsType, GetServerSideProps } from 'next'
+import {
+  Button,
+  Card,
+  Drawer,
+  Fieldset,
+  Grid,
+  Input,
+  Page,
+  Text,
+} from "@geist-ui/core";
+import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
 import prisma from "@/lib/prisma";
 import { NextApiRequest } from "next";
 import { NextServerOptions } from "next/dist/server/next";
- 
+
 import type { Hackathon } from "@prisma/client";
 import React, { useState } from "react";
 import type { ReactElement } from "react";
 import Link from "next/link";
 import AttendeeLayout from "@/components/layouts/attendee/AttendeeLayout";
 
-export default function Attendee({ hackathon }: { hackathon: Hackathon | null }): any {
-  if (!hackathon){
+export default function Attendee({
+  hackathon,
+}: {
+  hackathon: Hackathon | null;
+}): any {
+  if (!hackathon) {
     return (
       <>
-        <div>
-          404: Hackathon Not Found!
-        </div>
+        <div>404: Hackathon Not Found!</div>
       </>
     );
   }
@@ -26,8 +37,12 @@ export default function Attendee({ hackathon }: { hackathon: Hackathon | null })
       <div>
         <h1>{hackathon?.name}</h1>
         <h3>
-          {hackathon.startDate && new Date(hackathon.startDate).toLocaleString()}{' to '}
-          {hackathon.endDate && new Date(hackathon.endDate).toLocaleString()} at {hackathon?.location}
+          {hackathon.startDate &&
+            new Date(hackathon.startDate).toLocaleString()}
+          {" to "}
+          {hackathon.endDate &&
+            new Date(hackathon.endDate).toLocaleString()} at{" "}
+          {hackathon?.location}
         </h3>
         <code>/{hackathon?.slug}</code>
       </div>
@@ -35,36 +50,32 @@ export default function Attendee({ hackathon }: { hackathon: Hackathon | null })
   );
 }
 
-Attendee.getLayout = function getLayout(page: ReactElement, props: { hackathon: Hackathon | null }) {
-  return (
-    <AttendeeLayout hackathon={props.hackathon}>
-      {page}
-    </AttendeeLayout>
-  )
-}
-  
+Attendee.getLayout = function getLayout(
+  page: ReactElement,
+  props: { hackathon: Hackathon | null },
+) {
+  return <AttendeeLayout hackathon={props.hackathon}>{page}</AttendeeLayout>;
+};
+
 export const getServerSideProps = (async (context) => {
-  if(context.params?.slug){
+  if (context.params?.slug) {
     const hackathon = await prisma.hackathon.findUnique({
-        where: {
-            slug: context.params?.slug.toString(),
-        }
+      where: {
+        slug: context.params?.slug.toString(),
+      },
     });
     return {
       props: {
-        hackathon
+        hackathon,
       },
     };
-  }
-  else {
+  } else {
     return {
       props: {
-        hackathon: null
+        hackathon: null,
       },
     };
   }
-
-  
 }) satisfies GetServerSideProps<{
-  hackathon: Hackathon | null
+  hackathon: Hackathon | null;
 }>;

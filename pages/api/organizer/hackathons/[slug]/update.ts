@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { permitParams } from "@/lib/utils";
 import { getAuth } from "@clerk/nextjs/server";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -10,20 +11,18 @@ export default async function handler(
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     try {
-        const { name, location, startDate, endDate } = req.body;
-        const slug =
-            (name || "").toLowerCase().replace(/[^a-z0-9]{1,}/g, "-") +
-            "-" +
-            Math.random().toString(36).substring(2, 7);
+        const newData = req.body;
+        const { slug } = req.query;
 
-        const hackathon = await prisma.hackathon.create({
+        const hackathon = await prisma.hackathon.update({
             data: {
-                name,
-                slug,
-                location,
-                startDate: startDate ? new Date(startDate) : undefined,
-                endDate: endDate ? new Date(endDate) : undefined,
-                ownerId: userId,
+                ...permitParams(
+                    ["name", "location", "startDate", "endDate", "slug"],
+                    newData,
+                ),
+            },
+            where: {
+                slug: slug as string,
             },
         });
 

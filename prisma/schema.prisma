@@ -42,6 +42,7 @@ model AttendeeAttribute {
 
 model AttendeeAttributeValue {
   id          String            @id @default(uuid())
+  value       String
   attendeeId  String
   attendee    Attendee          @relation(fields: [attendeeId], references: [id])
   formFieldId String
@@ -56,8 +57,18 @@ model Attendee {
   email           String                   @unique
 
   checkedIn Boolean @default(false)
-  checkInKey String @unique
+  checkInKey String? @unique 
 
   hackathonId String
   hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
+  tokens      Token[]
+}
+
+model Token {
+  id            String       @id @default(uuid())
+  token         String       @unique @default(cuid())
+  magicKey      String?      @unique @default(cuid())
+  createdAt     DateTime     @default(now())
+  attendeeId    String
+  attendee      Attendee     @relation(fields: [attendeeId], references: [id])
 }

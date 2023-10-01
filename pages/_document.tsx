@@ -1,11 +1,11 @@
-import { Fragment } from "react"
-import Document, { Html, Head, Main, NextScript } from 'next/document'
-import { CssBaseline } from '@geist-ui/core'
+import { Fragment } from "react";
+import Document, { Html, Head, Main, NextScript } from "next/document";
+import { CssBaseline } from "@geist-ui/core";
 
 export default class MyDocument extends Document {
-  static async getInitialProps (ctx: any) {
-    const initialProps = await Document.getInitialProps(ctx)
-    const styles = CssBaseline.flush()
+  static async getInitialProps(ctx: any) {
+    const initialProps = await Document.getInitialProps(ctx);
+    const styles = CssBaseline.flush();
 
     return {
       ...initialProps,
@@ -15,7 +15,7 @@ export default class MyDocument extends Document {
           {styles}
         </Fragment>,
       ],
-    }
+    };
   }
 
   render() {
@@ -27,6 +27,6 @@ export default class MyDocument extends Document {
           <NextScript />
         </body>
       </Html>
-    )
+    );
   }
 }

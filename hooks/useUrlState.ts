@@ -1,9 +1,11 @@
 import { useRouter } from "next/router";
 
-export default function useUrlState (fragmentsToFind: Array<string | null>): { [key: string]: string } {
+export default function useUrlState(fragmentsToFind: Array<string | null>): {
+    [key: string]: string;
+} {
     const { asPath } = useRouter();
 
-    const fragments = asPath.substring(1).split('/');
+    const fragments = asPath.substring(1).split("/");
 
     console.log({ fragments });
 

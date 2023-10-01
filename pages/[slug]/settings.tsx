@@ -6,7 +6,6 @@ import {
   Grid,
   Input,
   Page,
-  Snippet,
   Text,
 } from "@geist-ui/core";
 import { getAuth } from "@clerk/nextjs/server";
@@ -25,12 +24,15 @@ import { delay } from "@/lib/utils";
 import Debug from "@/components/Debug";
 import Link from "next/link";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
+import { useRouter } from "next/router";
 
 export default function Hackathon({
   hackathon,
 }: {
   hackathon: Hackathon | null;
 }): any {
+  const router = useRouter();
+
   if (!hackathon) {
     return (
       <>
@@ -42,13 +44,47 @@ export default function Hackathon({
   return (
     <>
       <Page>
-        <h1>Integrate</h1>
-        <h3>Your API Key</h3>
-        <Snippet
-          symbol=""
-          text="kEpdOYlpKAQPOooPkVsonHcNorJtKx"
-          width="350px"
-        />
+        <Text h1>Settings</Text>
+        <Text h3>General</Text>
+        <Card>
+          <Form
+            schema={{
+              elements: [
+                {
+                  type: "text",
+                  validate: (value) =>
+                    value ==
+                    (value || "").toLowerCase().replace(/[^a-z0-9]{1,}/g, "-"),
+                  name: "slug",
+                  label: "Slug",
+                  defaultValue: hackathon.slug,
+                },
+              ],
+              submitText: "Save",
+            }}
+            submission={{
+              type: "controlled",
+              onSubmit: async (data) => {
+                fetch(`/api/hackathons/${hackathon.slug}/update`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        ...data
+                    })
+                });
+                await delay(1000);
+
+                if (data.slug !== hackathon.slug) router.push(`/${data.slug}/settings`);
+              },
+            }}
+            style={{
+              maxWidth: "400px",
+            }}
+          />
+        </Card>
+        <code>/{hackathon?.slug}</code>
       </Page>
     </>
   );
