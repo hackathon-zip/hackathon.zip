@@ -14,6 +14,7 @@ export default function middleware (request: NextRequest, event: NextFetchEvent)
             }
         })(request, event);
     }
+    
     const withoutAuthentication = (route: string, callback: (req: NextRequest) => any) => {
         return authMiddleware({
             publicRoutes: [route],
@@ -33,21 +34,7 @@ export default function middleware (request: NextRequest, event: NextFetchEvent)
     let subdomain: string | undefined;
 
     if (hostname.endsWith('hackathon.zip')) subdomain = hostname.split('.').reverse()[2];
-    if (hostname.endsWith('localhost')) return withAuthentication(() => null);
-/*
-    const isApi = pathname.startsWith('/api');
-
-
-    console.log({ hostname });
-    console.log(request.nextUrl)
-
-    if (subdomain === undefined) return withAuthentication(() => {
-        if (isApi) return rewrite(`/api/organizer${pathname}`);
-    });
-    
-    if (subdomain === 'api') return withoutAuthentication(pathname, () => rewrite(`/api/integration${pathname}`));
-    
-    return withoutAuthentication(pathname, () => rewrite(`/${isApi ? 'api/' : ''}attendee/${subdomain}${pathname}`)); */
+    if (hostname.endsWith('localhost')) subdomain = undefined;
 
     switch (subdomain) {
       case undefined: // you are on hackathon.zip

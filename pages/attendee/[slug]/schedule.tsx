@@ -24,12 +24,7 @@ export default function Attendee({ hackathon }: { hackathon: Hackathon | null })
   return (
     <>
       <div>
-        <h1>{hackathon?.name}</h1>
-        <h3>
-          {hackathon.startDate && new Date(hackathon.startDate).toLocaleString()}{' to '}
-          {hackathon.endDate && new Date(hackathon.endDate).toLocaleString()} at {hackathon?.location}
-        </h3>
-        <code>/{hackathon?.slug}</code>
+        <h1>Schedule</h1>
       </div>
     </>
   );

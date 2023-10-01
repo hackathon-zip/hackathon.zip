@@ -4,6 +4,9 @@ export default function useUrlState (fragmentsToFind: Array<string | null>): { [
     const { asPath } = useRouter();
 
     const fragments = asPath.substring(1).split('/');
+
+    console.log({ fragments });
+
     const output: { [key: string]: string } = {};
 
     fragmentsToFind.forEach((fragment, index) => {

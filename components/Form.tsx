@@ -78,7 +78,7 @@ interface FormSelect extends FormInput {
 
 type FormElement = FormTextInput | FormRadio | FormCheckbox | FormSelect | FormTextInputTuple;
 
-interface FormSchema {
+export interface FormSchema {
   elements: Array<FormElement>;
 }
 

@@ -9,7 +9,7 @@ import { SWRConfig } from 'swr';
 
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
-  getLayout?: (page: ReactElement) => ReactNode
+  getLayout?: (page: ReactElement, pageProps: any) => ReactNode
 }
  
 type AppPropsWithLayout = AppProps & {
@@ -28,7 +28,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
           }}
         >
           <CssBaseline />
-          {getLayout(<Component {...pageProps} />)}
+          {getLayout(<Component {...pageProps} />, pageProps)}
         </SWRConfig>
       </GeistProvider>
     </ClerkProvider>

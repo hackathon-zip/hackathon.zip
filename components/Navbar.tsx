@@ -18,9 +18,14 @@ export default function Navbar ({ breadcrumbs }: { breadcrumbs: any }) {
     const { hackathon: activeHackathon } = useUrlState(['hackathon']);
 
     return (
+        <div style={{
+            width: '100%',
+            height: '200px',
+            display: 'flex',
+            flexDirection: 'column',
+        }}>
       <nav style={{
         width: '100%',
-        height: '64px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -71,5 +76,6 @@ export default function Navbar ({ breadcrumbs }: { breadcrumbs: any }) {
         </div>
   
       </nav>
+      </div>
     )
 }

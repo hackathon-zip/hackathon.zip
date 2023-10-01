@@ -6,6 +6,8 @@ export function useMyHackathons (): DataHookOutput<{ hackathons: Hackathon[] }> 
         
     });
 
+    console.log({ data, error, isLoading })
+
     return {
         hackathons: data ?? [],
         isLoading,
