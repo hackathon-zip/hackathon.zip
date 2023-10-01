@@ -21,9 +21,13 @@ export default async function handler(
                 }
             }
         });
+
         if (token && isWithin15Minutes(token.createdAt)) {
-            res.setHeader("set-cookie", `${}=${token.token}; Max-Age=604800; Path=/`);
-            res.redirect("/");
+            res.setHeader("set-cookie", `${token.attendee.hackathon.slug}=${token.token}; Max-Age=604800; Path=/`);
+            if(process.env.NODE_ENV == "development"){
+                return res.redirect(`/attendee/${token.attendee.hackathon.slug}/`);
+            }
+            return res.redirect("/");
         }
         return res
             .status(400)

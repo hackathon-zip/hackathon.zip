@@ -65,7 +65,6 @@ model Attendee {
 }
 
 model Token {
-  id            String       @id @default(uuid())
   token         String       @unique @default(cuid())
   magicKey      String?      @unique @default(cuid())
   createdAt     DateTime     @default(now())

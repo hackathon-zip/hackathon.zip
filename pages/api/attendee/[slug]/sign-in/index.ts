@@ -48,6 +48,7 @@ export default async function handler(
                 }),
                 text: `Welcome, ${attendee.name}! https://${attendee.hackathon.slug}.hackathon.zip/sign-in/${loginToken.magicKey}`,
             });
+            console.log(`https://${attendee.hackathon.slug}.hackathon.zip/sign-in/${loginToken.magicKey}`)
             return res.status(200).json(email);
         }
         return res

@@ -10,7 +10,7 @@ import {
 } from "@geist-ui/core";
 import { useRef } from "react";
 import NextLink from "next/link";
-import type { Hackathon } from "@prisma/client";
+import type { Hackathon, Attendee } from "@prisma/client";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { Form } from "@/components/Form";
@@ -18,9 +18,11 @@ import { Form } from "@/components/Form";
 export default function AttendeeLayout({
   children,
   hackathon,
+  attendee
 }: {
   children: React.ReactNode;
   hackathon: Hackathon | null;
+  attendee: Attendee | null;
 }) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
@@ -67,7 +69,7 @@ export default function AttendeeLayout({
         </Modal.Action>
         <Modal.Action
           onClick={() => {
-            formRef.current.submit();
+            if(formRef.current) formRef.current.submit();
           }}
         >
           Sign In
@@ -142,6 +144,7 @@ export default function AttendeeLayout({
                   </Link>
                 </Text>
               </Card.Content>
+              {attendee && <>Signed in as {attendee?.name}</>}
             </Card>
           </div>
         </Grid>
