@@ -24,7 +24,7 @@ export default function middleware (request: NextRequest, event: NextFetchEvent)
     }
 
     const { hostname, pathname } = request.nextUrl;
-    
+    const rewrite = (path: string) => NextResponse.rewrite(new URL(path, request.url));
     /* let subdomain: string | undefined;
 
     if (hostname.endsWith('hackathon.zip')) subdomain = hostname.split('.').reverse()[2];
@@ -32,7 +32,7 @@ export default function middleware (request: NextRequest, event: NextFetchEvent)
 
     const isApi = pathname.startsWith('/api');
 
-    const rewrite = (path: string) => NextResponse.rewrite(new URL(path, request.url));
+    
     console.log({ hostname });
     console.log(request.nextUrl)
 
