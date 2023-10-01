@@ -24,6 +24,8 @@ export default function middleware (request: NextRequest, event: NextFetchEvent)
     }
 
     const { hostname, pathname } = request.nextUrl;
+
+    console.log(request.nextUrl)
     
     let subdomain: string | undefined;
 
@@ -45,11 +47,8 @@ export default function middleware (request: NextRequest, event: NextFetchEvent)
     
     return withoutAuthentication(pathname, () => rewrite(`/${isApi ? 'api/' : ''}attendee${subdomain}${pathname}`));
 
-    
-
-
-    subdomain = hostname.split('.')[0]             // subdomain.example.com
-    let isAPI = pathname.startsWith('/api/')       // if pathname begins with "/api/"
+    subdomain = hostname.split('.')[0]                                                      // subdomain.example.com
+    let isAPI = pathname.startsWith('/api/') && !pathname.startsWith("/api/organizer/")     // if pathname begins with "/api/"
     let pathnameWithoutAPI = pathname.replace("/api", "")
 
     switch (subdomain) {

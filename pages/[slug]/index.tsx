@@ -15,7 +15,7 @@ import { Form } from "@/components/Form";
 import { delay } from "@/lib/utils";
 import Debug from "@/components/Debug";
 import Link from "next/link";
-import HackathonLayout from "@/components/layouts/organizer/HackathonLayout";
+import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 
 export default function Hackathon({ hackathon }: { hackathon: Hackathon | null }): any {
   if (!hackathon){
