@@ -24,15 +24,20 @@ export default function middleware (request: NextRequest, event: NextFetchEvent)
     }
 
     const { hostname, pathname } = request.nextUrl;
+    const isApi = pathname.startsWith('/api');
+    let pathnameWithoutAPI = pathname.replace("/api", "")
+
+
     const rewrite = (path: string) => NextResponse.rewrite(new URL(path, request.url));
-    /* let subdomain: string | undefined;
+
+    let subdomain: string | undefined;
 
     if (hostname.endsWith('hackathon.zip')) subdomain = hostname.split('.').reverse()[2];
     if (hostname.endsWith('localhost')) return withAuthentication(() => null);
-
+/*
     const isApi = pathname.startsWith('/api');
 
-    
+
     console.log({ hostname });
     console.log(request.nextUrl)
 
@@ -44,19 +49,14 @@ export default function middleware (request: NextRequest, event: NextFetchEvent)
     
     return withoutAuthentication(pathname, () => rewrite(`/${isApi ? 'api/' : ''}attendee/${subdomain}${pathname}`)); */
 
-    let subdomain = hostname.split('.')[0]                                                      // subdomain.example.com
-    let isAPI = pathname.startsWith('/api/') && !pathname.startsWith("/api/organizer/")     // if pathname begins with "/api/"
-    let pathnameWithoutAPI = pathname.replace("/api", "")
-
     switch (subdomain) {
-      case 'hackathon': // you are on hackathon.zip
-      case 'localhost': // or you are testing, which equivalent to being on hackathon.zip
-          return withAuthentication(isAPI ? () => rewrite('/api/organizer' + pathnameWithoutAPI) : () => null);
+      case undefined: // you are on hackathon.zip
+          return withAuthentication(isApi ? () => rewrite('/api/organizer' + pathnameWithoutAPI) : () => null);
       case 'api': // you are on api.hackathon.zip
         return withoutAuthentication(pathname, () => rewrite('/api/integration' + pathname));
       default: // you are on [event].hackathon.zip
         return withoutAuthentication(pathname, () => rewrite(
-            isAPI ? 
+            isApi ? 
               `/api/attendee/${subdomain}` + pathnameWithoutAPI :
               `/attendee/${subdomain}` + pathname
         ));
