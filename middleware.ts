@@ -24,11 +24,8 @@ export default function middleware (request: NextRequest, event: NextFetchEvent)
     }
 
     const { hostname, pathname } = request.nextUrl;
-
-    console.log(request.nextUrl)
     
     let subdomain: string | undefined;
-
 
     if (hostname.endsWith('hackathon.zip')) subdomain = hostname.split('.').reverse()[2];
     if (hostname.endsWith('localhost')) return withAuthentication(() => null);
@@ -45,7 +42,7 @@ export default function middleware (request: NextRequest, event: NextFetchEvent)
     
     if (subdomain === 'api') return withoutAuthentication(pathname, () => rewrite(`/api/integration${pathname}`));
     
-    return withoutAuthentication(pathname, () => rewrite(`/${isApi ? 'api/' : ''}attendee${subdomain}${pathname}`));
+    return withoutAuthentication(pathname, () => rewrite(`/${isApi ? 'api/' : ''}attendee/${subdomain}${pathname}`));
 
     subdomain = hostname.split('.')[0]                                                      // subdomain.example.com
     let isAPI = pathname.startsWith('/api/') && !pathname.startsWith("/api/organizer/")     // if pathname begins with "/api/"
