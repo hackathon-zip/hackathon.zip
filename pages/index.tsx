@@ -15,8 +15,6 @@ import Debug from "@/components/Debug";
 import Link from "next/link";
 
 export default function Index({ hackathons }: { hackathons: Hackathon[] }): any {
-  const [drawerState, setDrawerState] = useState(false);
-  const [data, setData] = useState({});
 
   return (
     <>
@@ -25,9 +23,6 @@ export default function Index({ hackathons }: { hackathons: Hackathon[] }): any 
           <UserButton afterSignOutUrl="/" />
         </Page.Header>
         <h2>Hackathon Thing</h2>
-        <Debug data={{ data: {
-          hello: 'world'
-        } }} />
         <SignedIn>
           <Link href="/dashboard">
             <Button>Dashboard</Button>

@@ -5,6 +5,7 @@ import type { ReactElement, ReactNode, FC, ComponentType } from 'react';
 import type { NextPage } from 'next'
 import type { AppProps } from 'next/app'
 import { CssBaseline, GeistProvider } from '@geist-ui/core';
+import { SWRConfig } from 'swr';
 
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
@@ -17,12 +18,18 @@ type AppPropsWithLayout = AppProps & {
 
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page)
- 
+
   return (
     <ClerkProvider>
       <GeistProvider>
-        <CssBaseline />
-        {getLayout(<Component {...pageProps} />)}
+        <SWRConfig 
+          value={{
+            fetcher: (resource, init) => fetch(resource, init).then(res => res.json())
+          }}
+        >
+          <CssBaseline />
+          {getLayout(<Component {...pageProps} />)}
+        </SWRConfig>
       </GeistProvider>
     </ClerkProvider>
   );

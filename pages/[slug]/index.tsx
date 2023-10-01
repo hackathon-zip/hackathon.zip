@@ -15,7 +15,7 @@ import { Form } from "@/components/Form";
 import { delay } from "@/lib/utils";
 import Debug from "@/components/Debug";
 import Link from "next/link";
-import HackathonLayout from "@/components/HackathonLayout";
+import HackathonLayout from "@/components/layouts/organizer/HackathonLayout";
 
 export default function Hackathon({ hackathon }: { hackathon: Hackathon | null }): any {
   if (!hackathon){
@@ -27,8 +27,6 @@ export default function Hackathon({ hackathon }: { hackathon: Hackathon | null }
       </>
     );
   }
-
-  console.log('hi');
 
   return (
     <>
@@ -50,7 +48,7 @@ Hackathon.getLayout = function getLayout(page: ReactElement) {
         {page}
       </HackathonLayout>
     )
-  }
+}
   
 export const getServerSideProps = (async (context) => {
   const { userId } = getAuth(context.req);
