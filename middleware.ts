@@ -44,6 +44,8 @@ export default function middleware(
 
     subdomain = getSubdomains(hostname)?.[0];
 
+    console.log(subdomain, hostname, pathname, pathnameWithoutAPI, isApi);
+
     switch (subdomain) {
         case "organizer": // you are on organizer.hackathon.zip
             return withAuthentication(
@@ -62,12 +64,14 @@ export default function middleware(
                     isApi ? `/api${pathnameWithoutAPI}` : `/landing${pathname}`
                 )
             );
-        default: // you are on [event].hackathon.zip
+        default: // you are on [event].hackathon.zip or [customdomain]
+            let slug = subdomain;
+
             return withoutAuthentication(pathname, () =>
                 rewrite(
                     isApi
-                        ? `/api/attendee/${subdomain}` + pathnameWithoutAPI
-                        : `/attendee/${subdomain}` + pathname
+                        ? `/api/attendee/${slug}` + pathnameWithoutAPI
+                        : `/attendee/${slug}` + pathname
                 )
             );
     }
