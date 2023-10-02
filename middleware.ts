@@ -67,6 +67,10 @@ export default function middleware(
         default: // you are on [event].hackathon.zip or [customdomain]
             let slug = subdomain;
 
+            if (!hostname?.includes("hackathon.zip")) {
+                slug = hostname?.split(":")[0] ?? subdomain;
+            }
+
             return withoutAuthentication(pathname, () =>
                 rewrite(
                     isApi
