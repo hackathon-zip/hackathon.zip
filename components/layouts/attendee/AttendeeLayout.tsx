@@ -44,7 +44,6 @@ export default function AttendeeLayout({
         <title>{hackathon?.name}</title>
       </Head>
       <Modal {...bindings}>
-        <Modal.Title>Enter Your Email</Modal.Title>
         <Modal.Content>
           <Form
             schema={{
@@ -77,12 +76,13 @@ export default function AttendeeLayout({
                     text: "Please check your email for a magic URL, thanks!",
                     delay: 2000,
                   });
+                  setVisible(false)
                 }
               },
             }}
             hideSubmit={false}
             ref={formRef}
-            additionalButtons={<Button style={{ flexGrow: 1 }}>Cancel</Button>}
+            additionalButtons={<Button style={{ flexGrow: 1 }} onClick={() => setVisible(false)}>Cancel</Button>}
           />
         </Modal.Content>
       </Modal>
