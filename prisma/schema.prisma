@@ -40,6 +40,8 @@ model Hackathon {
 
   hcbId String?
 
+  customDomain String? @unique
+
   ownerId         String
   collaboratorIds String[]
 }
