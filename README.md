@@ -26,3 +26,33 @@ organizer.hackathon.zip/api/route -> /api/organizer/route
 ```
 api.hackathon.zip/route -> /api/integration/route
 ```
+
+## Local Development
+
+Clone the repository and run `npm install` (or `yarn` if you prefer).
+
+```
+git clone https://github.com/hackathon-zip/hackathon.zip.git
+```
+
+### Environment variables
+
+Make a copy of the `.env.example` file and name it `.env.development.local`. Fill in the values for the environment variables.
+
+### Running the server
+
+Run `npm run dev` (or `yarn dev`) to start the server. It will automatically restart when you make changes to the code.
+
+### Accessing the server
+
+The server will be running at `http://localhost:3000`. You can access the landing page at `http://localhost:3000/`, the organizer page at `http://organizer.localhost:3000/`, and the attendee page at `http://[event].localhost:3000/`.
+
+#### Custom domain testing
+
+If you want to test custom domains, you can add the following lines to your `/etc/hosts` file:
+
+```
+127.0.0.1 [full domain here]
+```
+
+Make sure the domain is set in the organizer dashboard (or the database, if you so dare)
