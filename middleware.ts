@@ -42,12 +42,10 @@ export default function middleware(
 
     let subdomain: string | undefined;
 
-    // if (hostname.endsWith("hackathon.zip"))
     subdomain = getSubdomains(hostname)?.[0];
-    // if (hostname.endsWith("localhost")) subdomain = undefined;
-    console.log(subdomain, hostname, request.nextUrl.host);
+
     switch (subdomain) {
-        case undefined: // you are on hackathon.zip
+        case "organizer": // you are on organizer.hackathon.zip
             return withAuthentication(
                 isApi && !isAttendeeApi
                     ? () => rewrite("/api/organizer" + pathnameWithoutAPI)
@@ -56,6 +54,13 @@ export default function middleware(
         case "api": // you are on api.hackathon.zip
             return withoutAuthentication(pathname, () =>
                 rewrite("/api/integration" + pathname)
+            );
+
+        case undefined: // you are on hackathon.zip
+            return withoutAuthentication(pathname, () =>
+                rewrite(
+                    isApi ? `/api${pathnameWithoutAPI}` : `/landing${pathname}`
+                )
             );
         default: // you are on [event].hackathon.zip
             return withoutAuthentication(pathname, () =>
@@ -75,8 +80,11 @@ export const config = {
 /**
  * Current Plan:
  *
- * hackathon.zip/route -> /route
- * hackathon.zip/api/route -> /api/organizer/route
+ * hackathon.zip/route -> /route (LANDING PAGE)
+ * hackathon.zip/api/route -> /api/route
+ *
+ * organizer.hackathon.zip/route -> /organizer/route
+ * organizer.hackathon.zip/api/route -> /api/organizer/route
  *
  * [event].hackathon.zip/route -> /attendee/[event]/route
  * [event].hackathon.zip/api/route -> /api/attendee/[event]/route
@@ -85,13 +93,10 @@ export const config = {
  */
 
 /**
- * Backup Plan:
+ * Old Current Plan:
  *
- * hackathon.zip/route -> /route (LANDING PAGE)
- * hackathon.zip/api/route -> /api/route
- *
- * organizer.hackathon.zip/route -> /organizer/route
- * organizer.hackathon.zip/api/route -> /api/organizer/route
+ * hackathon.zip/route -> /route
+ * hackathon.zip/api/route -> /api/organizer/route
  *
  * [event].hackathon.zip/route -> /attendee/[event]/route
  * [event].hackathon.zip/api/route -> /api/attendee/[event]/route
