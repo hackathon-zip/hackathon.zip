@@ -17,6 +17,10 @@ organizer.hackathon.zip/api/route -> /api/organizer/route
 ```
 [event].hackathon.zip/route -> /attendee/[event]/route
 [event].hackathon.zip/api/route -> /api/attendee/[event]/route
+
+// Or if using custom domains
+[customdomain]/route -> /attendee/[event]/route
+[customdomain]/api/route -> /api/attendee/[event]/route
 ```
 
 ```
