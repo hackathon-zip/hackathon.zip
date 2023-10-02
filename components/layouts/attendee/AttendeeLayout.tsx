@@ -133,7 +133,7 @@ export default function AttendeeLayout({
               </Card.Content>
               <Divider h="1px" my={0} />
               <Card.Content>
-                <Text b my={0}>
+                {attendee ? <>Signed in as {attendee?.name}.</> : <Text b my={0}>
                   <Link
                     href="#login"
                     color
@@ -142,9 +142,8 @@ export default function AttendeeLayout({
                   >
                     Sign In
                   </Link>
-                </Text>
+                </Text>}
               </Card.Content>
-              {attendee && <>Signed in as {attendee?.name}</>}
             </Card>
           </div>
         </Grid>
