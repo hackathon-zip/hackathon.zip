@@ -60,9 +60,7 @@ export default function middleware(
 
         case undefined: // you are on hackathon.zip
             return withoutAuthentication(pathname, () =>
-                rewrite(
-                    isApi ? `/api${pathnameWithoutAPI}` : `/landing${pathname}`
-                )
+                rewrite(isApi ? `/api${pathnameWithoutAPI}` : `${pathname}`)
             );
         default: // you are on [event].hackathon.zip or [customdomain]
             let slug = subdomain;

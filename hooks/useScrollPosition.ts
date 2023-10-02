@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 interface ScrollPosition {
     scrollX: number;
@@ -13,17 +13,17 @@ export const useScrollPosition = (): ScrollPosition => {
 
     useEffect(() => {
         const handleScroll = () => {
-            console.log('handle scroll')
+            console.log("handle scroll");
             setScrollPositions({
                 scrollX: window.scrollX,
                 scrollY: window.scrollY,
             });
         };
 
-        document.body.addEventListener('scroll', handleScroll);
+        document.body.addEventListener("scroll", handleScroll);
 
         return () => {
-            document.body.removeEventListener('scroll', handleScroll);
+            document.body.removeEventListener("scroll", handleScroll);
         };
     }, []);
 

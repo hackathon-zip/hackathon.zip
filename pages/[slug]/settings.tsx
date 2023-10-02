@@ -66,17 +66,18 @@ export default function Hackathon({
               type: "controlled",
               onSubmit: async (data) => {
                 fetch(`/api/hackathons/${hackathon.slug}/update`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        ...data
-                    })
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    ...data,
+                  }),
                 });
                 await delay(1000);
 
-                if (data.slug !== hackathon.slug) router.push(`/${data.slug}/settings`);
+                if (data.slug !== hackathon.slug)
+                  router.push(`/${data.slug}/settings`);
               },
             }}
             style={{

@@ -29,7 +29,7 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
     "feature",
   ]);
   const activeHackathon = hackathons.find(
-    (h: Hackathon) => h.slug === activeHackathonSlug,
+    (h: Hackathon) => h.slug === activeHackathonSlug
   );
 
   console.log({ activeHackathonSlug });
@@ -47,7 +47,7 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
         position: "sticky",
         top: 0,
         left: 0,
-        zIndex: 999,    
+        zIndex: 999,
       }}
     >
       <nav
@@ -59,7 +59,7 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
           justifyContent: "space-between",
           boxSizing: "border-box",
           padding: "0px 12px",
-          background: '#ffffff'
+          background: "#ffffff",
         }}
       >
         <div
@@ -120,14 +120,15 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
       >
         <Tabs
           onChange={(value) => {
-            router.push(`/${activeHackathonSlug}/${value == 'dashboard' ? '' : value}`);
+            router.push(
+              `/${activeHackathonSlug}/${value == "dashboard" ? "" : value}`
+            );
           }}
           style={{
-            
-            background: '#ffffff',
-            marginBottom: '-10px'
+            background: "#ffffff",
+            marginBottom: "-10px",
           }}
-          value={feature ?? 'dashboard'}
+          value={feature ?? "dashboard"}
         >
           <Tabs.Tab label="Dashboard" value="dashboard" />
           <Tabs.Tab label="Attendees" value="data" />
@@ -140,7 +141,9 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
           <Tabs.Tab label="Finances" value="finance" />
           <Tabs.Tab label="Settings" value="settings" />
           <span className="tab-styles-locator" />
-          <style dangerouslySetInnerHTML={{ __html: `
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
             .tab-styles-locator {
                 display: none;
             }
@@ -148,7 +151,9 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
             :has(> .tab-styles-locator) {
                 display: none;
             }
-          `}} />
+          `,
+            }}
+          />
         </Tabs>
       </div>
     </div>

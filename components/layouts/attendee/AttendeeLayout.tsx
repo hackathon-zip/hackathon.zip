@@ -5,8 +5,10 @@ import {
   Divider,
   Link,
   useModal,
+  Button,
   Modal,
   Input,
+  useToasts,
 } from "@geist-ui/core";
 import { useRef } from "react";
 import NextLink from "next/link";
@@ -18,12 +20,13 @@ import { Form } from "@/components/Form";
 export default function AttendeeLayout({
   children,
   hackathon,
-  attendee
+  attendee,
 }: {
   children: React.ReactNode;
   hackathon: Hackathon | null;
   attendee: Attendee | null;
 }) {
+  const { setToast } = useToasts();
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const transformURL = (path: string) =>
@@ -48,7 +51,7 @@ export default function AttendeeLayout({
               elements: [
                 {
                   type: "email",
-                  label: "Email",
+                  label: "Sign In With Email",
                   name: "email",
                   placeholder: "fiona@hackathon.zip",
                   required: true,
@@ -56,24 +59,32 @@ export default function AttendeeLayout({
               ],
             }}
             submission={{
-              type: "request",
-              method: "POST",
-              action: transformAPIURL("/sign-in"),
+              type: "controlled",
+              onSubmit: async (data) => {
+                let res = await fetch(transformAPIURL("/sign-in"), {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    ...data,
+                  }),
+                }).then((r) => r.json());
+                if (res.error) {
+                  setToast({ text: res.error, delay: 2000 });
+                } else {
+                  setToast({
+                    text: "Please check your email for a magic URL, thanks!",
+                    delay: 2000,
+                  });
+                }
+              },
             }}
-            hideSubmit={true}
+            hideSubmit={false}
             ref={formRef}
+            additionalButtons={<Button style={{ flexGrow: 1 }}>Cancel</Button>}
           />
         </Modal.Content>
-        <Modal.Action passive onClick={() => setVisible(false)}>
-          Cancel
-        </Modal.Action>
-        <Modal.Action
-          onClick={() => {
-            if(formRef.current) formRef.current.submit();
-          }}
-        >
-          Sign In
-        </Modal.Action>
       </Modal>
       <Grid.Container gap={4} justify="center" style={{ padding: "2rem" }}>
         <Grid xs={6}>
@@ -133,16 +144,20 @@ export default function AttendeeLayout({
               </Card.Content>
               <Divider h="1px" my={0} />
               <Card.Content>
-                {attendee ? <>Signed in as {attendee?.name}.</> : <Text b my={0}>
-                  <Link
-                    href="#login"
-                    color
-                    underline
-                    onClick={() => setVisible(true)}
-                  >
-                    Sign In
-                  </Link>
-                </Text>}
+                {attendee ? (
+                  <>Signed in as {attendee?.name}.</>
+                ) : (
+                  <Text b my={0}>
+                    <Link
+                      href="#login"
+                      color
+                      underline
+                      onClick={() => setVisible(true)}
+                    >
+                      Sign In
+                    </Link>
+                  </Text>
+                )}
               </Card.Content>
             </Card>
           </div>

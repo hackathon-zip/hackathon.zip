@@ -6,7 +6,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse,
+    res: NextApiResponse
 ) {
     const { userId } = getAuth(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
@@ -18,8 +18,25 @@ export default async function handler(
         const hackathon = await prisma.hackathon.update({
             data: {
                 ...permitParams<Hackathon>(
-                    ["name", "location", "startDate", "endDate", "slug", "bannerUrl", "broadcastEnabled", "checkInEnabled", "financeEnabled", "hcbId", "integrateEnabled", "logoUrl", "registerEnabled", "scheduleEnabled", "shipEnabled", "website"],
-                    newData,
+                    [
+                        "name",
+                        "location",
+                        "startDate",
+                        "endDate",
+                        "slug",
+                        "bannerUrl",
+                        "broadcastEnabled",
+                        "checkInEnabled",
+                        "financeEnabled",
+                        "hcbId",
+                        "integrateEnabled",
+                        "logoUrl",
+                        "registerEnabled",
+                        "scheduleEnabled",
+                        "shipEnabled",
+                        "website",
+                    ],
+                    newData
                 ),
             },
             where: {

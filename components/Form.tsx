@@ -177,13 +177,15 @@ export const Form = React.forwardRef(
       submission,
       hideSubmit = false,
       style,
+      additionalButtons,
     }: {
       schema: FormSchema;
       submission: FormSubmission<any>;
       hideSubmit?: boolean;
       style?: CSSProperties | undefined;
+      additionalButtons: React.ReactNode;
     },
-    ref,
+    ref
   ) => {
     const inputFields = Object.fromEntries(
       schema.elements
@@ -196,7 +198,7 @@ export const Form = React.forwardRef(
         })
         .filter((a) => a)
         .flat()
-        .map((input) => [input?.name, input]) as [string, FormTextInput][],
+        .map((input) => [input?.name, input]) as [string, FormTextInput][]
     );
 
     const [values, setValues] = useState<any>(
@@ -209,9 +211,9 @@ export const Form = React.forwardRef(
               isValid: false,
               showWarning: false,
             },
-          ],
-        ),
-      ),
+          ]
+        )
+      )
     );
 
     const [loading, setLoading] = useState(false);
@@ -260,7 +262,7 @@ export const Form = React.forwardRef(
     }
 
     const invalidFields = Object.keys(values).filter(
-      (name) => !values[name].isValid,
+      (name) => !values[name].isValid
     );
 
     return (
@@ -285,8 +287,8 @@ export const Form = React.forwardRef(
                       Object.entries(values).map(([name, value]) => [
                         name,
                         (value as any).value,
-                      ]),
-                    ),
+                      ])
+                    )
                   );
                   setLoading(false);
                 },
@@ -362,19 +364,30 @@ export const Form = React.forwardRef(
                   e.preventDefault();
                 }
               }}
+              style={{ flexGrow: 1 }}
             >
               {schema.submitText ?? "Submit"}
             </Button>
-            {Object.values(values).filter((value: any) => value.showWarning)
+            {additionalButtons}
+            {!additionalButtons &&
+              Object.values(values).filter((value: any) => value.showWarning)
+                .length > 0 && (
+                <Text margin={0}>
+                  {invalidFields.length} invalid field
+                  {invalidFields.length > 1 && "s"}
+                </Text>
+              )}
+          </div>
+          {additionalButtons &&
+            Object.values(values).filter((value: any) => value.showWarning)
               .length > 0 && (
-              <Text margin={0}>
+              <Text margin={0} mt={1}>
                 {invalidFields.length} invalid field
                 {invalidFields.length > 1 && "s"}
               </Text>
             )}
-          </div>
         </form>
       </>
     );
-  },
+  }
 );
