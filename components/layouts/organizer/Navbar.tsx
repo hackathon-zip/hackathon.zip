@@ -1,4 +1,5 @@
 import { useHackathon, useMyHackathons } from "@/hooks/data/hackathons";
+import { useScrollPosition } from "@/hooks/useScrollPosition";
 import useUrlState from "@/hooks/useUrlState";
 import { fetcher } from "@/lib/fetcher";
 import { ClerkLoaded, UserButton } from "@clerk/nextjs";
@@ -35,12 +36,18 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
 
   const router = useRouter();
 
+  const { scrollY } = useScrollPosition();
+
   return (
     <div
       style={{
         width: "100%",
         display: "flex",
         flexDirection: "column",
+        position: "sticky",
+        top: 0,
+        left: 0,
+        zIndex: 999,    
       }}
     >
       <nav
@@ -52,6 +59,7 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
           justifyContent: "space-between",
           boxSizing: "border-box",
           padding: "0px 12px",
+          background: '#ffffff'
         }}
       >
         <div
@@ -114,6 +122,11 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
           onChange={(value) => {
             router.push(`/${activeHackathonSlug}/${value == 'dashboard' ? '' : value}`);
           }}
+          style={{
+            
+            background: '#ffffff',
+            marginBottom: '-10px'
+          }}
           value={feature ?? 'dashboard'}
         >
           <Tabs.Tab label="Dashboard" value="dashboard" />
@@ -124,7 +137,18 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
           <Tabs.Tab label="Schedule" value="schedule" />
           <Tabs.Tab label="Ship" value="ship" />
           <Tabs.Tab label="Integrations" value="integrate" />
+          <Tabs.Tab label="Finances" value="finance" />
           <Tabs.Tab label="Settings" value="settings" />
+          <span className="tab-styles-locator" />
+          <style dangerouslySetInnerHTML={{ __html: `
+            .tab-styles-locator {
+                display: none;
+            }
+
+            :has(> .tab-styles-locator) {
+                display: none;
+            }
+          `}} />
         </Tabs>
       </div>
     </div>

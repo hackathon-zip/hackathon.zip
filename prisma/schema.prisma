@@ -18,11 +18,26 @@ model Hackathon {
 
   attendeeAttributes AttendeeAttribute[]
 
+  // event info
   location  String
   startDate DateTime?
   endDate   DateTime?
 
+  // branding
   website String?
+  logoUrl String?
+  bannerUrl String?
+
+  // features
+  registerEnabled     Boolean @default(false)
+  checkInEnabled      Boolean @default(false)
+  broadcastEnabled    Boolean @default(false)
+  scheduleEnabled     Boolean @default(false)
+  shipEnabled         Boolean @default(false)
+  integrateEnabled    Boolean @default(false)
+  financeEnabled      Boolean @default(false)
+
+  hcbId String?
 
   ownerId         String
   collaboratorIds String[]

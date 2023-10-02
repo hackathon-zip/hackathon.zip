@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { permitParams } from "@/lib/utils";
 import { getAuth } from "@clerk/nextjs/server";
+import { Hackathon } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
@@ -16,8 +17,8 @@ export default async function handler(
 
         const hackathon = await prisma.hackathon.update({
             data: {
-                ...permitParams(
-                    ["name", "location", "startDate", "endDate", "slug"],
+                ...permitParams<Hackathon>(
+                    ["name", "location", "startDate", "endDate", "slug", "bannerUrl", "broadcastEnabled", "checkInEnabled", "financeEnabled", "hcbId", "integrateEnabled", "logoUrl", "registerEnabled", "scheduleEnabled", "shipEnabled", "website"],
                     newData,
                 ),
             },

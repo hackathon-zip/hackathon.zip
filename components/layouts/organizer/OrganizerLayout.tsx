@@ -7,9 +7,19 @@ export default function HackathonLayout({
 }) {
   console.log("Call to HackathonLayout");
   return (
-    <>
-      <Navbar breadcrumbs={[]} />
-      {children}
-    </>
+    <div style={{
+      width: 'calc(100vw - (100vw - 100%))',
+      height: '100vh',
+    }}>
+        <Navbar breadcrumbs={[]} />
+
+      <div style={{
+        background: '#fafafa',
+        width: 'calc(100vw - (100vw - 100%))',
+        height: '100%',
+      }}>
+        {children}
+      </div>
+    </div>
   );
 }

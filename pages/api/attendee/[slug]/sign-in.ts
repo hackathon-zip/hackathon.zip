@@ -39,7 +39,7 @@ export default async function handler(
                 },
             });
             const email = await resend.emails.send({
-                from: `${attendee.hackathon.name} noreply@hackathon.zip>`,
+                from: `${attendee.hackathon.name} <emails@hackathon.zip>`,
                 to: ["ian@hackclub.com"], // [attendee.email],
                 subject: `Sign in to ${attendee.hackathon.name}'s portal`,
                 react: EmailTemplate({
@@ -48,8 +48,7 @@ export default async function handler(
                 }),
                 text: `Welcome, ${attendee.name}! https://${attendee.hackathon.slug}.hackathon.zip/sign-in/${loginToken.magicKey}`,
             });
-            console.log(`https://${attendee.hackathon.slug}.hackathon.zip/sign-in/${loginToken.magicKey}`)
-            return res.status(200).json(email);
+            return res.status(200).json({...email, url: `https://${attendee.hackathon.slug}.hackathon.zip/sign-in/${loginToken.magicKey}`});
         }
         return res
             .status(400)

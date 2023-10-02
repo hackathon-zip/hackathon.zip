@@ -16,7 +16,7 @@ import { NextApiRequest } from "next";
 import { NextServerOptions } from "next/dist/server/next";
 
 import type { Hackathon } from "@prisma/client";
-import { PlusCircle } from "@geist-ui/react-icons";
+import { PlusCircle, Radio } from "@geist-ui/react-icons";
 import React, { useState } from "react";
 import type { ReactElement } from "react";
 import { Form } from "@/components/Form";
@@ -24,6 +24,7 @@ import { delay } from "@/lib/utils";
 import Debug from "@/components/Debug";
 import Link from "next/link";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
+import FeatureInfo from "@/components/organizer/FeatureInfo";
 
 export default function Hackathon({
   hackathon,
@@ -37,6 +38,14 @@ export default function Hackathon({
       </>
     );
   }
+
+  if (!hackathon.broadcastEnabled) return (
+    <Page>
+      <FeatureInfo featureName="Broadcasts" featureDescription={<>
+        Communicate with hackers in real-time about hackathon&nbsp;updates.
+      </>} featureIcon={Radio} />
+    </Page>
+  );
 
   return (
     <>
