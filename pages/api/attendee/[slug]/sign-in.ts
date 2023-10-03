@@ -44,9 +44,9 @@ export default async function handler(
                 subject: `Sign in to ${attendee.hackathon.name}'s portal`,
                 react: EmailTemplate({
                     name: attendee.name,
-                    url: `https://${attendee.hackathon.slug}.hackathon.zip/sign-in/${loginToken.magicKey}`,
+                    url: `https://${attendee.hackathon.slug}.hackathon.zip/api/sign-in/${loginToken.magicKey}`,
                 }),
-                text: `Welcome, ${attendee.name}! https://${attendee.hackathon.slug}.hackathon.zip/sign-in/${loginToken.magicKey}`,
+                text: `Welcome, ${attendee.name}! https://${attendee.hackathon.slug}.hackathon.zip/api/sign-in/${loginToken.magicKey}`,
             });
             return res
                 .status(200)
