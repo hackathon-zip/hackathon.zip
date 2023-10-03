@@ -39,20 +39,13 @@ export default function Hackathon({
     );
   }
 
-  if (!hackathon.shipEnabled)
-    return (
-      <Page>
-        <FeatureInfo
-          featureName="Ship"
-          featureDescription={
-            <>
-              Gather project submissions from hackers and manage&nbsp;judging.
-            </>
-          }
-          featureIcon={Package}
-        />
-      </Page>
-    );
+  if (!hackathon.shipEnabled) return (
+    <Page>
+      <FeatureInfo featureKey="shipEnabled" featureName="Ship" featureDescription={<>
+        Gather project submissions from hackers and manage&nbsp;judging.
+      </>} featureIcon={Package} hackathonSlug={hackathon.slug} />
+    </Page>
+  );
 
   return (
     <>

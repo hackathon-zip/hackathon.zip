@@ -27,92 +27,98 @@ import Link from "next/link";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import { useRouter } from "next/router";
 import FeatureInfo from "@/components/organizer/FeatureInfo";
+import useSWR from "swr";
+  
+  export default function Hackathon({
+    hackathon
+  }: {
+    hackathon: Hackathon | null;
+  }): any {
+    const router = useRouter();
+  
+    if (!hackathon) {
+      return (
+        <>
+          <Page>404: Not Found!</Page>
+        </>
+      );
+    }
+  
+    if (!hackathon.financeEnabled) {
+      const [hcbSlug, setHcbSlug] = useState<string>('');
 
-export default function Hackathon({
-  hackathon,
-}: {
-  hackathon: Hackathon | null;
-}): any {
-  const router = useRouter();
+      return (
+        <Page>
+          <FeatureInfo beforeSubmit={async () => {
+            const hcbData = await fetch(`https://hcb.hackclub.com/api/v3/organizations/${hcbSlug}`).then(res => res.json());
 
-  if (!hackathon) {
-    return (
-      <>
-        <Page>404: Not Found!</Page>
-      </>
-    );
-  }
+            return {
+              hcbId: hcbData.id
+            };
+          }} featureKey="financeEnabled" featureName="Finances" featureDescription={<>
+            Grow your understanding of your hackathon's finances by linking&nbsp;with&nbsp;HCB.
+          </>} featureIcon={DollarSign} hackathonSlug={hackathon.slug}>
+            <Input crossOrigin value={hcbSlug} onChange={e => setHcbSlug(e.target.value)} name="hcbSlug" label="hcb.hackclub.com/" placeholder={hackathon.slug} width="400px">
+                <Text h5>
+                    HCB Account
+                </Text>
+            </Input>
+          </FeatureInfo>
+        </Page>
+      );
+    }
 
-  if (!hackathon.financeEnabled)
+    const { data, error, isLoading } = useSWR(`https://hcb.hackclub.com/api/v3/organizations/${hackathon.hcbId}`, {
+      keepPreviousData: true
+    });
+
     return (
       <Page>
-        <FeatureInfo
-          featureName="Finances"
-          featureDescription={
-            <>
-              Grow your understanding of your hackathon's finances by
-              linking&nbsp;with&nbsp;HCB.
-            </>
-          }
-          featureIcon={DollarSign}
-        >
-          <Input
-            crossOrigin
-            name="hcbSlug"
-            label="hcb.hackclub.com/"
-            placeholder={hackathon.slug}
-            width="400px"
-          >
-            <Text h5>HCB Account</Text>
-          </Input>
-        </FeatureInfo>
+        <Text h1>Finances</Text>
+        <Text>{hackathon.hcbId}</Text>
+        <Text>{JSON.stringify(data)}</Text>
       </Page>
-    );
-
-  return (
-    <Page>
-      <Text h1>Finances</Text>
-    </Page>
-  );
-}
-
-Hackathon.getLayout = function getLayout(page: ReactElement) {
-  return <HackathonLayout>{page}</HackathonLayout>;
-};
-
-export const getServerSideProps = (async (context) => {
-  const { userId } = getAuth(context.req);
-
-  console.log({ userId });
-
-  if (context.params?.slug) {
-    const hackathon = await prisma.hackathon.findUnique({
-      where: {
-        slug: context.params?.slug.toString(),
-        OR: [
-          {
-            ownerId: userId ?? undefined,
-          },
-          {
-            collaboratorIds: {
-              has: userId,
-            },
-          },
-        ],
-      },
-    });
-    return {
-      props: {
-        hackathon,
-      },
-    };
-  } else {
-    return {
-      props: {
-        hackathon: null,
-      },
-    };
+    )
   }
-}) satisfies GetServerSideProps<{
-  hackathon: Hackathon | null;
-}>;
+  
+  Hackathon.getLayout = function getLayout(page: ReactElement) {
+    return <HackathonLayout>{page}</HackathonLayout>;
+  };
+  
+  export const getServerSideProps = (async (context) => {
+    const { userId } = getAuth(context.req);
+  
+    console.log({ userId });
+  
+    if (context.params?.slug) {
+      const hackathon = await prisma.hackathon.findUnique({
+        where: {
+          slug: context.params?.slug.toString(),
+          OR: [
+            {
+              ownerId: userId ?? undefined,
+            },
+            {
+              collaboratorIds: {
+                has: userId,
+              },
+            },
+          ],
+        },
+      });
+      return {
+        props: {
+          hackathon,
+        },
+      };
+    } else {
+      return {
+        props: {
+          hackathon: null,
+        },
+      };
+    }
+  }) satisfies GetServerSideProps<{
+    hackathon: Hackathon | null;
+  }>;
+  

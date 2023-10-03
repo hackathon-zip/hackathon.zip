@@ -39,20 +39,13 @@ export default function Hackathon({
     );
   }
 
-  if (!hackathon.scheduleEnabled)
-    return (
-      <Page>
-        <FeatureInfo
-          featureName="Schedule"
-          featureDescription={
-            <>
-              Effortlessly manage and distribute your hackathon's&nbsp;schedule.
-            </>
-          }
-          featureIcon={Calendar}
-        />
-      </Page>
-    );
+  if (!hackathon.scheduleEnabled) return (
+    <Page>
+      <FeatureInfo featureKey="scheduleEnabled" featureName="Schedule" featureDescription={<>
+        Effortlessly manage and distribute your hackathon's&nbsp;schedule.
+      </>} featureIcon={Calendar} hackathonSlug={hackathon.slug} />
+    </Page>
+  );
 
   return (
     <>
