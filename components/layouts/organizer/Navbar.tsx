@@ -10,7 +10,7 @@ import {
   Select,
   Spinner,
   Tabs,
-  Text,
+  Text
 } from "@geist-ui/core";
 import { ChevronUpDown } from "@geist-ui/react-icons";
 import HomeIcon from "@geist-ui/react-icons/home";
@@ -26,10 +26,10 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
 
   const { hackathon: activeHackathonSlug, feature } = useUrlState([
     "hackathon",
-    "feature",
+    "feature"
   ]);
   const activeHackathon = hackathons.find(
-    (h: Hackathon) => h.slug === activeHackathonSlug,
+    (h: Hackathon) => h.slug === activeHackathonSlug
   );
 
   console.log({ activeHackathonSlug });
@@ -47,7 +47,7 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
         position: "sticky",
         top: 0,
         left: 0,
-        zIndex: 999,
+        zIndex: 999
       }}
     >
       <nav
@@ -59,13 +59,13 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
           justifyContent: "space-between",
           boxSizing: "border-box",
           padding: "0px 12px",
-          background: "#ffffff",
+          background: "#ffffff"
         }}
       >
         <div
           style={{
             display: "flex",
-            gap: "32px",
+            gap: "32px"
           }}
         >
           <Breadcrumbs>
@@ -115,18 +115,18 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
 
       <div
         style={{
-          width: "100%",
+          width: "100%"
         }}
       >
         <Tabs
           onChange={(value) => {
             router.push(
-              `/${activeHackathonSlug}/${value == "dashboard" ? "" : value}`,
+              `/${activeHackathonSlug}/${value == "dashboard" ? "" : value}`
             );
           }}
           style={{
             background: "#ffffff",
-            marginBottom: "-10px",
+            marginBottom: "-10px"
           }}
           value={feature ?? "dashboard"}
         >
@@ -151,7 +151,7 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
             :has(> .tab-styles-locator) {
                 display: none;
             }
-          `,
+          `
             }}
           />
         </Tabs>

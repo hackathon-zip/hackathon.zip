@@ -4,7 +4,7 @@ import {
   CSSProperties,
   ReactComponentElement,
   useState,
-  forwardRef,
+  forwardRef
 } from "react";
 import React from "react";
 
@@ -25,7 +25,7 @@ function InputTuple({
   label,
   mb,
   inputs,
-  required,
+  required
 }: {
   disabled?: boolean;
   getValue: any;
@@ -78,7 +78,7 @@ function InputTuple({
           style={{
             transform: "translateX(-1px)",
             clipPath:
-              "polygon(calc(0% + 1px) 0%, 100% 0%, 100% 100%, calc(0% + 1px) 100%)",
+              "polygon(calc(0% + 1px) 0%, 100% 0%, 100% 100%, calc(0% + 1px) 100%)"
           }}
         >
           <Input
@@ -178,7 +178,7 @@ export const Form = React.forwardRef(
       hideSubmit = false,
       style,
       additionalButtons,
-      clearValuesOnSuccesfulSubmit = false,
+      clearValuesOnSuccesfulSubmit = false
     }: {
       schema: FormSchema;
       submission: FormSubmission<any>;
@@ -187,7 +187,7 @@ export const Form = React.forwardRef(
       additionalButtons?: React.ReactNode;
       clearValuesOnSuccesfulSubmit?: boolean;
     },
-    ref,
+    ref
   ) => {
     const inputFields = Object.fromEntries(
       schema.elements
@@ -200,7 +200,7 @@ export const Form = React.forwardRef(
         })
         .filter((a) => a)
         .flat()
-        .map((input) => [input?.name, input]) as [string, FormTextInput][],
+        .map((input) => [input?.name, input]) as [string, FormTextInput][]
     );
 
     const [values, setValues] = useState<any>(
@@ -211,11 +211,11 @@ export const Form = React.forwardRef(
             {
               value: input.defaultValue ?? "",
               isValid: false,
-              showWarning: false,
-            },
-          ],
-        ),
-      ),
+              showWarning: false
+            }
+          ]
+        )
+      )
     );
 
     const [loading, setLoading] = useState(false);
@@ -264,7 +264,7 @@ export const Form = React.forwardRef(
     }
 
     const invalidFields = Object.keys(values).filter(
-      (name) => !values[name].isValid,
+      (name) => !values[name].isValid
     );
 
     return (
@@ -278,7 +278,7 @@ export const Form = React.forwardRef(
                 action: submission.action,
                 onSubmit: (e) => {
                   setLoading(true);
-                },
+                }
               }
             : {
                 onSubmit: async (e) => {
@@ -289,9 +289,9 @@ export const Form = React.forwardRef(
                       Object.fromEntries(
                         Object.entries(values).map(([name, value]) => [
                           name,
-                          (value as any).value,
-                        ]),
-                      ),
+                          (value as any).value
+                        ])
+                      )
                     )) as any) || true;
                   if (clearValuesOnSuccesfulSubmit) {
                     setValues(
@@ -302,15 +302,15 @@ export const Form = React.forwardRef(
                             {
                               value: input.defaultValue ?? "",
                               isValid: false,
-                              showWarning: false,
-                            },
-                          ],
-                        ),
-                      ),
+                              showWarning: false
+                            }
+                          ]
+                        )
+                      )
                     );
                   }
                   setLoading(false);
-                },
+                }
               })}
         >
           {schema.elements.map((formElement: FormElement) => {
@@ -356,7 +356,7 @@ export const Form = React.forwardRef(
                       label: input.inlineLabel || "",
                       name: input.name,
                       placeholder: input.placeholder,
-                      type: input.type,
+                      type: input.type
                     };
                   })}
                 />
@@ -368,7 +368,7 @@ export const Form = React.forwardRef(
               display: hideSubmit ? "none" : "flex",
               flexDirection: "row",
               gap: "16px",
-              alignItems: "center",
+              alignItems: "center"
             }}
           >
             <Button
@@ -408,5 +408,5 @@ export const Form = React.forwardRef(
         </form>
       </>
     );
-  },
+  }
 );

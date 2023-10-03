@@ -6,7 +6,7 @@ import {
   Grid,
   Input,
   Page,
-  Text,
+  Text
 } from "@geist-ui/core";
 import { getAuth } from "@clerk/nextjs/server";
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
@@ -27,7 +27,7 @@ import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import { useRouter } from "next/router";
 
 export default function Hackathon({
-  hackathon,
+  hackathon
 }: {
   hackathon: Hackathon | null;
 }): any {
@@ -57,10 +57,10 @@ export default function Hackathon({
                     (value || "").toLowerCase().replace(/[^a-z0-9]{1,}/g, "-"),
                   name: "slug",
                   label: "Slug",
-                  defaultValue: hackathon.slug,
-                },
+                  defaultValue: hackathon.slug
+                }
               ],
-              submitText: "Save",
+              submitText: "Save"
             }}
             submission={{
               type: "controlled",
@@ -68,20 +68,20 @@ export default function Hackathon({
                 fetch(`/api/hackathons/${hackathon.slug}/update`, {
                   method: "POST",
                   headers: {
-                    "Content-Type": "application/json",
+                    "Content-Type": "application/json"
                   },
                   body: JSON.stringify({
-                    ...data,
-                  }),
+                    ...data
+                  })
                 });
                 await delay(1000);
 
                 if (data.slug !== hackathon.slug)
                   router.push(`/${data.slug}/settings`);
-              },
+              }
             }}
             style={{
-              maxWidth: "400px",
+              maxWidth: "400px"
             }}
           />
         </Card>
@@ -106,26 +106,26 @@ export const getServerSideProps = (async (context) => {
         slug: context.params?.slug.toString(),
         OR: [
           {
-            ownerId: userId ?? undefined,
+            ownerId: userId ?? undefined
           },
           {
             collaboratorIds: {
-              has: userId,
-            },
-          },
-        ],
-      },
+              has: userId
+            }
+          }
+        ]
+      }
     });
     return {
       props: {
-        hackathon,
-      },
+        hackathon
+      }
     };
   } else {
     return {
       props: {
-        hackathon: null,
-      },
+        hackathon: null
+      }
     };
   }
 }) satisfies GetServerSideProps<{

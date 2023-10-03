@@ -14,8 +14,8 @@ export default function Markdown({ code }: { code: String }) {
       const compiled = String(
         await compile(`${code}`, {
           outputFormat: "function-body",
-          development: false,
-        }),
+          development: false
+        })
       );
       setMdxModule(await run(compiled, runtime));
     })();

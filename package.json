@@ -1,37 +1,37 @@
 {
-    "name": "hackathon-thing",
-    "version": "0.1.0",
-    "private": true,
-    "scripts": {
-        "dev": "next dev",
-        "build": "next build",
-        "start": "next start",
-        "lint": "next lint",
-        "postinstall": "prisma generate",
-        "format": "prettier --version"
-    },
-    "dependencies": {
-        "@clerk/nextjs": "^4.24.1",
-        "@geist-ui/core": "^2.3.8",
-        "@geist-ui/icons": "^1.0.2",
-        "@geist-ui/react-icons": "^1.0.1",
-        "@mdx-js/mdx": "^2.3.0",
-        "@prisma/client": "^5.3.1",
-        "@types/node": "20.6.3",
-        "@types/react": "18.2.22",
-        "@types/react-dom": "18.2.7",
-        "next": "13.5.2",
-        "next-qrcode": "^2.5.1",
-        "next-superjson-plugin": "^0.5.9",
-        "react": "18.2.0",
-        "react-dom": "18.2.0",
-        "resend": "^1.1.0",
-        "superjson": "^1.13.3",
-        "swr": "^2.2.4",
-        "typescript": "5.2.2"
-    },
-    "devDependencies": {
-        "prisma": "^5.3.1",
-        "prettier": "^3.0.3"
-    }
+  "name": "hackathon-thing",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "postinstall": "prisma generate",
+    "format": "prettier --write . --config prettier.config.js"
+  },
+  "dependencies": {
+    "@clerk/nextjs": "^4.24.1",
+    "@geist-ui/core": "^2.3.8",
+    "@geist-ui/icons": "^1.0.2",
+    "@geist-ui/react-icons": "^1.0.1",
+    "@mdx-js/mdx": "^2.3.0",
+    "@prisma/client": "^5.3.1",
+    "@types/node": "20.6.3",
+    "@types/react": "18.2.22",
+    "@types/react-dom": "18.2.7",
+    "next": "13.5.2",
+    "next-qrcode": "^2.5.1",
+    "next-superjson-plugin": "^0.5.9",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "resend": "^1.1.0",
+    "superjson": "^1.13.3",
+    "swr": "^2.2.4",
+    "typescript": "5.2.2"
+  },
+  "devDependencies": {
+    "prisma": "^5.3.1",
+    "prettier": "^3.0.3"
+  }
 }

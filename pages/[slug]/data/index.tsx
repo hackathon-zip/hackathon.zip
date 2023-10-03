@@ -11,7 +11,7 @@ import {
   Snippet,
   Table,
   Text,
-  Tooltip,
+  Tooltip
 } from "@geist-ui/core";
 import { getAuth } from "@clerk/nextjs/server";
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
@@ -24,7 +24,7 @@ import type {
   Attendee,
   Hackathon,
   AttendeeAttribute,
-  AttendeeAttributeValue,
+  AttendeeAttributeValue
 } from "@prisma/client";
 import { HelpCircle, PlusCircle } from "@geist-ui/react-icons";
 import React, { useState } from "react";
@@ -46,7 +46,7 @@ type HackathonWithAttendees = Hackathon & {
 
 function DataTable({
   attendees,
-  attributes,
+  attributes
 }: {
   attendees: AttendeeWithAttributes[];
   attributes: AttendeeAttribute[];
@@ -58,10 +58,10 @@ function DataTable({
     };
   } = {
     name: {
-      label: "Name",
+      label: "Name"
     },
     email: {
-      label: "Email",
+      label: "Email"
     },
     checkedIn: {
       label: (
@@ -71,13 +71,13 @@ function DataTable({
             text="This column cannot be modified. To check in an attendee, use the Check-In system."
             style={{
               scale: "0.8",
-              marginLeft: "4px",
+              marginLeft: "4px"
             }}
             scale={2 / 3}
           >
             <HelpCircle
               style={{
-                scale: "0.2",
+                scale: "0.2"
               }}
             />
           </Tooltip>
@@ -87,37 +87,37 @@ function DataTable({
         return (
           <span
             style={{
-              pointerEvents: "none",
+              pointerEvents: "none"
             }}
           >
             <Checkbox checked={value} scale={3 / 2} style={{}} />
           </span>
         );
-      },
-    },
+      }
+    }
   };
   const columns = [
     ...Object.entries(builtinColumns).map(([prop, { label, render }]) => ({
       label,
       prop,
-      render,
+      render
     })),
     ...attributes.map((attribute) => ({
       label: attribute.name,
       prop: attribute.id,
       render: (value: any, rowData: any) => {
         return value;
-      },
-    })),
+      }
+    }))
   ];
   const dataSource = attendees.map((attendee) => {
     const row: any = {
-      key: attendee.id,
+      key: attendee.id
     };
     attendee.attributeValues.forEach(
       (attributeValue: AttendeeAttributeValue) => {
         row[attributeValue.formFieldId] = attributeValue.value;
-      },
+      }
     );
     for (const prop in builtinColumns) {
       row[prop] = attendee[prop as keyof Attendee];
@@ -132,7 +132,7 @@ function DataTable({
           if (dataIndex !== rowIndex) return item;
           return {
             ...item,
-            property: Math.random().toString(16).slice(-5),
+            property: Math.random().toString(16).slice(-5)
           };
         });
       });
@@ -159,7 +159,7 @@ function DataTable({
 }
 
 export default function Hackathon({
-  hackathon,
+  hackathon
 }: {
   hackathon: null | HackathonWithAttendees;
 }): any {
@@ -202,34 +202,34 @@ export const getServerSideProps = (async (context) => {
         slug: context.params?.slug.toString(),
         OR: [
           {
-            ownerId: userId ?? undefined,
+            ownerId: userId ?? undefined
           },
           {
             collaboratorIds: {
-              has: userId,
-            },
-          },
-        ],
+              has: userId
+            }
+          }
+        ]
       },
       include: {
         attendeeAttributes: true,
         attendees: {
           include: {
-            attributeValues: true,
-          },
-        },
-      },
+            attributeValues: true
+          }
+        }
+      }
     });
     return {
       props: {
-        hackathon,
-      },
+        hackathon
+      }
     };
   } else {
     return {
       props: {
-        hackathon: null,
-      },
+        hackathon: null
+      }
     };
   }
 }) satisfies GetServerSideProps<{

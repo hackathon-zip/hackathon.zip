@@ -13,8 +13,8 @@ export default class MyDocument extends Document {
         <Fragment key="1">
           {initialProps.styles}
           {styles}
-        </Fragment>,
-      ],
+        </Fragment>
+      ]
     };
   }
 

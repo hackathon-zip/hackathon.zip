@@ -17,8 +17,8 @@ export default function LinkScanner() {
           width: 500,
           color: {
             dark: "#000000FF",
-            light: "#FFFFFFFF",
-          },
+            light: "#FFFFFFFF"
+          }
         }}
       />
     </div>

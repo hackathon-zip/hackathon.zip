@@ -8,7 +8,7 @@ import {
   Popover,
   Select,
   Tabs,
-  Text,
+  Text
 } from "@geist-ui/core";
 import { ChevronUpDown } from "@geist-ui/react-icons";
 import HomeIcon from "@geist-ui/react-icons/home";
@@ -30,7 +30,7 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
         width: "100%",
         height: "200px",
         display: "flex",
-        flexDirection: "column",
+        flexDirection: "column"
       }}
     >
       <nav
@@ -41,7 +41,7 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
           justifyContent: "space-between",
           boxSizing: "border-box",
           padding: "0px 32px",
-          boxShadow: "inset 0 -1px 0 0 hsla(0,0%,0%,.1)",
+          boxShadow: "inset 0 -1px 0 0 hsla(0,0%,0%,.1)"
         }}
       >
         <Breadcrumbs>
@@ -75,7 +75,7 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
                 label={
                   <span
                     style={{
-                      margin: "0px -8px",
+                      margin: "0px -8px"
                     }}
                   >
                     <ChevronUpDown />

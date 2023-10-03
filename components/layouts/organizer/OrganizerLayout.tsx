@@ -1,7 +1,7 @@
 import Navbar from "./Navbar";
 
 export default function HackathonLayout({
-  children,
+  children
 }: {
   children: React.ReactNode;
 }) {
@@ -10,7 +10,7 @@ export default function HackathonLayout({
     <div
       style={{
         width: "calc(100vw - (100vw - 100%))",
-        height: "100vh",
+        height: "100vh"
       }}
     >
       <Navbar breadcrumbs={[]} />
@@ -19,7 +19,7 @@ export default function HackathonLayout({
         style={{
           background: "#fafafa",
           width: "calc(100vw - (100vw - 100%))",
-          height: "100%",
+          height: "100%"
         }}
       >
         {children}

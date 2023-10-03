@@ -4,42 +4,42 @@ import { getAuth } from "@clerk/nextjs/server";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
-    req: NextApiRequest,
-    res: NextApiResponse
+  req: NextApiRequest,
+  res: NextApiResponse
 ) {
-    try {
-        const { name, email } = req.body;
+  try {
+    const { name, email } = req.body;
 
-        let slug = req.query.slug as string;
+    let slug = req.query.slug as string;
 
-        slug = await getHackathonSlug(slug);
+    slug = await getHackathonSlug(slug);
 
-        const attendee = await prisma.attendee.create({
-            data: {
-                name,
-                email,
-                hackathon: {
-                    connect: {
-                        slug,
-                    },
-                },
-            },
-        });
+    const attendee = await prisma.attendee.create({
+      data: {
+        name,
+        email,
+        hackathon: {
+          connect: {
+            slug
+          }
+        }
+      }
+    });
 
-        delete req.body.name;
-        delete req.body.email;
+    delete req.body.name;
+    delete req.body.email;
 
-        const attributes = await prisma.attendeeAttributeValue.createMany({
-            data: Object.keys(req.body).map((attribute) => ({
-                value: req.body[attribute],
-                attendeeId: attendee.id,
-                formFieldId: attribute,
-            })),
-        });
+    const attributes = await prisma.attendeeAttributeValue.createMany({
+      data: Object.keys(req.body).map((attribute) => ({
+        value: req.body[attribute],
+        attendeeId: attendee.id,
+        formFieldId: attribute
+      }))
+    });
 
-        res.status(200).send({ attendee, attributes });
-    } catch (error) {
-        console.error(error);
-        return res.status(400).json({ error });
-    }
+    res.status(200).send({ attendee, attributes });
+  } catch (error) {
+    console.error(error);
+    return res.status(400).json({ error });
+  }
 }

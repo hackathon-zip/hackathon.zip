@@ -20,7 +20,7 @@ export default function FeatureInfo({
   featureDescription,
   featureIcon: Icon,
   children,
-  hackathonSlug,
+  hackathonSlug
 }: {
   beforeSubmit?: () => Partial<Hackathon> | Promise<Partial<Hackathon>> | false;
   featureKey: FeatureKey;
@@ -44,12 +44,12 @@ export default function FeatureInfo({
     await fetch(`/api/hackathons/${hackathonSlug}/update`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         [featureKey]: true,
-        ...additionalOptions,
-      }),
+        ...additionalOptions
+      })
     }).then((res) => res.text());
 
     router.reload();
@@ -73,7 +73,7 @@ export default function FeatureInfo({
             alignItems: "center",
             justifyContent: "center",
             flexDirection: "column",
-            gap: "10px",
+            gap: "10px"
           }}
         >
           <Icon size={60} />
@@ -88,7 +88,7 @@ export default function FeatureInfo({
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
-            justifyContent: children ? "space-between" : "center",
+            justifyContent: children ? "space-between" : "center"
           }}
         >
           {children && (
@@ -97,7 +97,7 @@ export default function FeatureInfo({
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "flex-start",
-                justifyContent: "center",
+                justifyContent: "center"
               }}
             >
               {children}

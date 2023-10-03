@@ -3,7 +3,7 @@ import type { FormSchema } from "@/components/Form";
 import type { GetServerSideProps } from "next";
 
 export default function FormPreview({
-  formSchema,
+  formSchema
 }: {
   formSchema: FormSchema;
 }) {
@@ -13,7 +13,7 @@ export default function FormPreview({
         schema={formSchema}
         submission={{
           onSubmit: () => null,
-          type: "controlled",
+          type: "controlled"
         }}
       />
     </div>
@@ -27,9 +27,9 @@ export const getServerSideProps = (async (context) => {
       {
         name: "error",
         type: "text",
-        label: "Error",
-      },
-    ],
+        label: "Error"
+      }
+    ]
   };
 
   console.log({ rawSchema });
@@ -42,8 +42,8 @@ export const getServerSideProps = (async (context) => {
 
   return {
     props: {
-      formSchema: schema,
-    },
+      formSchema: schema
+    }
   };
 }) satisfies GetServerSideProps<{
   formSchema: FormSchema;

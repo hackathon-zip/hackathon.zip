@@ -7,13 +7,13 @@ import {
   Input,
   Page,
   Text,
-  useToasts,
+  useToasts
 } from "@geist-ui/core";
 import type {
   InferGetServerSidePropsType,
   GetServerSideProps,
   GetServerSidePropsContext,
-  GetServerSidePropsResult,
+  GetServerSidePropsResult
 } from "next";
 import prisma from "@/lib/prisma";
 import { NextApiRequest } from "next";
@@ -29,7 +29,7 @@ import Link from "next/link";
 import AttendeeLayout from "@/components/layouts/attendee/AttendeeLayout";
 
 export default function Attendee({
-  hackathon,
+  hackathon
 }: {
   hackathon: (Hackathon & { attendeeAttributes: AttendeeAttribute[] }) | null;
 }): any {
@@ -60,24 +60,24 @@ export default function Attendee({
                 label: "Email",
                 name: "email",
                 placeholder: "fiona@hackathon.zip",
-                required: true,
+                required: true
               },
               {
                 type: "text",
                 label: "Name",
                 name: "name",
                 placeholder: "Fiona Hackworth",
-                required: true,
+                required: true
               },
               ...hackathon.attendeeAttributes.map(
                 (x) =>
                   ({
                     ...x,
                     label: x.name,
-                    name: x.id,
-                  } as FormElement)
-              ),
-            ],
+                    name: x.id
+                  }) as FormElement
+              )
+            ]
           }}
           clearValuesOnSuccesfulSubmit={true}
           submission={{
@@ -86,11 +86,11 @@ export default function Attendee({
               let res = await fetch(transformAPIURL("/register"), {
                 method: "POST",
                 headers: {
-                  "Content-Type": "application/json",
+                  "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                  ...data,
-                }),
+                  ...data
+                })
               }).then((r) => r.json());
               if (res.error) {
                 setToast({
@@ -98,17 +98,17 @@ export default function Attendee({
                     res.error.meta?.cause ?? "Unknown error."
                   }`,
                   delay: 2000,
-                  type: "error",
+                  type: "error"
                 });
                 return false;
               } else {
                 setToast({
                   text: "You're signed up. Please check your email for information about accessing the attendee portal, thanks!",
-                  delay: 10000,
+                  delay: 10000
                 });
                 return true;
               }
-            },
+            }
           }}
         />
       </div>
@@ -135,16 +135,16 @@ export const getServerSideProps = (async (
       where: {
         OR: [
           {
-            slug: context.params?.slug.toString(),
+            slug: context.params?.slug.toString()
           },
           {
-            customDomain: context.params?.slug.toString(),
-          },
-        ],
+            customDomain: context.params?.slug.toString()
+          }
+        ]
       },
       include: {
-        attendeeAttributes: true,
-      },
+        attendeeAttributes: true
+      }
     });
     if (hackathon) {
       const token = context.req.cookies[hackathon?.slug as string];
@@ -155,10 +155,10 @@ export const getServerSideProps = (async (
             hackathonId: hackathon.id,
             tokens: {
               some: {
-                token: token,
-              },
-            },
-          },
+                token: token
+              }
+            }
+          }
         });
         if (attendee) {
           context.res.setHeader(
@@ -170,24 +170,24 @@ export const getServerSideProps = (async (
           return {
             props: {
               hackathon: null,
-              attendee: null,
-            },
+              attendee: null
+            }
           };
         }
       }
       return {
         props: {
           hackathon: hackathon,
-          attendee: attendee,
-        },
+          attendee: attendee
+        }
       };
     }
   }
   return {
     props: {
       hackathon: null,
-      attendee: null,
-    },
+      attendee: null
+    }
   };
 }) satisfies GetServerSideProps<{
   hackathon: Hackathon | null;

@@ -6,7 +6,7 @@ import {
   Grid,
   Input,
   Page,
-  Text,
+  Text
 } from "@geist-ui/core";
 import { getAuth } from "@clerk/nextjs/server";
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
@@ -24,7 +24,7 @@ import Debug from "@/components/Debug";
 import Link from "next/link";
 
 export default function Index({
-  hackathons,
+  hackathons
 }: {
   hackathons: Hackathon[];
 }): any {
@@ -55,14 +55,14 @@ export const getServerSideProps = (async (context) => {
 
   const hackathons = await prisma.hackathon.findMany({
     where: {
-      ownerId: userId ?? undefined,
-    },
+      ownerId: userId ?? undefined
+    }
   });
 
   return {
     props: {
-      hackathons,
-    },
+      hackathons
+    }
   };
 }) satisfies GetServerSideProps<{
   hackathons: Hackathon[];

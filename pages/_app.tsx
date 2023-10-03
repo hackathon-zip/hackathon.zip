@@ -18,7 +18,7 @@ type AppPropsWithLayout = AppProps & {
 function localStorageCacheProvider(): Map<string, any> {
   // When initializing, we restore the data from `localStorage` into a map.
   const map = new Map<string, any>(
-    JSON.parse(localStorage.getItem("app-cache") || "[]"),
+    JSON.parse(localStorage.getItem("app-cache") || "[]")
   );
 
   // Before unloading the app, we write back all the data into `localStorage`.
@@ -40,7 +40,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
         <SWRConfig
           value={{
             fetcher: (resource, init) =>
-              fetch(resource, init).then((res) => res.json()),
+              fetch(resource, init).then((res) => res.json())
             // provider: localStorageCacheProvider
           }}
         >

@@ -6,7 +6,7 @@ import {
   Grid,
   Input,
   Page,
-  Text,
+  Text
 } from "@geist-ui/core";
 import { getAuth } from "@clerk/nextjs/server";
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
@@ -25,7 +25,7 @@ import Navbar from "@/components/Navbar";
 import Link from "next/link";
 
 export default function Index({
-  hackathons,
+  hackathons
 }: {
   hackathons: Hackathon[];
 }): any {
@@ -60,7 +60,7 @@ export default function Index({
           style={{
             textAlign: "left",
             maxWidth: "600px",
-            width: "calc(100vw - 64px)",
+            width: "calc(100vw - 64px)"
           }}
         >
           <h2 style={{ marginBottom: "0px" }}>Create a Hackathon</h2>
@@ -76,14 +76,14 @@ export default function Index({
                     label: "Hackathon Name",
                     name: "name",
                     placeholder: "Thing Hacks 2023",
-                    required: true,
+                    required: true
                   },
                   {
                     type: "text",
                     label: "Venue & Location",
                     name: "location",
                     placeholder: "Things HQ in San Francisco",
-                    required: true,
+                    required: true
                   },
                   {
                     type: "tuple",
@@ -92,21 +92,21 @@ export default function Index({
                       {
                         type: "date",
                         inlineLabel: "Start Date",
-                        name: "startDate",
+                        name: "startDate"
                       },
                       {
                         type: "date",
                         inlineLabel: "End Date",
-                        name: "endDate",
-                      },
-                    ],
-                  },
-                ],
+                        name: "endDate"
+                      }
+                    ]
+                  }
+                ]
               }}
               submission={{
                 type: "request",
                 method: "POST",
-                action: "/api/hackathons/create",
+                action: "/api/hackathons/create"
               }}
             />
           </Drawer.Content>
@@ -142,7 +142,7 @@ export default function Index({
                   justifyContent: "center",
                   gap: 10,
                   margin: "0px",
-                  height: "100%",
+                  height: "100%"
                 }}
               >
                 <PlusCircle size={32} />
@@ -162,14 +162,14 @@ export const getServerSideProps = (async (context) => {
 
   const hackathons = await prisma.hackathon.findMany({
     where: {
-      ownerId: userId ?? undefined,
-    },
+      ownerId: userId ?? undefined
+    }
   });
 
   return {
     props: {
-      hackathons,
-    },
+      hackathons
+    }
   };
 }) satisfies GetServerSideProps<{
   hackathons: Hackathon[];

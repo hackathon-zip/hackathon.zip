@@ -6,7 +6,7 @@ import {
   Grid,
   Input,
   Page,
-  Text,
+  Text
 } from "@geist-ui/core";
 import { getAuth } from "@clerk/nextjs/server";
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
@@ -27,7 +27,7 @@ import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import FeatureInfo from "@/components/organizer/FeatureInfo";
 
 export default function Hackathon({
-  hackathon,
+  hackathon
 }: {
   hackathon: Hackathon | null;
 }): any {
@@ -89,26 +89,26 @@ export const getServerSideProps = (async (context) => {
         slug: context.params?.slug.toString(),
         OR: [
           {
-            ownerId: userId ?? undefined,
+            ownerId: userId ?? undefined
           },
           {
             collaboratorIds: {
-              has: userId,
-            },
-          },
-        ],
-      },
+              has: userId
+            }
+          }
+        ]
+      }
     });
     return {
       props: {
-        hackathon,
-      },
+        hackathon
+      }
     };
   } else {
     return {
       props: {
-        hackathon: null,
-      },
+        hackathon: null
+      }
     };
   }
 }) satisfies GetServerSideProps<{

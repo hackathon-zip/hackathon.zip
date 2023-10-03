@@ -6,13 +6,13 @@ import {
   Grid,
   Input,
   Page,
-  Text,
+  Text
 } from "@geist-ui/core";
 import type {
   InferGetServerSidePropsType,
   GetServerSideProps,
   GetServerSidePropsContext,
-  GetServerSidePropsResult,
+  GetServerSidePropsResult
 } from "next";
 import prisma from "@/lib/prisma";
 import { NextApiRequest } from "next";
@@ -25,7 +25,7 @@ import Link from "next/link";
 import AttendeeLayout from "@/components/layouts/attendee/AttendeeLayout";
 
 export default function Attendee({
-  hackathon,
+  hackathon
 }: {
   hackathon: Hackathon | null;
 }): any {
@@ -65,13 +65,13 @@ export const getServerSideProps = (async (
       where: {
         OR: [
           {
-            slug: context.params?.slug.toString(),
+            slug: context.params?.slug.toString()
           },
           {
-            customDomain: context.params?.slug.toString(),
-          },
-        ],
-      },
+            customDomain: context.params?.slug.toString()
+          }
+        ]
+      }
     });
     if (hackathon) {
       const token = context.req.cookies[hackathon?.slug as string];
@@ -82,18 +82,18 @@ export const getServerSideProps = (async (
             hackathonId: hackathon.id,
             tokens: {
               some: {
-                token: token,
-              },
-            },
-          },
+                token: token
+              }
+            }
+          }
         });
       }
       if (attendee) {
         return {
           props: {
             hackathon: hackathon,
-            attendee: attendee,
-          },
+            attendee: attendee
+          }
         };
       }
     }
@@ -101,12 +101,12 @@ export const getServerSideProps = (async (
   return {
     props: {
       hackathon: null,
-      attendee: null,
+      attendee: null
     },
     redirect: {
       destination: "/register",
-      permanent: false,
-    },
+      permanent: false
+    }
   };
 }) satisfies GetServerSideProps<{
   hackathon: Hackathon | null;

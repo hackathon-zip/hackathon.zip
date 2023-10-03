@@ -8,7 +8,7 @@ import {
   Button,
   Modal,
   Input,
-  useToasts,
+  useToasts
 } from "@geist-ui/core";
 import { useRef } from "react";
 import NextLink from "next/link";
@@ -20,7 +20,7 @@ import { Form } from "@/components/Form";
 export default function AttendeeLayout({
   children,
   hackathon,
-  attendee,
+  attendee
 }: {
   children: React.ReactNode;
   hackathon: Hackathon | null;
@@ -53,9 +53,9 @@ export default function AttendeeLayout({
                   label: "Sign In With Email",
                   name: "email",
                   placeholder: "fiona@hackathon.zip",
-                  required: true,
-                },
-              ],
+                  required: true
+                }
+              ]
             }}
             submission={{
               type: "controlled",
@@ -63,22 +63,22 @@ export default function AttendeeLayout({
                 let res = await fetch(transformAPIURL("/sign-in"), {
                   method: "POST",
                   headers: {
-                    "Content-Type": "application/json",
+                    "Content-Type": "application/json"
                   },
                   body: JSON.stringify({
-                    ...data,
-                  }),
+                    ...data
+                  })
                 }).then((r) => r.json());
                 if (res.error) {
                   setToast({ text: res.error, delay: 2000 });
                 } else {
                   setToast({
                     text: "Please check your email for a magic URL, thanks!",
-                    delay: 2000,
+                    delay: 2000
                   });
                   setVisible(false);
                 }
-              },
+              }
             }}
             hideSubmit={false}
             ref={formRef}
@@ -101,7 +101,7 @@ export default function AttendeeLayout({
                   minHeight: "100px",
                   padding: "16px",
                   backgroundSize: "cover",
-                  backgroundPosition: "center",
+                  backgroundPosition: "center"
                 }}
               >
                 <Text
@@ -109,7 +109,7 @@ export default function AttendeeLayout({
                   b
                   style={{
                     color: "white",
-                    fontWeight: "800",
+                    fontWeight: "800"
                   }}
                 >
                   {hackathon?.name}

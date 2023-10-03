@@ -7,7 +7,7 @@ import {
   Input,
   Page,
   Text,
-  Textarea,
+  Textarea
 } from "@geist-ui/core";
 import { getAuth } from "@clerk/nextjs/server";
 import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
@@ -28,7 +28,7 @@ import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import type { FormSchema } from "@/components/Form";
 
 export default function Hackathon({
-  hackathon,
+  hackathon
 }: {
   hackathon: Hackathon | null;
 }): any {
@@ -38,9 +38,9 @@ export default function Hackathon({
         type: "text",
         required: false,
         name: "name",
-        label: "Hello",
-      },
-    ],
+        label: "Hello"
+      }
+    ]
   };
   const [formJSON, setFormJSON] = useState<any>(defaultValue);
 
@@ -75,10 +75,10 @@ export default function Hackathon({
                   type: "text",
                   required: false,
                   name: "name",
-                  label: "Hello",
-                },
-              ],
-            }),
+                  label: "Hello"
+                }
+              ]
+            })
           )}`}
           width="100%"
           height="1000px"
@@ -105,26 +105,26 @@ export const getServerSideProps = (async (context) => {
         slug: context.params?.slug.toString(),
         OR: [
           {
-            ownerId: userId ?? undefined,
+            ownerId: userId ?? undefined
           },
           {
             collaboratorIds: {
-              has: userId,
-            },
-          },
-        ],
-      },
+              has: userId
+            }
+          }
+        ]
+      }
     });
     return {
       props: {
-        hackathon,
-      },
+        hackathon
+      }
     };
   } else {
     return {
       props: {
-        hackathon: null,
-      },
+        hackathon: null
+      }
     };
   }
 }) satisfies GetServerSideProps<{
