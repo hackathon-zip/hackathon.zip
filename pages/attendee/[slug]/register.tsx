@@ -31,7 +31,7 @@ import AttendeeLayout from "@/components/layouts/attendee/AttendeeLayout";
 export default function Attendee({
   hackathon,
 }: {
-  hackathon: Hackathon & { attendeeAttributes: AttendeeAttribute[] } | null;
+  hackathon: (Hackathon & { attendeeAttributes: AttendeeAttribute[] }) | null;
 }): any {
   if (!hackathon) {
     return (
@@ -69,11 +69,14 @@ export default function Attendee({
                 placeholder: "Fiona Hackworth",
                 required: true,
               },
-              ...hackathon.attendeeAttributes.map((x) => ({
-                ...x,
-                label: x.name,
-                name: x.id,
-              } as FormElement)),
+              ...hackathon.attendeeAttributes.map(
+                (x) =>
+                  ({
+                    ...x,
+                    label: x.name,
+                    name: x.id,
+                  }) as FormElement,
+              ),
             ],
           }}
           clearValuesOnSuccesfulSubmit={true}
@@ -151,10 +154,12 @@ export const getServerSideProps = (async (
           );
           context.res.statusCode = 302;
           context.res.end();
-          return {props: {
-            hackathon: null,
-            attendee: null,
-          }};
+          return {
+            props: {
+              hackathon: null,
+              attendee: null,
+            },
+          };
         }
       }
       return {

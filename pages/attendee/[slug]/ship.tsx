@@ -109,7 +109,7 @@ export const getServerSideProps = (async (
       hackathon: null,
       attendee: null,
     },
-  };;
+  };
 }) satisfies GetServerSideProps<{
   hackathon: Hackathon | null;
   attendee: Attendee | null;
