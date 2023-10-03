@@ -60,27 +60,20 @@ export default function Attendee({
 
   return (
     <>
-      <div>
+      <div style={{width: '100%'}}>
         <h1>{hackathon?.name}</h1>
-        <h3>
-          {hackathon.startDate &&
-            new Date(hackathon.startDate).toLocaleString()}
-          {" to "}
-          {hackathon.endDate &&
-            new Date(hackathon.endDate).toLocaleString()} at{" "}
-          {hackathon?.location}
-        </h3>
-        <code>/{hackathon?.slug}</code>
         <Grid.Container gap={2}>
           {hackathon?.dashboard?.links.map((link) => (
-            <Link href={link.url}>
-              <Button>{link.text}</Button>
-            </Link>
+            <Grid>
+              <Link href={link.url} >
+                <Button type="success">{link.text}</Button>
+              </Link>
+            </Grid>
           ))}
         </Grid.Container>
-        <Grid.Container gap={1.5}>
+        <Grid.Container gap={1.5} my={1}>
           {hackathon?.dashboard?.cards.map((card) => (
-            <Grid xs={12} justify="center">
+            <Grid xs={12}>
               <Card width="100%">
                 <Text h4 my={0}>
                   {card.header}
