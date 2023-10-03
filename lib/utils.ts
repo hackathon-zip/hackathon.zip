@@ -8,7 +8,7 @@ type Params = Record<string, unknown>;
 
 export function permitParams<T extends Params>(
     allowedKeys: (keyof T)[],
-    params: T,
+    params: T
 ): T {
     const permittedParams = {} as T;
 
@@ -40,7 +40,7 @@ export function getSubdomains(host: string | null): string[] | undefined {
 }
 
 export async function getHackathonBySubdomain(
-    host: string,
+    host: string
 ): Promise<Hackathon> {
     const subdomains = getSubdomains(host);
     const hackathon = await prisma.hackathon.findUnique({
@@ -54,4 +54,33 @@ export async function getHackathonBySubdomain(
     }
 
     return hackathon;
+}
+
+export async function getHackathonSlug(slugParameter: string): Promise<string> {
+    try {
+        const res = await prisma.hackathon.findFirst({
+            where: {
+                OR: [
+                    {
+                        slug: slugParameter,
+                    },
+                    {
+                        customDomain: slugParameter,
+                    },
+                ],
+            },
+            select: {
+                slug: true,
+            },
+        });
+
+        if (!res) {
+            throw new Error("Hackathon not found");
+        }
+
+        return res.slug;
+    } catch (err) {
+        console.error(err);
+        throw new Error("Hackathon not found");
+    }
 }

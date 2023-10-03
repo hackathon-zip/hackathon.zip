@@ -7,7 +7,7 @@ const isWithin15Minutes = (dateToCheck: Date) =>
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse,
+    res: NextApiResponse
 ) {
     try {
         let token = await prisma.token.findUnique({
@@ -34,13 +34,8 @@ export default async function handler(
             });
             res.setHeader(
                 "set-cookie",
-                `${token.attendee.hackathon.slug}=${token.token}; Max-Age=604800; Path=/`,
+                `${token.attendee.hackathon.slug}=${token.token}; Max-Age=604800; Path=/`
             );
-            if (process.env.NODE_ENV == "development") {
-                return res.redirect(
-                    `/attendee/${token.attendee.hackathon.slug}/`,
-                );
-            }
             return res.redirect("/");
         }
         return res.status(400).json({

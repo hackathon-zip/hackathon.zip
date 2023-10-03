@@ -75,7 +75,7 @@ export default function Attendee({
                     ...x,
                     label: x.name,
                     name: x.id,
-                  }) as FormElement,
+                  } as FormElement)
               ),
             ],
           }}
@@ -93,7 +93,13 @@ export default function Attendee({
                 }),
               }).then((r) => r.json());
               if (res.error) {
-                setToast({ text: res.error, delay: 2000 });
+                setToast({
+                  text: `${res.error.name ?? "Error"}: ${
+                    res.error.meta?.cause ?? "Unknown error."
+                  }`,
+                  delay: 2000,
+                  type: "error",
+                });
                 return false;
               } else {
                 setToast({
@@ -112,7 +118,7 @@ export default function Attendee({
 
 Attendee.getLayout = function getLayout(
   page: ReactElement,
-  props: { hackathon: Hackathon | null; attendee: Attendee | null },
+  props: { hackathon: Hackathon | null; attendee: Attendee | null }
 ) {
   return (
     <AttendeeLayout hackathon={props.hackathon} attendee={props.attendee}>
@@ -122,12 +128,19 @@ Attendee.getLayout = function getLayout(
 };
 
 export const getServerSideProps = (async (
-  context: GetServerSidePropsContext,
+  context: GetServerSidePropsContext
 ) => {
   if (context.params?.slug) {
-    const hackathon = await prisma.hackathon.findUnique({
+    const hackathon = await prisma.hackathon.findFirst({
       where: {
-        slug: context.params?.slug.toString(),
+        OR: [
+          {
+            slug: context.params?.slug.toString(),
+          },
+          {
+            customDomain: context.params?.slug.toString(),
+          },
+        ],
       },
       include: {
         attendeeAttributes: true,
@@ -150,7 +163,7 @@ export const getServerSideProps = (async (
         if (attendee) {
           context.res.setHeader(
             "location",
-            context.resolvedUrl.replace(/\/$/, "").replace("/register", ""),
+            context.resolvedUrl.replace(/\/$/, "").replace("/register", "")
           );
           context.res.statusCode = 302;
           context.res.end();

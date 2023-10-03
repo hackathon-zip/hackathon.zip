@@ -8,7 +8,7 @@ import { getSubdomains } from "./lib/utils";
 
 export default function middleware(
     request: NextRequest,
-    event: NextFetchEvent,
+    event: NextFetchEvent
 ) {
     const withAuthentication = (callback: (req: NextRequest) => any) => {
         return authMiddleware({
@@ -21,7 +21,7 @@ export default function middleware(
 
     const withoutAuthentication = (
         route: string,
-        callback: (req: NextRequest) => any,
+        callback: (req: NextRequest) => any
     ) => {
         return authMiddleware({
             publicRoutes: [route],
@@ -48,24 +48,35 @@ export default function middleware(
 
     switch (subdomain) {
         case "organizer": // you are on organizer.hackathon.zip
+            console.log("organizer");
             return withAuthentication(
                 isApi && !isAttendeeApi
                     ? () => rewrite("/api/organizer" + pathnameWithoutAPI)
-                    : () => null,
+                    : () => null
             );
         case "api": // you are on api.hackathon.zip
+            console.log("api");
             return withoutAuthentication(pathname, () =>
-                rewrite("/api/integration" + pathname),
+                rewrite("/api/integration" + pathname)
             );
 
         case undefined: // you are on hackathon.zip
+            console.log("undefined");
             return withoutAuthentication(pathname, () =>
-                rewrite(isApi ? `/api${pathnameWithoutAPI}` : `${pathname}`),
+                rewrite(isApi ? `/api${pathnameWithoutAPI}` : `${pathname}`)
             );
         default: // you are on [event].hackathon.zip or [customdomain]
+            console.log("default");
             let slug = subdomain;
 
-            if (!hostname?.includes("hackathon.zip")) {
+            if (
+                !hostname?.includes(
+                    process.env.NODE_ENV === "production"
+                        ? "hackathon.zip"
+                        : "localhost"
+                )
+            ) {
+                console.log("custom domain");
                 slug = hostname?.split(":")[0] ?? subdomain;
             }
 
@@ -73,8 +84,8 @@ export default function middleware(
                 rewrite(
                     isApi
                         ? `/api/attendee/${slug}` + pathnameWithoutAPI
-                        : `/attendee/${slug}` + pathname,
-                ),
+                        : `/attendee/${slug}` + pathname
+                )
             );
     }
 }

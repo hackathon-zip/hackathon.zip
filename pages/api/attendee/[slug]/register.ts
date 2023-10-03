@@ -1,20 +1,26 @@
 import prisma from "@/lib/prisma";
+import { getHackathonSlug } from "@/lib/utils";
 import { getAuth } from "@clerk/nextjs/server";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse,
+    res: NextApiResponse
 ) {
     try {
         const { name, email } = req.body;
+
+        let slug = req.query.slug as string;
+
+        slug = await getHackathonSlug(slug);
+
         const attendee = await prisma.attendee.create({
             data: {
                 name,
                 email,
                 hackathon: {
                     connect: {
-                        slug: req.query.slug as string,
+                        slug,
                     },
                 },
             },
@@ -31,7 +37,7 @@ export default async function handler(
             })),
         });
 
-        res.redirect(`/api/attendee/${req.query.slug}/sign-in`);
+        res.status(200).send({ attendee, attributes });
     } catch (error) {
         console.error(error);
         return res.status(400).json({ error });
