@@ -7,7 +7,8 @@
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
-        "postinstall": "prisma generate"
+        "postinstall": "prisma generate",
+        "format": "prettier --version"
     },
     "dependencies": {
         "@clerk/nextjs": "^4.24.1",
@@ -30,6 +31,7 @@
         "typescript": "5.2.2"
     },
     "devDependencies": {
-        "prisma": "^5.3.1"
+        "prisma": "^5.3.1",
+        "prettier": "^3.0.3"
     }
 }
