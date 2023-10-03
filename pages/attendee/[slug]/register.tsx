@@ -108,7 +108,7 @@ export default function Attendee({
 
 Attendee.getLayout = function getLayout(
   page: ReactElement,
-  props: { hackathon: Hackathon | null; attendee: Attendee | null }
+  props: { hackathon: Hackathon | null; attendee: Attendee | null },
 ) {
   return (
     <AttendeeLayout hackathon={props.hackathon} attendee={props.attendee}>
@@ -118,7 +118,7 @@ Attendee.getLayout = function getLayout(
 };
 
 export const getServerSideProps = (async (
-  context: GetServerSidePropsContext
+  context: GetServerSidePropsContext,
 ) => {
   if (context.params?.slug) {
     const hackathon = await prisma.hackathon.findUnique({
@@ -146,7 +146,7 @@ export const getServerSideProps = (async (
         if (attendee) {
           context.res.setHeader(
             "location",
-            context.resolvedUrl.replace(/\/$/, "").replace("/register", "")
+            context.resolvedUrl.replace(/\/$/, "").replace("/register", ""),
           );
           context.res.statusCode = 302;
           context.res.end();

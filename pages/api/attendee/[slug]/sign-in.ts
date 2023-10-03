@@ -8,7 +8,7 @@ const resend = new Resend(process.env.RESEND);
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse
+    res: NextApiResponse,
 ) {
     try {
         let attendee = await prisma.attendee.findUnique({

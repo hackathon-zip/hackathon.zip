@@ -117,7 +117,7 @@ function DataTable({
     attendee.attributeValues.forEach(
       (attributeValue: AttendeeAttributeValue) => {
         row[attributeValue.formFieldId] = attributeValue.value;
-      }
+      },
     );
     for (const prop in builtinColumns) {
       row[prop] = attendee[prop as keyof Attendee];

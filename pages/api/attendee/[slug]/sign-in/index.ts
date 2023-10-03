@@ -8,7 +8,7 @@ const resend = new Resend(process.env.RESEND);
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse
+    res: NextApiResponse,
 ) {
     try {
         let attendee = await prisma.attendee.findUnique({
@@ -49,7 +49,7 @@ export default async function handler(
                 text: `Welcome, ${attendee.name}! https://${attendee.hackathon.slug}.hackathon.zip/sign-in/${loginToken.magicKey}`,
             });
             console.log(
-                `https://${attendee.hackathon.slug}.hackathon.zip/sign-in/${loginToken.magicKey}`
+                `https://${attendee.hackathon.slug}.hackathon.zip/sign-in/${loginToken.magicKey}`,
             );
             return res.status(200).json(email);
         }

@@ -8,7 +8,7 @@ type Params = Record<string, unknown>;
 
 export function permitParams<T extends Params>(
     allowedKeys: (keyof T)[],
-    params: T
+    params: T,
 ): T {
     const permittedParams = {} as T;
 
@@ -40,7 +40,7 @@ export function getSubdomains(host: string | null): string[] | undefined {
 }
 
 export async function getHackathonBySubdomain(
-    host: string
+    host: string,
 ): Promise<Hackathon> {
     const subdomains = getSubdomains(host);
     const hackathon = await prisma.hackathon.findUnique({

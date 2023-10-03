@@ -78,7 +78,7 @@ export default function Hackathon({
                   label: "Hello",
                 },
               ],
-            })
+            }),
           )}`}
           width="100%"
           height="1000px"

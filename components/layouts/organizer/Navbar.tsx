@@ -29,7 +29,7 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
     "feature",
   ]);
   const activeHackathon = hackathons.find(
-    (h: Hackathon) => h.slug === activeHackathonSlug
+    (h: Hackathon) => h.slug === activeHackathonSlug,
   );
 
   console.log({ activeHackathonSlug });
@@ -121,7 +121,7 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
         <Tabs
           onChange={(value) => {
             router.push(
-              `/${activeHackathonSlug}/${value == "dashboard" ? "" : value}`
+              `/${activeHackathonSlug}/${value == "dashboard" ? "" : value}`,
             );
           }}
           style={{

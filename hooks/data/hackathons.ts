@@ -14,7 +14,7 @@ export function useMyHackathons(): DataHookOutput<{ hackathons: Hackathon[] }> {
 }
 
 export function useHackathon(
-    slug: string
+    slug: string,
 ): DataHookOutput<{ hackathon: Hackathon }> {
     const { data, error, isLoading } = useSWR(`/api/hackathons/${slug}`, {});
 

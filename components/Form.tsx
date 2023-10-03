@@ -187,7 +187,7 @@ export const Form = React.forwardRef(
       additionalButtons?: React.ReactNode;
       clearValuesOnSuccesfulSubmit?: boolean;
     },
-    ref
+    ref,
   ) => {
     const inputFields = Object.fromEntries(
       schema.elements
@@ -200,7 +200,7 @@ export const Form = React.forwardRef(
         })
         .filter((a) => a)
         .flat()
-        .map((input) => [input?.name, input]) as [string, FormTextInput][]
+        .map((input) => [input?.name, input]) as [string, FormTextInput][],
     );
 
     const [values, setValues] = useState<any>(
@@ -213,9 +213,9 @@ export const Form = React.forwardRef(
               isValid: false,
               showWarning: false,
             },
-          ]
-        )
-      )
+          ],
+        ),
+      ),
     );
 
     const [loading, setLoading] = useState(false);
@@ -264,7 +264,7 @@ export const Form = React.forwardRef(
     }
 
     const invalidFields = Object.keys(values).filter(
-      (name) => !values[name].isValid
+      (name) => !values[name].isValid,
     );
 
     return (
@@ -285,14 +285,14 @@ export const Form = React.forwardRef(
                   e.preventDefault();
                   setLoading(true);
                   let succesful =
-                    (await submission.onSubmit(
+                    ((await submission.onSubmit(
                       Object.fromEntries(
                         Object.entries(values).map(([name, value]) => [
                           name,
                           (value as any).value,
-                        ])
-                      )
-                    ) as any) || true;
+                        ]),
+                      ),
+                    )) as any) || true;
                   if (clearValuesOnSuccesfulSubmit) {
                     setValues(
                       Object.fromEntries(
@@ -304,9 +304,9 @@ export const Form = React.forwardRef(
                               isValid: false,
                               showWarning: false,
                             },
-                          ]
-                        )
-                      )
+                          ],
+                        ),
+                      ),
                     );
                   }
                   setLoading(false);
@@ -408,5 +408,5 @@ export const Form = React.forwardRef(
         </form>
       </>
     );
-  }
+  },
 );

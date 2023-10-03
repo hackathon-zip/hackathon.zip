@@ -22,7 +22,7 @@ export function syntaxHighlight(json: string, comment: string) {
           cls = "null";
         }
         return '<span class="' + cls + '">' + match + "</span>";
-      }
+      },
     ) +
     '<span class="comment"> // ' +
     comment +

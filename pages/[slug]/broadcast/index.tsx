@@ -39,13 +39,23 @@ export default function Hackathon({
     );
   }
 
-  if (!hackathon.broadcastEnabled) return (
-    <Page>
-      <FeatureInfo featureKey="broadcastEnabled" featureName="Broadcasts" featureDescription={<>
-        Communicate with hackers in real-time about hackathon&nbsp;updates.
-      </>} featureIcon={Radio} hackathonSlug={hackathon.slug} />
-    </Page>
-  );
+  if (!hackathon.broadcastEnabled)
+    return (
+      <Page>
+        <FeatureInfo
+          featureKey="broadcastEnabled"
+          featureName="Broadcasts"
+          featureDescription={
+            <>
+              Communicate with hackers in real-time about
+              hackathon&nbsp;updates.
+            </>
+          }
+          featureIcon={Radio}
+          hackathonSlug={hackathon.slug}
+        />
+      </Page>
+    );
 
   return (
     <>

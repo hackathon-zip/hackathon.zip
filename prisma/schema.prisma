@@ -23,6 +23,7 @@ model Hackathon {
   startDate DateTime?
   endDate   DateTime?
   schedule  Schedule?
+  dashboard AttendeeDashboard?
 
   // branding
   website   String?
@@ -47,10 +48,12 @@ model Hackathon {
 }
 
 model AttendeeDashboard {
-  id    String                  @id @default(uuid())
-  body  String
-  cards AttendeeDashboardCard[]
-  links AttendeeDashboardLink[]
+  id          String                  @id @default(uuid())
+  body        String
+  cards       AttendeeDashboardCard[]
+  links       AttendeeDashboardLink[]
+  hackathonId String                  @unique
+  hackathon   Hackathon               @relation(fields: [hackathonId], references: [id])
 }
 
 model AttendeeDashboardCard {

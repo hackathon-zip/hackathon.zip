@@ -4,6 +4,7 @@ import {
   Drawer,
   Fieldset,
   Grid,
+  Link,
   Input,
   Page,
   Text,
@@ -18,17 +19,36 @@ import prisma from "@/lib/prisma";
 import { NextApiRequest } from "next";
 import { NextServerOptions } from "next/dist/server/next";
 
-import type { Hackathon, Attendee } from "@prisma/client";
+import type {
+  Hackathon,
+  Attendee,
+  AttendeeDashboard,
+  AttendeeDashboardCard,
+  AttendeeDashboardLink,
+} from "@prisma/client";
 import React, { useState } from "react";
 import type { ReactElement } from "react";
 import Link from "next/link";
+import Markdown from "@/components/Markdown";
 import AttendeeLayout from "@/components/layouts/attendee/AttendeeLayout";
+import { compile } from "@mdx-js/mdx";
 
 export default function Attendee({
   hackathon,
   attendee,
 }: {
-  hackathon: Hackathon | null;
+  hackathon:
+    | (Hackathon & {
+        dashboard:
+          | (AttendeeDashboard & {
+              cards: (AttendeeDashboardCard & {
+                links: AttendeeDashboardLink[];
+              })[];
+              links: AttendeeDashboardLink[];
+            })
+          | null;
+      })
+    | null;
   attendee: Attendee | null;
 }): any {
   if (!hackathon) {
@@ -52,6 +72,31 @@ export default function Attendee({
           {hackathon?.location}
         </h3>
         <code>/{hackathon?.slug}</code>
+        <Grid.Container gap={2}>
+          {hackathon?.dashboard?.links.map((link) => (
+            <Link href={link.url}>
+              <Button>{link.text}</Button>
+            </Link>
+          ))}
+        </Grid.Container>
+        <Grid.Container gap={1.5}>
+          {hackathon?.dashboard?.cards.map((card) => (
+            <Grid xs={12} justify="center">
+              <Card width="100%">
+                <Text h4 my={0}>
+                  {card.header}
+                </Text>
+                <Text>{card.text}</Text>
+                {card.links.map((link) => (
+                  <Link href={link.url}>
+                    <Button>{link.text}</Button>
+                  </Link>
+                ))}
+              </Card>
+            </Grid>
+          ))}
+        </Grid.Container>
+        {hackathon?.dashboard && <Markdown code={hackathon?.dashboard?.body} />}
       </div>
     </>
   );
@@ -59,7 +104,7 @@ export default function Attendee({
 
 Attendee.getLayout = function getLayout(
   page: ReactElement,
-  props: { hackathon: Hackathon | null; attendee: Attendee | null }
+  props: { hackathon: Hackathon | null; attendee: Attendee | null },
 ) {
   return (
     <AttendeeLayout hackathon={props.hackathon} attendee={props.attendee}>
@@ -69,7 +114,7 @@ Attendee.getLayout = function getLayout(
 };
 
 export const getServerSideProps = (async (
-  context: GetServerSidePropsContext
+  context: GetServerSidePropsContext,
 ) => {
   if (context.params?.slug) {
     const hackathon = await prisma.hackathon.findFirst({
@@ -82,6 +127,18 @@ export const getServerSideProps = (async (
             customDomain: context.params?.slug.toString(),
           },
         ],
+      },
+      include: {
+        dashboard: {
+          include: {
+            links: true,
+            cards: {
+              include: {
+                links: true,
+              },
+            },
+          },
+        },
       },
     });
     if (hackathon) {
@@ -111,7 +168,7 @@ export const getServerSideProps = (async (
   }
   context.res.setHeader(
     "location",
-    context.resolvedUrl.replace(/\/$/, "") + "/register"
+    context.resolvedUrl.replace(/\/$/, "") + "/register",
   );
   context.res.statusCode = 302;
   context.res.end();

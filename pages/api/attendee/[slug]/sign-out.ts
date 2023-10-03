@@ -8,11 +8,11 @@ const resend = new Resend(process.env.RESEND);
 
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse
+    res: NextApiResponse,
 ) {
     res.setHeader(
         "set-cookie",
-        `${req.query.slug}=deleted; expires=Thu, 01 Jan 1970 00:00:00 GMT Path=/`
+        `${req.query.slug}=deleted; expires=Thu, 01 Jan 1970 00:00:00 GMT Path=/`,
     );
-    res.redirect("/")
+    res.redirect("/");
 }
