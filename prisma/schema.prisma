@@ -46,6 +46,32 @@ model Hackathon {
   collaboratorIds String[]
 }
 
+model AttendeeDashboard {
+  id    String                  @id @default(uuid())
+  body  String
+  cards AttendeeDashboardCard[]
+  links AttendeeDashboardLink[]
+}
+
+model AttendeeDashboardCard {
+  id                  String                  @id @default(uuid())
+  text                String
+  links               AttendeeDashboardLink[]
+  header              String
+  AttendeeDashboard   AttendeeDashboard?      @relation(fields: [attendeeDashboardId], references: [id])
+  attendeeDashboardId String?
+}
+
+model AttendeeDashboardLink {
+  id          String                 @id @default(uuid())
+  text        String
+  url         String
+  cardId      String?
+  card        AttendeeDashboardCard? @relation(fields: [cardId], references: [id])
+  dashboardId String?
+  dashboard   AttendeeDashboard?     @relation(fields: [dashboardId], references: [id])
+}
+
 model Schedule {
   id          String    @id @default(uuid())
   hackathonId String    @unique
@@ -61,13 +87,13 @@ model Track {
 }
 
 model Event {
-  id        String    @id @default(uuid())
+  id        String   @id @default(uuid())
   name      String
   location  String
   startDate DateTime
   endDate   DateTime
   trackId   String
-  track     Track     @relation(fields: [trackId], references: [id])
+  track     Track    @relation(fields: [trackId], references: [id])
 }
 
 model AttendeeAttribute {
