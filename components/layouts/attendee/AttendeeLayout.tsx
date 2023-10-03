@@ -120,7 +120,7 @@ export default function AttendeeLayout({
                   <Card.Content>
                     <Text b my={0}>
                       <Link color underline href={transformURL("/")}>
-                        Home
+                        Dashboard
                       </Link>
                     </Text>
                   </Card.Content>
@@ -133,18 +133,6 @@ export default function AttendeeLayout({
                     <Text b my={0}>
                       <Link color underline href={transformURL("/register")}>
                         Register
-                      </Link>
-                    </Text>
-                  </Card.Content>
-                  <Divider h="1px" my={0} />
-                </>
-              )}
-              {attendee && (
-                <>
-                  <Card.Content>
-                    <Text b my={0}>
-                      <Link color underline href={transformURL("/schedule")}>
-                        Schedule
                       </Link>
                     </Text>
                   </Card.Content>
