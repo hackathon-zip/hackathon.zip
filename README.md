@@ -56,3 +56,22 @@ If you want to test custom domains, you can add the following lines to your `/et
 ```
 
 Make sure the domain is set in the organizer dashboard (or the database, if you so dare)
+
+## Todo
+
+- [ ] Ship (showcase) functionality
+- [ ] Broadcasts (communication) functionality
+- [ ] Schedule functionality
+- [ ] Better check-in system
+- [ ] Dark mode
+- [ ] Build out settings page
+  - [ ] Add a way to add custom domains
+  - [ ] Transfer ownership of event
+  - [ ] Delete event
+  - [ ] Change event date
+  - [ ] Change event name
+  - [ ] Change event location
+- [ ] Add event branding
+  - [ ] Printful Merch Integration (@jackmerrill)
+
+_More will be added soon_
