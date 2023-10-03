@@ -178,12 +178,14 @@ export const Form = React.forwardRef(
       hideSubmit = false,
       style,
       additionalButtons,
+      clearValuesOnSuccesfulSubmit = false,
     }: {
       schema: FormSchema;
       submission: FormSubmission<any>;
       hideSubmit?: boolean;
       style?: CSSProperties | undefined;
       additionalButtons: React.ReactNode;
+      clearValuesOnSuccesfulSubmit: boolean;
     },
     ref
   ) => {
@@ -282,14 +284,31 @@ export const Form = React.forwardRef(
                 onSubmit: async (e) => {
                   e.preventDefault();
                   setLoading(true);
-                  await submission.onSubmit(
-                    Object.fromEntries(
-                      Object.entries(values).map(([name, value]) => [
-                        name,
-                        (value as any).value,
-                      ])
-                    )
-                  );
+                  let succesful =
+                    (await submission.onSubmit(
+                      Object.fromEntries(
+                        Object.entries(values).map(([name, value]) => [
+                          name,
+                          (value as any).value,
+                        ])
+                      )
+                    )) || true;
+                  if (clearValuesOnSuccesfulSubmit) {
+                    setValues(
+                      Object.fromEntries(
+                        Object.entries(inputFields).map<[string, FormValue]>(
+                          ([name, input]) => [
+                            name,
+                            {
+                              value: input.defaultValue ?? "",
+                              isValid: false,
+                              showWarning: false,
+                            },
+                          ]
+                        )
+                      )
+                    );
+                  }
                   setLoading(false);
                 },
               })}

@@ -61,9 +61,16 @@ export const getServerSideProps = (async (
   context: GetServerSidePropsContext
 ) => {
   if (context.params?.slug) {
-    const hackathon = await prisma.hackathon.findUnique({
+    const hackathon = await prisma.hackathon.findFirst({
       where: {
-        slug: context.params?.slug.toString(),
+        OR: [
+          {
+            slug: context.params?.slug.toString(),
+          },
+          {
+            customDomain: context.params?.slug.toString(),
+          },
+        ],
       },
     });
     if (hackathon) {
@@ -81,20 +88,23 @@ export const getServerSideProps = (async (
           },
         });
       }
-      return {
-        props: {
-          hackathon: hackathon,
-          attendee: attendee,
-        },
-      };
+      if (attendee) {
+        return {
+          props: {
+            hackathon: hackathon,
+            attendee: attendee,
+          },
+        };
+      }
     }
   }
-  return {
-    props: {
-      hackathon: null,
-      attendee: null,
-    },
-  };
+  context.res.setHeader(
+    "location",
+    context.resolvedUrl.replace(/\/$/, "").replace("/schedule", "") + "/register"
+  );
+  context.res.statusCode = 302;
+  context.res.end();
+  return;
 }) satisfies GetServerSideProps<{
   hackathon: Hackathon | null;
   attendee: Attendee | null;

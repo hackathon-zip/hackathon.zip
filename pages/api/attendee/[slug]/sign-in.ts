@@ -48,12 +48,10 @@ export default async function handler(
                 }),
                 text: `Welcome, ${attendee.name}! https://${attendee.hackathon.slug}.hackathon.zip/api/sign-in/${loginToken.magicKey}`,
             });
-            return res
-                .status(200)
-                .json({
-                    ...email,
-                    url: `https://${attendee.hackathon.slug}.hackathon.zip/sign-in/${loginToken.magicKey}`,
-                });
+            return res.status(200).json({
+                ...email,
+                url: `https://${attendee.hackathon.slug}.hackathon.zip/sign-in/${loginToken.magicKey}`,
+            });
         }
         return res.status(400).json({
             error: "Attendee does not exist, please register for this event.",

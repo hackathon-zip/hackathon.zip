@@ -99,20 +99,23 @@ export const getServerSideProps = (async (
           },
         });
       }
-      return {
-        props: {
-          hackathon: hackathon,
-          attendee: attendee,
-        },
-      };
+      if (attendee) {
+        return {
+          props: {
+            hackathon: hackathon,
+            attendee: attendee,
+          },
+        };
+      }
     }
   }
-  return {
-    props: {
-      hackathon: null,
-      attendee: null,
-    },
-  };
+  context.res.setHeader(
+    "location",
+    context.resolvedUrl.replace(/\/$/, "") + "/register"
+  );
+  context.res.statusCode = 302;
+  context.res.end();
+  return;
 }) satisfies GetServerSideProps<{
   hackathon: Hackathon | null;
   attendee: Attendee | null;

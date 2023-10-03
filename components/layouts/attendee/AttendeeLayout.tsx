@@ -76,13 +76,17 @@ export default function AttendeeLayout({
                     text: "Please check your email for a magic URL, thanks!",
                     delay: 2000,
                   });
-                  setVisible(false)
+                  setVisible(false);
                 }
               },
             }}
             hideSubmit={false}
             ref={formRef}
-            additionalButtons={<Button style={{ flexGrow: 1 }} onClick={() => setVisible(false)}>Cancel</Button>}
+            additionalButtons={
+              <Button style={{ flexGrow: 1 }} onClick={() => setVisible(false)}>
+                Cancel
+              </Button>
+            }
           />
         </Modal.Content>
       </Modal>
@@ -111,38 +115,66 @@ export default function AttendeeLayout({
                   {hackathon?.name}
                 </Text>
               </div>
-              <Card.Content>
-                <Text b my={0}>
-                  <Link color underline href={transformURL("/")}>
-                    Home
-                  </Link>
-                </Text>
-              </Card.Content>
-              <Divider h="1px" my={0} />
-              <Card.Content>
-                <Text b my={0}>
-                  <Link color underline href={transformURL("/register")}>
-                    Register
-                  </Link>
-                </Text>
-              </Card.Content>
-              <Divider h="1px" my={0} />
-              <Card.Content>
-                <Text b my={0}>
-                  <Link color underline href={transformURL("/schedule")}>
-                    Schedule
-                  </Link>
-                </Text>
-              </Card.Content>
-              <Divider h="1px" my={0} />
-              <Card.Content>
-                <Text b my={0}>
-                  <Link color underline href={transformURL("/ship")}>
-                    Ship
-                  </Link>
-                </Text>
-              </Card.Content>
-              <Divider h="1px" my={0} />
+              {attendee && (
+                <>
+                  <Card.Content>
+                    <Text b my={0}>
+                      <Link color underline href={transformURL("/")}>
+                        Home
+                      </Link>
+                    </Text>
+                  </Card.Content>
+                  <Divider h="1px" my={0} />
+                </>
+              )}
+              {!attendee && (
+                <>
+                  <Card.Content>
+                    <Text b my={0}>
+                      <Link color underline href={transformURL("/register")}>
+                        Register
+                      </Link>
+                    </Text>
+                  </Card.Content>
+                  <Divider h="1px" my={0} />
+                </>
+              )}
+              {attendee && (
+                <>
+                  <Card.Content>
+                    <Text b my={0}>
+                      <Link color underline href={transformURL("/schedule")}>
+                        Schedule
+                      </Link>
+                    </Text>
+                  </Card.Content>
+                  <Divider h="1px" my={0} />
+                </>
+              )}
+              {attendee && (
+                <>
+                  <Card.Content>
+                    <Text b my={0}>
+                      <Link color underline href={transformURL("/ship")}>
+                        Ship
+                      </Link>
+                    </Text>
+                  </Card.Content>
+                  <Divider h="1px" my={0} />
+                </>
+              )}
+              {attendee && (
+                <>
+                  <Card.Content>
+                    <Text b my={0}>
+                      <Link color underline href={transformAPIURL("/sign-out")}>
+                        Sign Out
+                      </Link>
+                    </Text>
+                  </Card.Content>
+                  <Divider h="1px" my={0} />
+                </>
+              )}
               <Card.Content>
                 {attendee ? (
                   <>Signed in as {attendee?.name}.</>

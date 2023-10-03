@@ -7,7 +7,7 @@ import {
   Input,
   Page,
   Text,
-  useToasts
+  useToasts,
 } from "@geist-ui/core";
 import type {
   InferGetServerSidePropsType,
@@ -39,13 +39,13 @@ export default function Attendee({
       </>
     );
   }
-  
+
   const { setToast } = useToasts();
   const router = useRouter();
   const transformAPIURL = (path: string) =>
-  router.asPath.startsWith("/attendee/")
-    ? `/api/attendee/${hackathon?.slug}${path}`
-    : `/api/${path}`;
+    router.asPath.startsWith("/attendee/")
+      ? `/api/attendee/${hackathon?.slug}${path}`
+      : `/api/${path}`;
 
   return (
     <>
@@ -68,9 +68,14 @@ export default function Attendee({
                 placeholder: "Fiona Hackworth",
                 required: true,
               },
-              ...hackathon.attendeeAttributes.map(x => ({...x, label: x.name, name: x.id}))
-            ]
+              ...hackathon.attendeeAttributes.map((x) => ({
+                ...x,
+                label: x.name,
+                name: x.id,
+              })),
+            ],
           }}
+          clearValuesOnSuccesfulSubmit={true}
           submission={{
             type: "controlled",
             onSubmit: async (data) => {
@@ -85,11 +90,13 @@ export default function Attendee({
               }).then((r) => r.json());
               if (res.error) {
                 setToast({ text: res.error, delay: 2000 });
+                return false;
               } else {
                 setToast({
-                  text: "Please check your email for a magic URL, thanks!",
-                  delay: 2000,
+                  text: "You're signed up. Please check your email for information about accessing the attendee portal, thanks!",
+                  delay: 10000,
                 });
+                return true;
               }
             },
           }}
@@ -119,8 +126,8 @@ export const getServerSideProps = (async (
         slug: context.params?.slug.toString(),
       },
       include: {
-        attendeeAttributes: true
-      }
+        attendeeAttributes: true,
+      },
     });
     if (hackathon) {
       const token = context.req.cookies[hackathon?.slug as string];
@@ -136,6 +143,15 @@ export const getServerSideProps = (async (
             },
           },
         });
+        if (attendee) {
+          context.res.setHeader(
+            "location",
+            context.resolvedUrl.replace(/\/$/, "").replace("/register", "")
+          );
+          context.res.statusCode = 302;
+          context.res.end();
+          return;
+        }
       }
       return {
         props: {
