@@ -24,6 +24,14 @@ export default async function handler(
         });
 
         if (token && isWithin15Minutes(token.createdAt)) {
+            await prisma.token.update({
+                where: {
+                    magicKey: req.query.magicKey as string,
+                },
+                data: {
+                    magicKey: null
+                },
+            });
             res.setHeader(
                 "set-cookie",
                 `${token.attendee.hackathon.slug}=${token.token}; Max-Age=604800; Path=/`
