@@ -12,7 +12,7 @@ export default async function handler(
 ) {
     res.setHeader(
         "set-cookie",
-        `${token.attendee.hackathon.slug}=deleted; Max-Age=604800; Path=/`
+        `${req.query.slug}=deleted; expires=Thu, 01 Jan 1970 00:00:00 GMT Path=/`
     );
     res.redirect("/")
 }
