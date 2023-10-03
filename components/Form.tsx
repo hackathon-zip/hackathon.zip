@@ -142,7 +142,7 @@ interface FormSelect extends FormInput {
   options: string[];
 }
 
-type FormElement =
+export type FormElement =
   | FormTextInput
   | FormRadio
   | FormCheckbox

@@ -104,7 +104,12 @@ export const getServerSideProps = (async (
   );
   context.res.statusCode = 302;
   context.res.end();
-  return;
+  return {
+    props: {
+      hackathon: null,
+      attendee: null,
+    },
+  };;
 }) satisfies GetServerSideProps<{
   hackathon: Hackathon | null;
   attendee: Attendee | null;

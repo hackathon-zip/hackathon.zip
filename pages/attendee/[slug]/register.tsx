@@ -20,8 +20,9 @@ import { NextApiRequest } from "next";
 import { NextServerOptions } from "next/dist/server/next";
 
 import { useRouter } from "next/router";
-import type { Hackathon, Attendee } from "@prisma/client";
+import type { Hackathon, Attendee, AttendeeAttribute } from "@prisma/client";
 import { Form } from "@/components/Form";
+import type { FormElement } from "@/components/Form";
 import React, { useState } from "react";
 import type { ReactElement } from "react";
 import Link from "next/link";
@@ -30,7 +31,7 @@ import AttendeeLayout from "@/components/layouts/attendee/AttendeeLayout";
 export default function Attendee({
   hackathon,
 }: {
-  hackathon: Hackathon | null;
+  hackathon: Hackathon & { attendeeAttributes: AttendeeAttribute[] } | null;
 }): any {
   if (!hackathon) {
     return (
@@ -72,7 +73,7 @@ export default function Attendee({
                 ...x,
                 label: x.name,
                 name: x.id,
-              })),
+              } as FormElement)),
             ],
           }}
           clearValuesOnSuccesfulSubmit={true}
@@ -150,7 +151,10 @@ export const getServerSideProps = (async (
           );
           context.res.statusCode = 302;
           context.res.end();
-          return;
+          return {props: {
+            hackathon: null,
+            attendee: null,
+          }};
         }
       }
       return {

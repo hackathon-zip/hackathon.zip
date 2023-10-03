@@ -14,7 +14,7 @@ export default async function handler(
                 email,
                 hackathon: {
                     connect: {
-                        slug: req.query.slug,
+                        slug: req.query.slug as string,
                     },
                 },
             },
