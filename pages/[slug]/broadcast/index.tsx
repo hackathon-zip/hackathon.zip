@@ -39,23 +39,6 @@ export default function Hackathon({
     );
   }
 
-<<<<<<< HEAD
-  if (!hackathon.broadcastEnabled)
-    return (
-      <Page>
-        <FeatureInfo
-          featureName="Broadcasts"
-          featureDescription={
-            <>
-              Communicate with hackers in real-time about
-              hackathon&nbsp;updates.
-            </>
-          }
-          featureIcon={Radio}
-        />
-      </Page>
-    );
-=======
   if (!hackathon.broadcastEnabled) return (
     <Page>
       <FeatureInfo featureKey="broadcastEnabled" featureName="Broadcasts" featureDescription={<>
@@ -63,7 +46,6 @@ export default function Hackathon({
       </>} featureIcon={Radio} hackathonSlug={hackathon.slug} />
     </Page>
   );
->>>>>>> 223b54e (features)
 
   return (
     <>

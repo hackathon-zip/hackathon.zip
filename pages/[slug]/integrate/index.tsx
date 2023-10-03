@@ -39,24 +39,6 @@ export default function Hackathon({
       </>
     );
   }
-<<<<<<< HEAD
-
-  if (!hackathon.integrateEnabled)
-    return (
-      <Page>
-        <FeatureInfo
-          featureName="Integrations"
-          featureDescription={
-            <>
-              Bring your own infrastructure, add external plugins, and integrate
-              with&nbsp;our&nbsp;API.
-            </>
-          }
-          featureIcon={Terminal}
-        />
-      </Page>
-    );
-=======
   
   if (!hackathon.integrateEnabled) return (
     <Page>
@@ -65,7 +47,6 @@ export default function Hackathon({
       </>} featureIcon={Terminal} hackathonSlug={hackathon.slug} />
     </Page>
   );
->>>>>>> 223b54e (features)
 
   return (
     <>

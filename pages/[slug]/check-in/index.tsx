@@ -39,22 +39,6 @@ export default function Hackathon({
     );
   }
 
-<<<<<<< HEAD
-  if (!hackathon.checkInEnabled)
-    return (
-      <Page>
-        <FeatureInfo
-          featureName="Check-In"
-          featureDescription={
-            <>
-              Check-in your hackers and track their attendance with&nbsp;ease.
-            </>
-          }
-          featureIcon={CheckSquare}
-        />
-      </Page>
-    );
-=======
   if (!hackathon.checkInEnabled) return (
     <Page>
       <FeatureInfo featureKey="checkInEnabled" featureName="Check-In" featureDescription={<>
@@ -62,7 +46,6 @@ export default function Hackathon({
       </>} featureIcon={CheckSquare} hackathonSlug={hackathon.slug} />
     </Page>
   );
->>>>>>> 223b54e (features)
 
   return (
     <>

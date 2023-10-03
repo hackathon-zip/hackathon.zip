@@ -184,8 +184,8 @@ export const Form = React.forwardRef(
       submission: FormSubmission<any>;
       hideSubmit?: boolean;
       style?: CSSProperties | undefined;
-      additionalButtons: React.ReactNode;
-      clearValuesOnSuccesfulSubmit: boolean;
+      additionalButtons?: React.ReactNode;
+      clearValuesOnSuccesfulSubmit?: boolean;
     },
     ref
   ) => {
@@ -292,7 +292,7 @@ export const Form = React.forwardRef(
                           (value as any).value,
                         ])
                       )
-                    )) || true;
+                    ) as any) || true;
                   if (clearValuesOnSuccesfulSubmit) {
                     setValues(
                       Object.fromEntries(
