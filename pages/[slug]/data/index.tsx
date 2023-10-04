@@ -34,6 +34,7 @@ import { delay } from "@/lib/utils";
 import Debug from "@/components/Debug";
 import Link from "next/link";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
+import dynamic from "next/dynamic";
 
 type AttendeeWithAttributes = Attendee & {
   attributeValues: AttendeeAttributeValue[];
@@ -158,6 +159,46 @@ function DataTable({
   );
 }
 
+export function NewDataTable ({ attendees, attributes }: { attendees: AttendeeWithAttributes[], attributes: AttendeeAttribute[] }) {
+  const ActiveTable = dynamic(
+    () => import("active-table-react").then((mod) => mod.ActiveTable),
+    {
+      ssr: false,
+    }
+  );
+
+  const defaultContent: any = [
+    ["Planet", "Diameter", "Mass", "Moons", "Density"],
+    ["Earth", 12756, 5.97, 1, 5514],
+    ["Mars", 6792, 0.642, 2, 3934],
+    ["Jupiter", 142984, 1898, 79, 1326],
+    ["Saturn", 120536, 568, 82, 687],
+    ["Neptune", 49528, 102, 14, 1638]];
+
+  const [content, setContent] = useState(defaultContent);
+
+
+  return (
+    <>
+      <ActiveTable content={content} onContentUpdate={newContent => {
+        console.log('content changed');
+        console.log(newContent);
+        setContent(newContent);
+      }} displayAddNewColumn={false} customColumnsSettings={content[0].map((c: any) => ({
+        headerName: c,
+        isHeaderTextEditable: false,
+        columnDropdown: {
+          isSortAvailable: false,
+          isDeleteAvailable: false,
+          isInsertLeftAvailable: false,
+          isInsertRightAvailable: false,
+          isMoveAvailable: true
+        }
+      })) as any} />
+    </>
+  )
+}
+
 export default function Hackathon({
   hackathon
 }: {
@@ -178,7 +219,7 @@ export default function Hackathon({
       <Page>
         <h1>Attendees</h1>
 
-        <DataTable
+        <NewDataTable
           attendees={hackathon.attendees}
           attributes={hackathon.attendeeAttributes}
         />

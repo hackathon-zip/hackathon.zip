@@ -164,7 +164,7 @@ export const getServerSideProps = (async (
       attendee: null
     },
     redirect: {
-      destination: "/register",
+      destination: new URL('https://example.com' + context.req.url as string).pathname + "/register",
       permanent: false
     }
   };
