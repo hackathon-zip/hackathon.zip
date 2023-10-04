@@ -94,6 +94,8 @@ model Sponsor {
   logoUrl    String?
   website    String?
 
+  showOnWebsite Boolean @default(false)
+
   // Private information
   contactName  String?
   contactEmail String?
