@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Sponsor" ALTER COLUMN "amountCash" SET DATA TYPE DOUBLE PRECISION;

@@ -101,7 +101,7 @@ model Sponsor {
   contactEmail String?
   contactPhone String?
 
-  amountCash  Int?
+  amountCash  Float?
   amountOther String?
 
   hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
