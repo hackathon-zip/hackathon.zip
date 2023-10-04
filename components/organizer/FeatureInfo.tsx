@@ -1,4 +1,4 @@
-import { Button, Card, Display, Input, Text } from "@geist-ui/core";
+import { Button, Card, Display, Text } from "@geist-ui/core";
 import { Icon } from "@geist-ui/react-icons";
 import { Hackathon } from "@prisma/client";
 import { useRouter } from "next/router";
@@ -11,7 +11,9 @@ type FeatureKey =
   | "scheduleEnabled"
   | "shipEnabled"
   | "integrateEnabled"
-  | "financeEnabled";
+  | "financeEnabled"
+  | "sponsorsEnabled"
+  | "leadsEnabled";
 
 export default function FeatureInfo({
   beforeSubmit,

@@ -38,6 +38,14 @@ export const NavbarTabs = [
     value: "ship"
   },
   {
+    label: "Sponsors",
+    value: "sponsors"
+  },
+  {
+    label: "Leads",
+    value: "leads"
+  },
+  {
     label: "Integrations",
     value: "integrate"
   },

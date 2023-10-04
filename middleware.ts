@@ -48,7 +48,7 @@ export default function middleware(
 
     switch (subdomain) {
         case "organizer": // you are on organizer.hackathon.zip
-            console.log("[domain routing]: organizer");
+            console.log("[domain routing]: organizer", pathnameWithoutAPI);
             return withAuthentication(
                 isApi && !isAttendeeApi
                     ? () => rewrite("/api/organizer" + pathnameWithoutAPI)

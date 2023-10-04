@@ -1,11 +1,11 @@
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
-import { Page, Snippet } from "@geist-ui/core";
+import { Page } from "@geist-ui/core";
 import type { GetServerSideProps } from "next";
 
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import FeatureInfo from "@/components/organizer/FeatureInfo";
-import { Terminal } from "@geist-ui/react-icons";
+import { Link } from "@geist-ui/react-icons";
 import type { Hackathon } from "@prisma/client";
 import type { ReactElement } from "react";
 
@@ -22,19 +22,19 @@ export default function Hackathon({
     );
   }
 
-  if (!hackathon.integrateEnabled)
+  if (!hackathon.leadsEnabled)
     return (
       <Page>
         <FeatureInfo
-          featureKey="integrateEnabled"
-          featureName="Integrations"
+          featureKey="leadsEnabled"
+          featureName="Leads"
           featureDescription={
             <>
-              Bring your own infrastructure, add external plugins, and integrate
-              with&nbsp;our&nbsp;API.
+              Manage leads for venues, sponsorships, and other
+              hackathon&nbsp;resources.
             </>
           }
-          featureIcon={Terminal}
+          featureIcon={Link}
           hackathonSlug={hackathon.slug}
         />
       </Page>
@@ -43,13 +43,7 @@ export default function Hackathon({
   return (
     <>
       <Page>
-        <h1>Integrate</h1>
-        <h3>Your API Key</h3>
-        <Snippet
-          symbol=""
-          text="kEpdOYlpKAQPOooPkVsonHcNorJtKx"
-          width="350px"
-        />
+        <h1>Leads</h1>
       </Page>
     </>
   );
