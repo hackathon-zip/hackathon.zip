@@ -37,7 +37,7 @@ export default async function handler(
       }))
     });
 
-    res.status(200).send({ attendee, attributes });
+    res.redirect(`/api/attendee/${req.query.slug}/sign-in`);
   } catch (error) {
     console.error(error);
     return res.status(400).json({ error });

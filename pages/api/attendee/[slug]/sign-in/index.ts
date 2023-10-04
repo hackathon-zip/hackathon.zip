@@ -41,8 +41,8 @@ export default async function handler(
         }
       });
       const email = await resend.emails.send({
-        from: `${attendee.hackathon.name} noreply@hackathon.zip>`,
-        to: ["ian@hackclub.com"], // [attendee.email],
+        from: `${attendee.hackathon.name} <noreply@hackathon.zip>`,
+        to: [attendee.email], // [attendee.email],
         subject: `Sign in to ${attendee.hackathon.name}'s portal`,
         react: EmailTemplate({
           name: attendee.name,

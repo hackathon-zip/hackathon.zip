@@ -20,6 +20,9 @@
     "@types/node": "20.6.3",
     "@types/react": "18.2.22",
     "@types/react-dom": "18.2.7",
+    "active-table": "^1.0.3",
+    "active-table-react": "^1.0.3",
+    "markdown-it": "^13.0.2",
     "next": "13.5.2",
     "next-qrcode": "^2.5.1",
     "next-superjson-plugin": "^0.5.9",
@@ -31,7 +34,8 @@
     "typescript": "5.2.2"
   },
   "devDependencies": {
-    "prisma": "^5.3.1",
-    "prettier": "^3.0.3"
+    "@types/markdown-it": "^13.0.2",
+    "prettier": "^3.0.3",
+    "prisma": "^5.3.1"
   }
 }

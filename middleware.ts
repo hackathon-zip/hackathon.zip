@@ -44,29 +44,29 @@ export default function middleware(
 
   subdomain = getSubdomains(hostname)?.[0];
 
-  console.log(subdomain, hostname, pathname, pathnameWithoutAPI, isApi);
+  // console.log(subdomain, hostname, pathname, pathnameWithoutAPI, isApi);
 
   switch (subdomain) {
     case "organizer": // you are on organizer.hackathon.zip
-      console.log("organizer");
+      console.log("[domain routing]: organizer");
       return withAuthentication(
         isApi && !isAttendeeApi
           ? () => rewrite("/api/organizer" + pathnameWithoutAPI)
           : () => null
       );
     case "api": // you are on api.hackathon.zip
-      console.log("api");
+      console.log("[domain routing]: api");
       return withoutAuthentication(pathname, () =>
         rewrite("/api/integration" + pathname)
       );
 
     case undefined: // you are on hackathon.zip
-      console.log("undefined");
+      console.log("[domain routing]: undefined");
       return withoutAuthentication(pathname, () =>
         rewrite(isApi ? `/api${pathnameWithoutAPI}` : `${pathname}`)
       );
     default: // you are on [event].hackathon.zip or [customdomain]
-      console.log("default");
+      console.log("[domain routing]: default");
       let slug = subdomain;
 
       if (
@@ -74,7 +74,7 @@ export default function middleware(
           process.env.NODE_ENV === "production" ? "hackathon.zip" : "localhost"
         )
       ) {
-        console.log("custom domain");
+        console.log("[domain routing]: custom domain");
         slug = hostname?.split(":")[0] ?? subdomain;
       }
 
