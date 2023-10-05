@@ -1,4 +1,4 @@
-import { Button, Input, Text } from "@geist-ui/core";
+import { Button, Input, Select, Text } from "@geist-ui/core";
 import React, { CSSProperties, useState } from "react";
 
 function Required() {
@@ -353,6 +353,38 @@ export const Form = React.forwardRef(
                     };
                   })}
                 />
+              );
+            } else if (formElement.type == "select") {
+              const element = formElement as FormSelect;
+
+              return (
+                <>
+                  {element.label && (
+                    <Text h5>
+                      {element.label}
+                      {element.required && <Required />}
+                    </Text>
+                  )}
+                  <Select
+                    placeholder={element.placeholder}
+                    width="100%"
+                    disabled={loading}
+                    aria-label={element.label}
+                    value={getValue(element.name)}
+                    onChange={(v) =>
+                      updateValue(
+                        element.name,
+                        Array.isArray(v) ? v.join(",") : v
+                      )
+                    }
+                  >
+                    {element.options.map((option) => (
+                      <Select.Option key={option} value={option}>
+                        {option}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </>
               );
             }
           })}

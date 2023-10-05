@@ -13,6 +13,7 @@ import type { GetServerSideProps } from "next";
 import { Form } from "@/components/Form";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import FeatureInfo from "@/components/organizer/FeatureInfo";
+import { formatPhoneNumber } from "@/lib/utils";
 import { Package, Plus } from "@geist-ui/react-icons";
 import type { Hackathon, Sponsor } from "@prisma/client";
 import { useRef, useState, type ReactElement } from "react";
@@ -61,7 +62,16 @@ export default function Hackathon({
         contact: (
           <>
             {s.contactName} (
-            <a href={`mailto:${s.contactEmail}`}>{s.contactEmail}</a>)
+            <a href={`mailto:${s.contactEmail}`}>{s.contactEmail}</a>
+            {s.contactPhone && (
+              <>
+                ,&nbsp;
+                <a href={`tel:${s.contactPhone}`}>
+                  {formatPhoneNumber(s.contactPhone)}
+                </a>
+              </>
+            )}
+            )
           </>
         ),
         amount: s.amountCash
@@ -146,7 +156,7 @@ export default function Hackathon({
                       placeholder: "10000",
                       required: true,
                       inlineLabel: "$"
-                    }
+                    } // TODO: Add amountOther (such as in-kind donations)
                   ]
                 }}
                 submission={{
@@ -183,6 +193,14 @@ export default function Hackathon({
                               <a href={`mailto:${res.contactEmail}`}>
                                 {res.contactEmail}
                               </a>
+                              {res.contactPhone && (
+                                <>
+                                  ,&nbsp;
+                                  <a href={`tel:${res.contactPhone}`}>
+                                    {formatPhoneNumber(res.contactPhone)}
+                                  </a>
+                                </>
+                              )}
                               )
                             </>
                           ),

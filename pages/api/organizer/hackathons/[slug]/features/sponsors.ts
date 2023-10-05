@@ -28,7 +28,7 @@ export default async function handler(
                     }
                 });
 
-                return res.json({ sponsor });
+                return res.json(sponsor);
             }
         }
     } catch (error) {
