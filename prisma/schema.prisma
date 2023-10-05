@@ -89,7 +89,7 @@ model Schedule {
 
 model Sponsor {
   id         String    @id @default(uuid())
-  hackathonId String    @unique
+  hackathonId String    
   name       String
   logoUrl    String?
   website    String?
@@ -109,7 +109,7 @@ model Sponsor {
 
 model Lead {
   id        String    @id @default(uuid())
-  hackathonId String    @unique
+  hackathonId String   
   name      String
   email     String
   phone     String?
