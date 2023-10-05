@@ -20,7 +20,7 @@ import { NextApiRequest } from "next";
 import { NextServerOptions } from "next/dist/server/next";
 
 import { useRouter } from "next/router";
-import type { Hackathon, Attendee, AttendeeAttribute } from "@prisma/client";
+import type { Hackathon, Attendee, SignupForm, SignupFormField, AttendeeAttribute } from "@prisma/client";
 import { Form } from "@/components/Form";
 import type { FormElement } from "@/components/Form";
 import React, { useState } from "react";
@@ -31,7 +31,7 @@ import AttendeeLayout from "@/components/layouts/attendee/AttendeeLayout";
 export default function Attendee({
   hackathon
 }: {
-  hackathon: (Hackathon & { attendeeAttributes: AttendeeAttribute[] }) | null;
+  hackathon: (Hackathon & { signupForm: SignupForm & { fields: (SignupFormField & { attribute: AttendeeAttribute })[] }  }) | null;
 }): any {
   if (!hackathon) {
     return (
@@ -56,27 +56,31 @@ export default function Attendee({
           schema={{
             elements: [
               {
-                type: "email",
-                label: "Email",
-                name: "email",
-                placeholder: "fiona@hackathon.zip",
-                required: true
-              },
-              {
                 type: "text",
                 label: "Name",
                 name: "name",
                 placeholder: "Fiona Hackworth",
                 required: true
               },
-              ...hackathon.attendeeAttributes.map(
+              {
+                type: "email",
+                label: "Email",
+                name: "email",
+                placeholder: "fiona@hackathon.zip",
+                required: true
+              },
+              ...(hackathon.signupForm?.fields?.map(
                 (x) =>
                   ({
+                    ...x.attribute,
                     ...x,
-                    label: x.name,
-                    name: x.id
+                    label: x.label,
+                    placeholder: x.plaecholder,
+                    description: x.description,
+                    name: x.attribute.id,
+                    type: x.attribute.type
                   }) as FormElement
-              )
+              ) || [])
             ]
           }}
           clearValuesOnSuccesfulSubmit={true}
@@ -143,7 +147,16 @@ export const getServerSideProps = (async (
         ]
       },
       include: {
-        attendeeAttributes: true
+        attendeeAttributes: true,
+        signupForm: {
+          include: {
+            fields: {
+              include: {
+                attribute: true
+              }
+            }
+          }
+        }
       }
     });
     if (hackathon) {
