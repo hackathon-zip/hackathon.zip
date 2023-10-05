@@ -60,11 +60,13 @@ export default function middleware(
                 rewrite("/api/integration" + pathname)
             );
 
-        case undefined: // you are on hackathon.zip
+        case undefined: // you are on hackathon.zip 
+        // note: adding "landing" below is breaking testing right now, it's impossible to test /attendee/ routes with it there.
+        // i've removed it temporarily, long term we need a way to distinguish them.
             console.log("[domain routing]: undefined");
             return withoutAuthentication(pathname, () =>
                 rewrite(
-                    isApi ? `/api${pathnameWithoutAPI}` : `/landing${pathname}`
+                    isApi ? `/api${pathnameWithoutAPI}` : `${pathname}` 
                 )
             );
         default: // you are on [event].hackathon.zip or [customdomain]
