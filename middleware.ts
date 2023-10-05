@@ -7,89 +7,93 @@ import { getSubdomains } from "./lib/utils";
 // See https://clerk.com/docs/references/nextjs/auth-middleware for more information about configuring your middleware
 
 export default function middleware(
-  request: NextRequest,
-  event: NextFetchEvent
+    request: NextRequest,
+    event: NextFetchEvent
 ) {
-  const withAuthentication = (callback: (req: NextRequest) => any) => {
-    return authMiddleware({
-      publicRoutes: ["/"],
-      afterAuth: (auth: any, req: NextRequest) => {
-        return callback(req);
-      }
-    })(request, event);
-  };
+    const withAuthentication = (callback: (req: NextRequest) => any) => {
+        return authMiddleware({
+            publicRoutes: ["/"],
+            afterAuth: (auth: any, req: NextRequest) => {
+                return callback(req);
+            }
+        })(request, event);
+    };
 
-  const withoutAuthentication = (
-    route: string,
-    callback: (req: NextRequest) => any
-  ) => {
-    return authMiddleware({
-      publicRoutes: [route],
-      afterAuth: (auth: any, req: NextRequest) => {
-        return callback(req);
-      }
-    })(request, event);
-  };
+    const withoutAuthentication = (
+        route: string,
+        callback: (req: NextRequest) => any
+    ) => {
+        return authMiddleware({
+            publicRoutes: [route],
+            afterAuth: (auth: any, req: NextRequest) => {
+                return callback(req);
+            }
+        })(request, event);
+    };
 
-  const { pathname } = request.nextUrl;
-  const hostname = request.headers.get("host"); // Get the hostname from the request headers, because Next.js doesn't like localhost subdomains (vercel/next.js#56320)
-  const isApi = pathname.startsWith("/api");
-  const isAttendeeApi = pathname.startsWith("/api/attendee/");
-  let pathnameWithoutAPI = pathname.replace("/api", "");
+    const { pathname } = request.nextUrl;
+    const hostname = request.headers.get("host"); // Get the hostname from the request headers, because Next.js doesn't like localhost subdomains (vercel/next.js#56320)
+    const isApi = pathname.startsWith("/api");
+    const isAttendeeApi = pathname.startsWith("/api/attendee/");
+    let pathnameWithoutAPI = pathname.replace("/api", "");
 
-  const rewrite = (path: string) =>
-    NextResponse.rewrite(new URL(path, request.url));
+    const rewrite = (path: string) =>
+        NextResponse.rewrite(new URL(path, request.url));
 
-  let subdomain: string | undefined;
+    let subdomain: string | undefined;
 
-  subdomain = getSubdomains(hostname)?.[0];
+    subdomain = getSubdomains(hostname)?.[0];
 
-  // console.log(subdomain, hostname, pathname, pathnameWithoutAPI, isApi);
+    // console.log(subdomain, hostname, pathname, pathnameWithoutAPI, isApi);
 
-  switch (subdomain) {
-    case "organizer": // you are on organizer.hackathon.zip
-      console.log("[domain routing]: organizer");
-      return withAuthentication(
-        isApi && !isAttendeeApi
-          ? () => rewrite("/api/organizer" + pathnameWithoutAPI)
-          : () => null
-      );
-    case "api": // you are on api.hackathon.zip
-      console.log("[domain routing]: api");
-      return withoutAuthentication(pathname, () =>
-        rewrite("/api/integration" + pathname)
-      );
+    switch (subdomain) {
+        case "organizer": // you are on organizer.hackathon.zip
+            console.log("[domain routing]: organizer", pathnameWithoutAPI);
+            return withAuthentication(
+                isApi && !isAttendeeApi
+                    ? () => rewrite("/api/organizer" + pathnameWithoutAPI)
+                    : () => null
+            );
+        case "api": // you are on api.hackathon.zip
+            console.log("[domain routing]: api");
+            return withoutAuthentication(pathname, () =>
+                rewrite("/api/integration" + pathname)
+            );
 
-    case undefined: // you are on hackathon.zip
-      console.log("[domain routing]: undefined");
-      return withoutAuthentication(pathname, () =>
-        rewrite(isApi ? `/api${pathnameWithoutAPI}` : `${pathname}`)
-      );
-    default: // you are on [event].hackathon.zip or [customdomain]
-      console.log("[domain routing]: default");
-      let slug = subdomain;
+        case undefined: // you are on hackathon.zip
+            console.log("[domain routing]: undefined");
+            return withoutAuthentication(pathname, () =>
+                rewrite(
+                    isApi ? `/api${pathnameWithoutAPI}` : `/landing${pathname}`
+                )
+            );
+        default: // you are on [event].hackathon.zip or [customdomain]
+            console.log("[domain routing]: default");
+            let slug = subdomain;
 
-      if (
-        !hostname?.includes(
-          process.env.NODE_ENV === "production" ? "hackathon.zip" : "localhost"
-        )
-      ) {
-        console.log("[domain routing]: custom domain");
-        slug = hostname?.split(":")[0] ?? subdomain;
-      }
+            if (
+                !hostname?.includes(
+                    process.env.NODE_ENV === "production"
+                        ? "hackathon.zip"
+                        : "localhost"
+                )
+            ) {
+                console.log("[domain routing]: custom domain");
+                slug = hostname?.split(":")[0] ?? subdomain;
+            }
 
-      return withoutAuthentication(pathname, () =>
-        rewrite(
-          isApi
-            ? `/api/attendee/${slug}` + pathnameWithoutAPI
-            : `/attendee/${slug}` + pathname
-        )
-      );
-  }
+            return withoutAuthentication(pathname, () =>
+                rewrite(
+                    isApi
+                        ? `/api/attendee/${slug}` + pathnameWithoutAPI
+                        : `/attendee/${slug}` + pathname
+                )
+            );
+    }
 }
 
 export const config = {
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"]
+    matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"]
 };
 
 /**

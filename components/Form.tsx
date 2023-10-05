@@ -1,12 +1,5 @@
-import Debug from "@/components/Debug";
 import { Button, Input, Text } from "@geist-ui/core";
-import {
-  CSSProperties,
-  ReactComponentElement,
-  useState,
-  forwardRef
-} from "react";
-import React from "react";
+import React, { CSSProperties, useState } from "react";
 
 function Required() {
   return (

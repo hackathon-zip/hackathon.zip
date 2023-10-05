@@ -25,6 +25,8 @@ model Hackathon {
   schedule  Schedule?
   signupForm  SignupForm?
   dashboard AttendeeDashboard?
+  sponsors  Sponsor[]
+  leads     Lead[]
 
   // branding
   website   String?
@@ -39,6 +41,8 @@ model Hackathon {
   shipEnabled      Boolean @default(false)
   integrateEnabled Boolean @default(false)
   financeEnabled   Boolean @default(false)
+  sponsorsEnabled Boolean @default(false)
+  leadsEnabled     Boolean @default(false)
 
   hcbId String?
 
@@ -81,6 +85,46 @@ model Schedule {
   hackathonId String    @unique
   tracks      Track[]
   hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
+}
+
+model Sponsor {
+  id         String    @id @default(uuid())
+  hackathonId String    @unique
+  name       String
+  logoUrl    String?
+  website    String?
+
+  showOnWebsite Boolean @default(false)
+
+  // Private information
+  contactName  String?
+  contactEmail String?
+  contactPhone String?
+
+  amountCash  Float?
+  amountOther String?
+
+  hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
+}
+
+model Lead {
+  id        String    @id @default(uuid())
+  hackathonId String    @unique
+  name      String
+  email     String
+  phone     String?
+  company   String?
+  jobTitle  String?
+
+  type     LeadType
+
+  hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
+}
+
+enum LeadType {
+  Venue
+  Sponsor
+  Other
 }
 
 model SignupForm {

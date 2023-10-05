@@ -1,31 +1,13 @@
-import {
-  Button,
-  Card,
-  Drawer,
-  Fieldset,
-  Grid,
-  Input,
-  Page,
-  Snippet,
-  Text
-} from "@geist-ui/core";
-import { getAuth } from "@clerk/nextjs/server";
-import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import prisma from "@/lib/prisma";
-import { NextApiRequest } from "next";
-import { NextServerOptions } from "next/dist/server/next";
+import { getAuth } from "@clerk/nextjs/server";
+import { Page, Snippet } from "@geist-ui/core";
+import type { GetServerSideProps } from "next";
 
-import type { Hackathon } from "@prisma/client";
-import { PlusCircle, Terminal } from "@geist-ui/react-icons";
-import React, { useState } from "react";
-import type { ReactElement } from "react";
-import { Form } from "@/components/Form";
-import { delay } from "@/lib/utils";
-import Debug from "@/components/Debug";
-import Link from "next/link";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import FeatureInfo from "@/components/organizer/FeatureInfo";
+import { Terminal } from "@geist-ui/react-icons";
+import type { Hackathon } from "@prisma/client";
+import type { ReactElement } from "react";
 
 export default function Hackathon({
   hackathon

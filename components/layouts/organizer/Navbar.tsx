@@ -1,40 +1,75 @@
-import { useHackathon, useMyHackathons } from "@/hooks/data/hackathons";
 import { useScrollPosition } from "@/hooks/useScrollPosition";
 import useUrlState from "@/hooks/useUrlState";
-import { fetcher } from "@/lib/fetcher";
 import { ClerkLoaded, UserButton } from "@clerk/nextjs";
-import {
-  Breadcrumbs,
-  Button,
-  Popover,
-  Select,
-  Spinner,
-  Tabs,
-  Text
-} from "@geist-ui/core";
-import { ChevronUpDown } from "@geist-ui/react-icons";
+import { Breadcrumbs, Tabs } from "@geist-ui/core";
 import HomeIcon from "@geist-ui/react-icons/home";
-import { Hackathon } from "@prisma/client";
-import Link from "next/link";
 import { useRouter } from "next/router";
-import { ReactElement, ReactNode } from "react";
+import { ReactNode } from "react";
 
 type TypescriptIsWrong = any;
 
-export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
-  const { hackathons, isLoading, isError } = useMyHackathons();
+export const NavbarTabs = [
+  {
+    label: "Dashboard",
+    value: "dashboard"
+  },
+  {
+    label: "Attendees",
+    value: "data"
+  },
+  {
+    label: "Registration",
+    value: "registration"
+  },
+  {
+    label: "Check-In",
+    value: "check-in"
+  },
+  {
+    label: "Broadcasts",
+    value: "broadcast"
+  },
+  {
+    label: "Schedule",
+    value: "schedule"
+  },
+  {
+    label: "Ship",
+    value: "ship"
+  },
+  {
+    label: "Sponsors",
+    value: "sponsors"
+  },
+  {
+    label: "Leads",
+    value: "leads"
+  },
+  {
+    label: "Integrations",
+    value: "integrate"
+  },
+  {
+    label: "Finances",
+    value: "finance"
+  },
+  {
+    label: "Settings",
+    value: "settings"
+  }
+];
+
+export default function Navbar({
+  breadcrumbs
+}: {
+  breadcrumbs?: { value: ReactNode; href?: string }[];
+}) {
+  const router = useRouter();
 
   const { hackathon: activeHackathonSlug, feature } = useUrlState([
     "hackathon",
     "feature"
   ]);
-  const activeHackathon = hackathons.find(
-    (h: Hackathon) => h.slug === activeHackathonSlug
-  );
-
-  console.log({ activeHackathonSlug });
-
-  const router = useRouter();
 
   const { scrollY } = useScrollPosition();
 
@@ -72,34 +107,13 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
             <Breadcrumbs.Item nextLink href="/dashboard">
               <HomeIcon />
             </Breadcrumbs.Item>
-            {breadcrumbs}
+            {breadcrumbs?.map((b) => (
+              <Breadcrumbs.Item nextLink={!!b.href} href={b.href}>
+                {b.value}
+              </Breadcrumbs.Item>
+            ))}
             {/* <Breadcrumbs.Item href=""><Inbox /> Inbox</Breadcrumbs.Item>
                 <Breadcrumbs.Item>Page</Breadcrumbs.Item> */}
-
-            <Breadcrumbs.Item nextLink href={"/" + activeHackathonSlug}>
-              {isLoading ? <Spinner /> : activeHackathon?.name}
-            </Breadcrumbs.Item>
-
-            <Popover
-              content={
-                (
-                  <>
-                    <Popover.Item title>
-                      <span>{activeHackathon?.name}</span>
-                    </Popover.Item>
-                    {hackathons
-                      .filter((h: Hackathon) => h.slug !== activeHackathonSlug)
-                      .map((h: Hackathon) => (
-                        <Popover.Item>
-                          <Link href={`/${h.slug}`}>{h.name}</Link>
-                        </Popover.Item>
-                      ))}
-                  </>
-                ) as TypescriptIsWrong
-              }
-            >
-              <Button icon={<ChevronUpDown />} auto scale={2 / 3} />
-            </Popover>
           </Breadcrumbs>
         </div>
         <div>
@@ -130,16 +144,10 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
           }}
           value={feature ?? "dashboard"}
         >
-          <Tabs.Tab label="Dashboard" value="dashboard" />
-          <Tabs.Tab label="Attendees" value="data" />
-          <Tabs.Tab label="Registration" value="register" />
-          <Tabs.Tab label="Check-In" value="check-in" />
-          <Tabs.Tab label="Broadcasts" value="broadcast" />
-          <Tabs.Tab label="Schedule" value="schedule" />
-          <Tabs.Tab label="Ship" value="ship" />
-          <Tabs.Tab label="Integrations" value="integrate" />
-          <Tabs.Tab label="Finances" value="finance" />
-          <Tabs.Tab label="Settings" value="settings" />
+          {NavbarTabs.map((tab) => (
+            <Tabs.Item label={tab.label} value={tab.value} />
+          ))}
+
           <span className="tab-styles-locator" />
           <style
             dangerouslySetInnerHTML={{
