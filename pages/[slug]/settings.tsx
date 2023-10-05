@@ -1,30 +1,14 @@
-import {
-  Button,
-  Card,
-  Drawer,
-  Fieldset,
-  Grid,
-  Input,
-  Page,
-  Text
-} from "@geist-ui/core";
-import { getAuth } from "@clerk/nextjs/server";
-import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import prisma from "@/lib/prisma";
-import { NextApiRequest } from "next";
-import { NextServerOptions } from "next/dist/server/next";
+import { getAuth } from "@clerk/nextjs/server";
+import { Card, Page, Text } from "@geist-ui/core";
+import type { GetServerSideProps } from "next";
 
-import type { Hackathon } from "@prisma/client";
-import { PlusCircle } from "@geist-ui/react-icons";
-import React, { useState } from "react";
-import type { ReactElement } from "react";
 import { Form } from "@/components/Form";
-import { delay } from "@/lib/utils";
-import Debug from "@/components/Debug";
-import Link from "next/link";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
+import { delay } from "@/lib/utils";
+import type { Hackathon } from "@prisma/client";
 import { useRouter } from "next/router";
+import type { ReactElement } from "react";
 
 export default function Hackathon({
   hackathon
@@ -52,12 +36,42 @@ export default function Hackathon({
               elements: [
                 {
                   type: "text",
+                  name: "name",
+                  label: "Event Name",
+                  defaultValue: hackathon.name
+                },
+                {
+                  type: "text",
                   validate: (value) =>
                     value ==
                     (value || "").toLowerCase().replace(/[^a-z0-9]{1,}/g, "-"),
                   name: "slug",
                   label: "Slug",
                   defaultValue: hackathon.slug
+                },
+                {
+                  type: "tuple",
+                  label: "Dates",
+                  inputs: [
+                    {
+                      type: "datetime-local",
+                      inlineLabel: "Start",
+                      name: "startDate",
+                      defaultValue: hackathon.startDate
+                        ? new Date(hackathon.startDate)
+                            .toISOString()
+                            .slice(0, 16)
+                        : undefined
+                    },
+                    {
+                      type: "datetime-local",
+                      inlineLabel: "End",
+                      name: "endDate",
+                      defaultValue: hackathon.endDate
+                        ? new Date(hackathon.endDate).toISOString().slice(0, 16)
+                        : undefined
+                    }
+                  ]
                 }
               ],
               submitText: "Save"

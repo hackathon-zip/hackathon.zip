@@ -1,28 +1,14 @@
-import {
-  Button,
-  Card,
-  Drawer,
-  Fieldset,
-  Grid,
-  Input,
-  Page,
-  Text
-} from "@geist-ui/core";
-import { getAuth } from "@clerk/nextjs/server";
-import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
-import { ClerkLoaded, UserButton } from "@clerk/nextjs";
 import prisma from "@/lib/prisma";
-import { NextApiRequest } from "next";
-import { NextServerOptions } from "next/dist/server/next";
+import { getAuth } from "@clerk/nextjs/server";
+import { Card, Drawer, Fieldset, Grid, Page, Text } from "@geist-ui/core";
+import type { GetServerSideProps } from "next";
 
-import type { Hackathon } from "@prisma/client";
-import { PlusCircle } from "@geist-ui/react-icons";
-import { useState } from "react";
-import { Form } from "@/components/Form";
-import { delay } from "@/lib/utils";
 import Debug from "@/components/Debug";
-import Navbar from "@/components/Navbar";
+import { Form } from "@/components/Form";
+import { PlusCircle } from "@geist-ui/react-icons";
+import type { Hackathon } from "@prisma/client";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function Index({
   hackathons
@@ -90,13 +76,13 @@ export default function Index({
                     label: "Dates",
                     inputs: [
                       {
-                        type: "date",
-                        inlineLabel: "Start Date",
+                        type: "datetime-local",
+                        inlineLabel: "Start",
                         name: "startDate"
                       },
                       {
-                        type: "date",
-                        inlineLabel: "End Date",
+                        type: "datetime-local",
+                        inlineLabel: "End",
                         name: "endDate"
                       }
                     ]

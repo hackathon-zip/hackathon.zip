@@ -113,7 +113,7 @@ interface FormTextInputTuple extends BaseFormElement {
 }
 
 interface FormTextInput extends FormInput {
-  type: "date" | "text" | "email" | "password" | "number";
+  type: "date" | "datetime-local" | "text" | "email" | "password" | "number";
   placeholder?: string;
   inlineLabel?: string;
   defaultValue?: string;
