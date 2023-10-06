@@ -4,7 +4,6 @@ import { Button, Checkbox, Page, Table, Tooltip } from "@geist-ui/core";
 import type { GetServerSideProps } from "next";
 
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
-import { delay } from "@/lib/utils";
 import { HelpCircle } from "@geist-ui/react-icons";
 import type {
   Attendee,
@@ -183,101 +182,101 @@ export function NewDataTable(
     return attendeeAttribute?.value;
   }
   
-  // const defaultContent = [defaultShape.map((s: Column) => s.name), ...attendees.map((attendee: AttendeeWithAttributes) => {
-  //   const contentArray = [];
+  const defaultContent = [defaultShape.map((s: Column) => s.name), ...attendees.map((attendee: AttendeeWithAttributes) => {
+    const contentArray = [];
 
-  //   for (const column of defaultShape) {
-  //     if (column.fromAttendee)
-  //       contentArray.push(column.fromAttendee(attendee));
-  //     else
-  //       contentArray.push(getAttributeValue(attendee, column.name));
-  //   }
+    for (const column of defaultShape) {
+      if (column.fromAttendee)
+        contentArray.push(column.fromAttendee(attendee));
+      else
+        contentArray.push(getAttributeValue(attendee, column.name));
+    }
 
-  //   return contentArray;
-  // })];
+    return contentArray;
+  })];
 
-  const defaultContent = [
-    [
-        "Name",
-        "Email",
-        "Favorite Color"
-    ],
-    [
-        "Ian Madden",
-        "ian@hackclub.com",
-        "Pink"
-    ],
-    [
-        "Sam Poder",
-        "test@hackclub.com",
-        null
-    ],
-    [
-        "Sam Poder",
-        "sam@hackclub.com",
-        "Green"
-    ],
-    [
-        "Sam Poder",
-        "sampoder@hackclub.com",
-        "Blue"
-    ],
-    [
-        "Sam Poder",
-        "poder@hackclub.com",
-        "Purple"
-    ],
-    [
-        "Sam Poder",
-        "sam.r.poder@gmail.com",
-        "Purple"
-    ],
-    [
-        "Sam Poder",
-        "sam.r.poder+1@gmail.com",
-        "Purple"
-    ],
-    [
-        "Sam Poder",
-        "sampoder@berkeley.edu",
-        "Pink"
-    ],
-    [
-        "Sam Poder",
-        "test@sampoder.com",
-        "Red"
-    ],
-    [
-        "Test",
-        "test@test.test",
-        "Test"
-    ],
-    [
-        "Manu Gurudath ",
-        "manusvathgurudath@gmail.com",
-        "black"
-    ],
-    [
-        "Sam Poder",
-        "sam+1222@hackclub.com",
-        "Green"
-    ],
-    [
-        "sam",
-        "tesss@sampoder.com",
-        "green"
-    ],
-    [
-        "Sam Poder",
-        "tesssssssss@sampoder.com",
-        "Green"
-    ],
-    [
-        "rest in peace",
-        "restinpeace@sampoder.com",
-        "green"
-    ]
-]
+//   const defaultContent = [
+//     [
+//         "Name",
+//         "Email",
+//         "Favorite Color"
+//     ],
+//     [
+//         "Ian Madden",
+//         "ian@hackclub.com",
+//         "Pink"
+//     ],
+//     [
+//         "Sam Poder",
+//         "test@hackclub.com",
+//         null
+//     ],
+//     [
+//         "Sam Poder",
+//         "sam@hackclub.com",
+//         "Green"
+//     ],
+//     [
+//         "Sam Poder",
+//         "sampoder@hackclub.com",
+//         "Blue"
+//     ],
+//     [
+//         "Sam Poder",
+//         "poder@hackclub.com",
+//         "Purple"
+//     ],
+//     [
+//         "Sam Poder",
+//         "sam.r.poder@gmail.com",
+//         "Purple"
+//     ],
+//     [
+//         "Sam Poder",
+//         "sam.r.poder+1@gmail.com",
+//         "Purple"
+//     ],
+//     [
+//         "Sam Poder",
+//         "sampoder@berkeley.edu",
+//         "Pink"
+//     ],
+//     [
+//         "Sam Poder",
+//         "test@sampoder.com",
+//         "Red"
+//     ],
+//     [
+//         "Test",
+//         "test@test.test",
+//         "Test"
+//     ],
+//     [
+//         "Manu Gurudath ",
+//         "manusvathgurudath@gmail.com",
+//         "black"
+//     ],
+//     [
+//         "Sam Poder",
+//         "sam+1222@hackclub.com",
+//         "Green"
+//     ],
+//     [
+//         "sam",
+//         "tesss@sampoder.com",
+//         "green"
+//     ],
+//     [
+//         "Sam Poder",
+//         "tesssssssss@sampoder.com",
+//         "Green"
+//     ],
+//     [
+//         "rest in peace",
+//         "restinpeace@sampoder.com",
+//         "green"
+//     ]
+// ]
 
   console.log('RENDER', defaultContent);
 
@@ -287,6 +286,7 @@ export function NewDataTable(
   const [content, setContent] = useState([...defaultContent.map((s: any) => [...s])]);
   const contentRef = useRef([...defaultContent.map((s: any) => [...s])] as any);
   // (window as any).stringifiedContent = JSON.stringify(defaultContent)
+
 
   // useEffect(() => {
   //   contentRef.current = content;
@@ -320,6 +320,7 @@ export function NewDataTable(
                   type: 'text',
                   name: newHeader
                 })
+                shapeRef.current = tempShape;
                 // setShape(tempShape);
               }
             }
@@ -331,6 +332,7 @@ export function NewDataTable(
               if (!newHeaders.includes(oldHeader)) {
                 let tempShape = [...shapeRef.current];
                 delete tempShape[i];
+                shapeRef.current = tempShape;
                 // setShape(tempShape);
               }
             }
@@ -352,6 +354,8 @@ export function NewDataTable(
               }
             }
 
+            console.log({ differences });
+
             if(differences.length > 0){
               console.log("we have a difference.")
             }
@@ -361,7 +365,7 @@ export function NewDataTable(
 
               let tempShape = [...shapeRef.current];
               tempShape[differences[0].index].name = differences[0].new;
-              // setShape(tempShape);
+              shapeRef.current = tempShape;
 
             } else if (differences.length == 2) {
               // a column was moved
@@ -370,7 +374,7 @@ export function NewDataTable(
               let tempColumn = {...tempShape[differences[0].index]};
               tempShape[differences[0].index] == tempShape[differences[1].index];
               tempShape[differences[1].index] == tempColumn;
-              // setShape(tempShape);
+              shapeRef.current = tempShape;
 
             } else if (differences.length > 2) {
               // some goofy shit happened that we don't understand
@@ -385,10 +389,7 @@ export function NewDataTable(
           console.log("content changed");
           setContent(newContent as any);
           console.log('fuck react :)');
-          await delay(3000);
-          console.log('fuck react even more :)');
-          await delay(3000);
-          console.log("SETTING REF", newContent)
+          
           contentRef.current = JSON.parse(JSON.stringify(newContent)) as any;
           // (window as any).stringifiedContent = JSON.stringify(newContent)
           // setContent(newContent as any);
