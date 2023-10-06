@@ -58,7 +58,14 @@ export default function Hackathon({
                       inlineLabel: "Start",
                       name: "startDate",
                       defaultValue: hackathon.startDate
-                        ? new Date(hackathon.startDate)
+                        ? new Date(
+                            new Date(hackathon.startDate).toLocaleString(
+                              "en-US",
+                              {
+                                timeZone: hackathon.timezone ?? undefined
+                              }
+                            )
+                          )
                             .toISOString()
                             .slice(0, 16)
                         : undefined
@@ -68,10 +75,30 @@ export default function Hackathon({
                       inlineLabel: "End",
                       name: "endDate",
                       defaultValue: hackathon.endDate
-                        ? new Date(hackathon.endDate).toISOString().slice(0, 16)
+                        ? new Date(
+                            new Date(hackathon.endDate).toLocaleString(
+                              "en-US",
+                              {
+                                timeZone: hackathon.timezone ?? undefined
+                              }
+                            )
+                          )
+                            .toISOString()
+                            .slice(0, 16)
                         : undefined
                     }
                   ]
+                },
+                {
+                  type: "autocomplete",
+                  label: "Timezone",
+                  name: "timezone",
+                  options: Intl.supportedValuesOf("timeZone").map((t) => ({
+                    label: t,
+                    value: t
+                  })),
+                  placeholder: "America/Los_Angeles",
+                  defaultValue: hackathon.timezone ?? undefined
                 }
               ],
               submitText: "Save"

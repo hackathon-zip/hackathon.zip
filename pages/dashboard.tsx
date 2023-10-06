@@ -86,6 +86,16 @@ export default function Index({
                         name: "endDate"
                       }
                     ]
+                  },
+                  {
+                    type: "autocomplete",
+                    label: "Timezone",
+                    name: "timezone",
+                    options: Intl.supportedValuesOf("timeZone").map((t) => ({
+                      label: t,
+                      value: t
+                    })),
+                    placeholder: "America/Los_Angeles"
                   }
                 ]
               }}
