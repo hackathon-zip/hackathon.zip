@@ -8,26 +8,26 @@ import { getSubdomains } from "./lib/utils";
 
 export default function middleware(
     request: NextRequest,
-    event: NextFetchEvent
+    event: NextFetchEvent,
 ) {
     const withAuthentication = (callback: (req: NextRequest) => any) => {
         return authMiddleware({
             publicRoutes: ["/"],
             afterAuth: (auth: any, req: NextRequest) => {
                 return callback(req);
-            }
+            },
         })(request, event);
     };
 
     const withoutAuthentication = (
         route: string,
-        callback: (req: NextRequest) => any
+        callback: (req: NextRequest) => any,
     ) => {
         return authMiddleware({
             publicRoutes: [route],
             afterAuth: (auth: any, req: NextRequest) => {
                 return callback(req);
-            }
+            },
         })(request, event);
     };
 
@@ -52,32 +52,32 @@ export default function middleware(
             return withAuthentication(
                 isApi && !isAttendeeApi
                     ? () => rewrite("/api/organizer" + pathnameWithoutAPI)
-                    : () => null
+                    : () => null,
             );
         case "api": // you are on api.hackathon.zip
             console.log("[domain routing]: api");
-            return withoutAuthentication(pathname, () =>
-                rewrite("/api/integration" + pathname)
+            return withoutAuthentication(
+                pathname,
+                () => rewrite("/api/integration" + pathname),
             );
 
-        case undefined: // you are on hackathon.zip 
-        // note: adding "landing" below is breaking testing right now, it's impossible to test /attendee/ routes with it there.
-        // i've removed it temporarily, long term we need a way to distinguish them.
+        case undefined: // you are on hackathon.zip
             console.log("[domain routing]: undefined");
             return withoutAuthentication(pathname, () =>
                 rewrite(
-                    isApi ? `/api${pathnameWithoutAPI}` : `${pathname}` 
-                )
-            );
+                    isApi
+                        ? `/api/organizer${pathnameWithoutAPI}`
+                        : pathname.split("/").length > 1
+                            ? `${pathname}`
+                            : `/landing${pathname}`,
+                ));
         default: // you are on [event].hackathon.zip or [customdomain]
             console.log("[domain routing]: default");
             let slug = subdomain;
 
             if (
                 !hostname?.includes(
-                    process.env.NODE_ENV === "production"
-                        ? "hackathon.zip"
-                        : "localhost"
+                    process.env.NODE_ENV === "production" ? "hackathon.zip" : "localhost",
                 )
             ) {
                 console.log("[domain routing]: custom domain");
@@ -88,14 +88,13 @@ export default function middleware(
                 rewrite(
                     isApi
                         ? `/api/attendee/${slug}` + pathnameWithoutAPI
-                        : `/attendee/${slug}` + pathname
-                )
-            );
+                        : `/attendee/${slug}` + pathname,
+                ));
     }
 }
 
 export const config = {
-    matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"]
+    matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
 };
 
 /**

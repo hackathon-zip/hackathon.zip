@@ -1,40 +1,20 @@
-import {
-  Button,
-  Card,
-  Checkbox,
-  Code,
-  Drawer,
-  Fieldset,
-  Grid,
-  Input,
-  Page,
-  Snippet,
-  Table,
-  Text,
-  Tooltip
-} from "@geist-ui/core";
-import { getAuth } from "@clerk/nextjs/server";
-import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import prisma from "@/lib/prisma";
-import { NextApiRequest } from "next";
-import { NextServerOptions } from "next/dist/server/next";
+import { getAuth } from "@clerk/nextjs/server";
+import { Button, Checkbox, Page, Table, Tooltip } from "@geist-ui/core";
+import type { GetServerSideProps } from "next";
 
+import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
+import { delay } from "@/lib/utils";
+import { HelpCircle } from "@geist-ui/react-icons";
 import type {
   Attendee,
-  Hackathon,
   AttendeeAttribute,
-  AttendeeAttributeValue
+  AttendeeAttributeValue,
+  Hackathon,
 } from "@prisma/client";
-import { HelpCircle, PlusCircle } from "@geist-ui/react-icons";
-import React, { useState } from "react";
-import type { ReactElement } from "react";
-import { Form } from "@/components/Form";
-import { delay } from "@/lib/utils";
-import Debug from "@/components/Debug";
-import Link from "next/link";
-import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import dynamic from "next/dynamic";
+import type { ReactElement } from "react";
+import React, { useRef, useState } from "react";
 
 type AttendeeWithAttributes = Attendee & {
   attributeValues: AttendeeAttributeValue[];
@@ -47,7 +27,7 @@ type HackathonWithAttendees = Hackathon & {
 
 function DataTable({
   attendees,
-  attributes
+  attributes,
 }: {
   attendees: AttendeeWithAttributes[];
   attributes: AttendeeAttribute[];
@@ -59,10 +39,10 @@ function DataTable({
     };
   } = {
     name: {
-      label: "Name"
+      label: "Name",
     },
     email: {
-      label: "Email"
+      label: "Email",
     },
     checkedIn: {
       label: (
@@ -72,13 +52,13 @@ function DataTable({
             text="This column cannot be modified. To check in an attendee, use the Check-In system."
             style={{
               scale: "0.8",
-              marginLeft: "4px"
+              marginLeft: "4px",
             }}
             scale={2 / 3}
           >
             <HelpCircle
               style={{
-                scale: "0.2"
+                scale: "0.2",
               }}
             />
           </Tooltip>
@@ -88,37 +68,37 @@ function DataTable({
         return (
           <span
             style={{
-              pointerEvents: "none"
+              pointerEvents: "none",
             }}
           >
             <Checkbox checked={value} scale={3 / 2} style={{}} />
           </span>
         );
-      }
-    }
+      },
+    },
   };
   const columns = [
     ...Object.entries(builtinColumns).map(([prop, { label, render }]) => ({
       label,
       prop,
-      render
+      render,
     })),
     ...attributes.map((attribute) => ({
       label: attribute.name,
       prop: attribute.id,
       render: (value: any, rowData: any) => {
         return value;
-      }
-    }))
+      },
+    })),
   ];
   const dataSource = attendees.map((attendee) => {
     const row: any = {
-      key: attendee.id
+      key: attendee.id,
     };
     attendee.attributeValues.forEach(
       (attributeValue: AttendeeAttributeValue) => {
         row[attributeValue.formFieldId] = attributeValue.value;
-      }
+      },
     );
     for (const prop in builtinColumns) {
       row[prop] = attendee[prop as keyof Attendee];
@@ -133,7 +113,7 @@ function DataTable({
           if (dataIndex !== rowIndex) return item;
           return {
             ...item,
-            property: Math.random().toString(16).slice(-5)
+            property: Math.random().toString(16).slice(-5),
           };
         });
       });
@@ -159,48 +139,287 @@ function DataTable({
   );
 }
 
-export function NewDataTable ({ attendees, attributes }: { attendees: AttendeeWithAttributes[], attributes: AttendeeAttribute[] }) {
+export function NewDataTable(
+  { attendees, attributes }: {
+    attendees: AttendeeWithAttributes[];
+    attributes: AttendeeAttribute[];
+  },
+) {
   const ActiveTable = dynamic(
     () => import("active-table-react").then((mod) => mod.ActiveTable),
     {
       ssr: false,
-    }
+    },
   );
 
-  const defaultContent: any = [
-    ["Planet", "Diameter", "Mass", "Moons", "Density"],
-    ["Earth", 12756, 5.97, 1, 5514],
-    ["Mars", 6792, 0.642, 2, 3934],
-    ["Jupiter", 142984, 1898, 79, 1326],
-    ["Saturn", 120536, 568, 82, 687],
-    ["Neptune", 49528, 102, 14, 1638]];
+  type Column = {
+    type: string;
+    name: string;
+    fromAttendee?: (attendee: Attendee) => string;
+  }
 
-  const [content, setContent] = useState(defaultContent);
+  const defaultShape: Column[] = [
+    {
+      type: 'text',
+      name: 'Name',
+      fromAttendee: (attendee: Attendee) => attendee.name
+    },
+    {
+      type: 'text',
+      name: 'Email',
+      fromAttendee: (attendee: Attendee) => attendee.email
+    },
+    ...attributes.map((attribute: AttendeeAttribute) => ({
+      type: 'text',
+      name: attribute.name
+    }))
+  ];
+
+  function getAttributeValue ({ attributeValues }: AttendeeWithAttributes, value: string) {
+    const attributeId = attributes.find((attribute: AttendeeAttribute) => attribute.name == value)?.id;
+
+    const attendeeAttribute = attributeValues.find((attributeValue: AttendeeAttributeValue) => attributeValue.formFieldId == attributeId);
+
+    return attendeeAttribute?.value;
+  }
+  
+  // const defaultContent = [defaultShape.map((s: Column) => s.name), ...attendees.map((attendee: AttendeeWithAttributes) => {
+  //   const contentArray = [];
+
+  //   for (const column of defaultShape) {
+  //     if (column.fromAttendee)
+  //       contentArray.push(column.fromAttendee(attendee));
+  //     else
+  //       contentArray.push(getAttributeValue(attendee, column.name));
+  //   }
+
+  //   return contentArray;
+  // })];
+
+  const defaultContent = [
+    [
+        "Name",
+        "Email",
+        "Favorite Color"
+    ],
+    [
+        "Ian Madden",
+        "ian@hackclub.com",
+        "Pink"
+    ],
+    [
+        "Sam Poder",
+        "test@hackclub.com",
+        null
+    ],
+    [
+        "Sam Poder",
+        "sam@hackclub.com",
+        "Green"
+    ],
+    [
+        "Sam Poder",
+        "sampoder@hackclub.com",
+        "Blue"
+    ],
+    [
+        "Sam Poder",
+        "poder@hackclub.com",
+        "Purple"
+    ],
+    [
+        "Sam Poder",
+        "sam.r.poder@gmail.com",
+        "Purple"
+    ],
+    [
+        "Sam Poder",
+        "sam.r.poder+1@gmail.com",
+        "Purple"
+    ],
+    [
+        "Sam Poder",
+        "sampoder@berkeley.edu",
+        "Pink"
+    ],
+    [
+        "Sam Poder",
+        "test@sampoder.com",
+        "Red"
+    ],
+    [
+        "Test",
+        "test@test.test",
+        "Test"
+    ],
+    [
+        "Manu Gurudath ",
+        "manusvathgurudath@gmail.com",
+        "black"
+    ],
+    [
+        "Sam Poder",
+        "sam+1222@hackclub.com",
+        "Green"
+    ],
+    [
+        "sam",
+        "tesss@sampoder.com",
+        "green"
+    ],
+    [
+        "Sam Poder",
+        "tesssssssss@sampoder.com",
+        "Green"
+    ],
+    [
+        "rest in peace",
+        "restinpeace@sampoder.com",
+        "green"
+    ]
+]
+
+  console.log('RENDER', defaultContent);
 
 
+  const shapeRef = useRef(defaultShape);
+
+  const [content, setContent] = useState([...defaultContent.map((s: any) => [...s])]);
+  const contentRef = useRef([...defaultContent.map((s: any) => [...s])] as any);
+  // (window as any).stringifiedContent = JSON.stringify(defaultContent)
+
+  // useEffect(() => {
+  //   contentRef.current = content;
+  // }, [content]);
+    
   return (
     <>
-      <ActiveTable content={content} onContentUpdate={newContent => {
-        console.log('content changed');
-        console.log(newContent);
-        setContent(newContent);
-      }} displayAddNewColumn={false} customColumnsSettings={content[0].map((c: any) => ({
-        headerName: c,
-        isHeaderTextEditable: false,
-        columnDropdown: {
-          isSortAvailable: false,
-          isDeleteAvailable: false,
-          isInsertLeftAvailable: false,
-          isInsertRightAvailable: false,
-          isMoveAvailable: true
-        }
-      })) as any} />
+      <ActiveTable
+        content={content as any}
+        onContentUpdate={async (newContent) => {
+          // return setContent(newContent as any);
+          const oldHeaders = JSON.parse(JSON.stringify(contentRef.current[0] as string[]));
+          const newHeaders = newContent[0] as string[];
+
+          console.log({
+            newHeaders,
+            oldHeaders,
+            defaultContent,
+            defaultShape,
+            attributes
+          })
+
+          if (oldHeaders.length < newHeaders.length) {
+            // a column was added
+
+            for (let i = 0; i < newHeaders.length; i++) {
+              const newHeader = newHeaders[i];
+              if (!oldHeaders.includes(newHeader)) {
+                let tempShape = [...shapeRef.current];
+                tempShape.splice(i, 0, {
+                  type: 'text',
+                  name: newHeader
+                })
+                // setShape(tempShape);
+              }
+            }
+          } else if (oldHeaders.length > newHeaders.length) {
+            // a column was removed
+
+            for (let i = 0; i < oldHeaders.length; i++) {
+              const oldHeader = oldHeaders[i];
+              if (!newHeaders.includes(oldHeader)) {
+                let tempShape = [...shapeRef.current];
+                delete tempShape[i];
+                // setShape(tempShape);
+              }
+            }
+
+          } else if (oldHeaders.length == newHeaders.length) {
+            let differences: {
+              old: string;
+              new: string;
+              index: number;
+            }[] = [];
+
+            for (let i = 0; i < oldHeaders.length; i++) {
+              if (oldHeaders[i] != newHeaders[i]) {
+                differences.push({
+                  old: oldHeaders[i],
+                  new: newHeaders[i],
+                  index: i
+                });
+              }
+            }
+
+            if(differences.length > 0){
+              console.log("we have a difference.")
+            }
+
+            if (differences.length == 1) {
+              // a column was renamed
+
+              let tempShape = [...shapeRef.current];
+              tempShape[differences[0].index].name = differences[0].new;
+              // setShape(tempShape);
+
+            } else if (differences.length == 2) {
+              // a column was moved
+
+              let tempShape = [...shapeRef.current];
+              let tempColumn = {...tempShape[differences[0].index]};
+              tempShape[differences[0].index] == tempShape[differences[1].index];
+              tempShape[differences[1].index] == tempColumn;
+              // setShape(tempShape);
+
+            } else if (differences.length > 2) {
+              // some goofy shit happened that we don't understand
+              
+              console.log("Good luck!");
+            } else {
+              // table body updated
+              
+              console.log('Table body updated, hooray!');
+            }
+          }
+          console.log("content changed");
+          setContent(newContent as any);
+          console.log('fuck react :)');
+          await delay(3000);
+          console.log('fuck react even more :)');
+          await delay(3000);
+          console.log("SETTING REF", newContent)
+          contentRef.current = JSON.parse(JSON.stringify(newContent)) as any;
+          // (window as any).stringifiedContent = JSON.stringify(newContent)
+          // setContent(newContent as any);
+        }}
+        displayAddNewColumn={false}
+        onColumnsUpdate={(newColumns) => {
+          console.log("columns changed");
+          console.log(newColumns);
+        }}
+        customColumnsSettings={(content[0] as any).map((c: any, i: number) => ({
+          headerName: c,
+          isHeaderTextEditable: c != "Name" && c != "Email",
+          columnDropdown: {
+            isSortAvailable: false,
+            isDeleteAvailable: true,
+            isInsertLeftAvailable: c != "Name" && c != "Email",
+            isInsertRightAvailable: i == (content[0] as any).length - 1,
+            isMoveAvailable: c != "Name" && c != "Email",
+          },
+        })) as any}
+      />
+      {JSON.stringify(content)}
     </>
-  )
+  );
+}
+
+export function DataTableTwo({}) {
 }
 
 export default function Hackathon({
-  hackathon
+  hackathon,
 }: {
   hackathon: null | HackathonWithAttendees;
 }): any {
@@ -243,34 +462,34 @@ export const getServerSideProps = (async (context) => {
         slug: context.params?.slug.toString(),
         OR: [
           {
-            ownerId: userId ?? undefined
+            ownerId: userId ?? undefined,
           },
           {
             collaboratorIds: {
-              has: userId
-            }
-          }
-        ]
+              has: userId,
+            },
+          },
+        ],
       },
       include: {
         attendeeAttributes: true,
         attendees: {
           include: {
-            attributeValues: true
-          }
-        }
-      }
+            attributeValues: true,
+          },
+        },
+      },
     });
     return {
       props: {
-        hackathon
-      }
+        hackathon,
+      },
     };
   } else {
     return {
       props: {
-        hackathon: null
-      }
+        hackathon: null,
+      },
     };
   }
 }) satisfies GetServerSideProps<{
