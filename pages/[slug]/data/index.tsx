@@ -3,6 +3,7 @@ import { getAuth } from "@clerk/nextjs/server";
 import { Button, Checkbox, Page, Table, Tooltip } from "@geist-ui/core";
 import type { GetServerSideProps } from "next";
 
+import Debug from "@/components/Debug";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import { HelpCircle } from "@geist-ui/react-icons";
 import type {
@@ -142,6 +143,15 @@ function fix<T>(value: T): T {
   return JSON.parse(JSON.stringify(value));
 }
 
+
+export type Column = {
+  type: string;
+  name: string;
+  id: string;
+  fromAttendee?: (attendee: Attendee) => string;
+  readOnly?: boolean;
+}
+
 export function NewDataTable(
   { attendees, attributes }: {
     attendees: AttendeeWithAttributes[];
@@ -155,30 +165,38 @@ export function NewDataTable(
     },
   );
 
-  type Column = {
-    type: string;
-    name: string;
-    fromAttendee?: (attendee: Attendee) => string;
-  }
+  
 
   const builtInAttributes: Column[] = [
     {
       type: 'text',
       name: 'Name',
-      fromAttendee: (attendee: Attendee) => attendee.name
+      id: 'built-in',
+      fromAttendee: (attendee: Attendee) => attendee.name,
+      readOnly: false
     },
     {
       type: 'text',
       name: 'Email',
-      fromAttendee: (attendee: Attendee) => attendee.email
+      id: 'built-in',
+      fromAttendee: (attendee: Attendee) => attendee.email,
+      readOnly: false
+    },
+    {
+      type: 'checkbox',
+      name: 'Checked In',
+      id: 'built-in',
+      fromAttendee: (attendee: Attendee) => attendee.checkedIn ? 'true' : 'false',
+      readOnly: true
     }
-  ];
+  ]; // these are separated that way we can use them when setting column settings
 
   const defaultShape: Column[] = [
     ...builtInAttributes,
     ...attributes.map((attribute: AttendeeAttribute) => ({
       type: 'text',
-      name: attribute.name
+      name: attribute.name,
+      id: attribute.id
     }))
   ];
 
@@ -208,6 +226,8 @@ export function NewDataTable(
   const latestShapeRef = useRef(fix(defaultShape));
 
   const [shape, setShape] = useState(defaultShape);
+
+  console.log("INITIAL SHAPE", shape)
 
   const [content, setContent] = useState([...defaultContent.map((s: any) => [...s])]);
   const contentRef = useRef([...defaultContent.map((s: any) => [...s])] as any);
@@ -244,7 +264,8 @@ export function NewDataTable(
                 let tempShape = [...latestShapeRef.current];
                 tempShape.splice(i, 0, {
                   type: 'text',
-                  name: newHeader
+                  name: newHeader,
+                  id: 'to-create'
                 })
                 latestShapeRef.current = tempShape;
                 // setShape(tempShape);
@@ -331,19 +352,34 @@ export function NewDataTable(
 
           console.log("[event] columns changed", { newColumns });
         }}
-        customColumnsSettings={(content[0] as any).map((c: any, i: number) => ({
-          headerName: c,
-          isHeaderTextEditable: c != "Name" && c != "Email",
-          columnDropdown: {
-            isSortAvailable: false,
-            isDeleteAvailable: true,
-            isInsertLeftAvailable: c != "Name" && c != "Email",
-            isInsertRightAvailable: i == (content[0] as any).length - 1,
-            isMoveAvailable: c != "Name" && c != "Email",
-          },
-        })) as any}
+        customColumnsSettings={shape.map((column: Column, i: number) => {
+          console.log({ column });
+          return {
+            headerName: column.name,
+            isHeaderTextEditable: i >= builtInAttributes.length,
+            columnDropdown: {
+              isSortAvailable: false,
+              isDeleteAvailable: i >= builtInAttributes.length,
+              isInsertLeftAvailable: i >= builtInAttributes.length,
+              isInsertRightAvailable: i >= builtInAttributes.length - 1,
+              isMoveAvailable: i >= builtInAttributes.length + 1
+            },
+            isCellTextEditable: !(column.readOnly === false)
+          };
+        })}
+        // customColumnsSettings={(content[0] as any).map((c: any, i: number) => ({
+        //   headerName: c,
+        //   isHeaderTextEditable: c != "Name" && c != "Email",
+        //   columnDropdown: {
+        //     isSortAvailable: false,
+        //     isDeleteAvailable: true,
+        //     isInsertLeftAvailable: c != "Name" && c != "Email",
+        //     isInsertRightAvailable: i == (content[0] as any).length - 1,
+        //     isMoveAvailable: c != "Name" && c != "Email",
+        //   },
+        // })) as any} // @sampoder lets change this to use the `shape` variable instead of content, since we'll have more control over the attributes
       />
-      {JSON.stringify(content)}
+      <Debug data={{ shape }} />
     </>
   );
 }
