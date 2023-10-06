@@ -12,6 +12,7 @@ import type {
   AttendeeAttributeValue,
   Hackathon,
 } from "@prisma/client";
+import { DEFAULT_COLUMN_TYPES } from "active-table/dist/enums/defaultColumnTypes";
 import dynamic from "next/dynamic";
 import type { ReactElement } from "react";
 import React, { useRef, useState } from "react";
@@ -170,6 +171,13 @@ export function NewDataTable(
   const builtInAttributes: Column[] = [
     {
       type: 'text',
+      name: 'ID',
+      id: 'built-in',
+      fromAttendee: (attendee: Attendee) => attendee.id,
+      readOnly: true
+    },
+    {
+      type: 'text',
       name: 'Name',
       id: 'built-in',
       fromAttendee: (attendee: Attendee) => attendee.name,
@@ -240,145 +248,158 @@ export function NewDataTable(
     
   return (
     <>
-      <ActiveTable
-        content={content as any}
-        onContentUpdate={async (newContent) => {
-          // return setContent(newContent as any);
-          const oldHeaders = fix(contentRef.current[0] as string[]);
-          const newHeaders = newContent[0] as string[];
-
-          console.log('[event] content update', {
-            newHeaders,
-            oldHeaders,
-            defaultContent,
-            defaultShape,
-            attributes
-          })
-
-          if (oldHeaders.length < newHeaders.length) {
-            // a column was added
-
-            for (let i = 0; i < newHeaders.length; i++) {
-              const newHeader = newHeaders[i];
-              if (!oldHeaders.includes(newHeader)) {
-                let tempShape = [...latestShapeRef.current];
-                tempShape.splice(i, 0, {
-                  type: 'text',
-                  name: newHeader,
-                  id: 'to-create'
-                })
-                latestShapeRef.current = tempShape;
-                // setShape(tempShape);
-              }
-            }
-          } else if (oldHeaders.length > newHeaders.length) {
-            // a column was removed
-
-            for (let i = 0; i < oldHeaders.length; i++) {
-              const oldHeader = oldHeaders[i];
-              if (!newHeaders.includes(oldHeader)) {
-                let tempShape = [...latestShapeRef.current];
-                delete tempShape[i];
-                latestShapeRef.current = tempShape;
-                // setShape(tempShape);
-              }
-            }
-
-          } else if (oldHeaders.length == newHeaders.length) {
-            let differences: {
-              old: string;
-              new: string;
-              index: number;
-            }[] = [];
-
-            for (let i = 0; i < oldHeaders.length; i++) {
-              if (oldHeaders[i] != newHeaders[i]) {
-                differences.push({
-                  old: oldHeaders[i],
-                  new: newHeaders[i],
-                  index: i
-                });
-              }
-            }
-
-            if(differences.length > 0){
-              console.log('[event] differences found', { differences });
-            }
-
-            if (differences.length == 1) {
-              // a column was renamed
-
-              let tempShape = [...latestShapeRef.current];
-              tempShape[differences[0].index].name = differences[0].new;
-              latestShapeRef.current = tempShape;
-
-            } else if (differences.length == 2) {
-              // a column was moved
-
-              let tempShape = [...latestShapeRef.current];
-              let tempColumn = {...tempShape[differences[0].index]};
-              tempShape[differences[0].index] == tempShape[differences[1].index];
-              tempShape[differences[1].index] == tempColumn;
-              latestShapeRef.current = tempShape;
-
-            } else if (differences.length > 2) {
-              // some goofy shit happened that we don't understand
-              
-              console.error('Long differences length found')
-            } else {
-              // table body updated
-              
-              console.log('[event] table body updated');
-            }
+      <div className="activetable__wrapper">
+        <style dangerouslySetInnerHTML={{ __html: `
+          .activetable__wrapper > * > table {
+            width: 100vw;
+            margin: -10px
           }
+        ` }}></style>
+        <ActiveTable
+          tableStyle={{
+            width: '100%'
+          }}
+          content={content as any}
+          onContentUpdate={async (newContent) => {
+            // return setContent(newContent as any);
+            const oldHeaders = fix(contentRef.current[0] as string[]);
+            const newHeaders = newContent[0] as string[];
 
-          setContent(newContent as any);
+            console.log('[event] content update', {
+              newHeaders,
+              oldHeaders,
+              defaultContent,
+              defaultShape,
+              attributes
+            })
 
-          contentRef.current = fix(newContent) as any;
-        }}
-        displayAddNewColumn={false}
-        onColumnsUpdate={(newColumns) => {
-          const oldShape = fix(lastSavedShapeRef.current);
-          const newShape = latestShapeRef.current;
+            if (oldHeaders.length < newHeaders.length) {
+              // a column was added
 
-          const isNew = JSON.stringify(newShape) != JSON.stringify(oldShape);
+              for (let i = 0; i < newHeaders.length; i++) {
+                const newHeader = newHeaders[i];
+                if (!oldHeaders.includes(newHeader)) {
+                  let tempShape = [...latestShapeRef.current];
+                  tempShape.splice(i, 0, {
+                    type: 'text',
+                    name: newHeader,
+                    id: 'to-create'
+                  })
+                  latestShapeRef.current = tempShape;
+                  // setShape(tempShape);
+                }
+              }
+            } else if (oldHeaders.length > newHeaders.length) {
+              // a column was removed
 
-          if (!isNew) return false;
+              for (let i = 0; i < oldHeaders.length; i++) {
+                const oldHeader = oldHeaders[i];
+                if (!newHeaders.includes(oldHeader)) {
+                  let tempShape = [...latestShapeRef.current];
+                  delete tempShape[i];
+                  latestShapeRef.current = tempShape;
+                  // setShape(tempShape);
+                }
+              }
+
+            } else if (oldHeaders.length == newHeaders.length) {
+              let differences: {
+                old: string;
+                new: string;
+                index: number;
+              }[] = [];
+
+              for (let i = 0; i < oldHeaders.length; i++) {
+                if (oldHeaders[i] != newHeaders[i]) {
+                  differences.push({
+                    old: oldHeaders[i],
+                    new: newHeaders[i],
+                    index: i
+                  });
+                }
+              }
+
+              if(differences.length > 0){
+                console.log('[event] differences found', { differences });
+              }
+
+              if (differences.length == 1) {
+                // a column was renamed
+
+                let tempShape = [...latestShapeRef.current];
+                tempShape[differences[0].index].name = differences[0].new;
+                latestShapeRef.current = tempShape;
+
+              } else if (differences.length == 2) {
+                // a column was moved
+
+                let tempShape = [...latestShapeRef.current];
+                let tempColumn = {...tempShape[differences[0].index]};
+                tempShape[differences[0].index] == tempShape[differences[1].index];
+                tempShape[differences[1].index] == tempColumn;
+                latestShapeRef.current = tempShape;
+
+              } else if (differences.length > 2) {
+                // some goofy shit happened that we don't understand
+                
+                console.error('Long differences length found')
+              } else {
+                // table body updated
+                
+                console.log('[event] table body updated');
+              }
+            }
+
+            setContent(newContent as any);
+
+            contentRef.current = fix(newContent) as any;
+          }}
+          displayAddNewColumn={false}
+          onColumnsUpdate={(newColumns) => {
+            const oldShape = fix(lastSavedShapeRef.current);
+            const newShape = latestShapeRef.current;
+
+            const isNew = JSON.stringify(newShape) != JSON.stringify(oldShape);
+
+            if (!isNew) return false;
 
 
-          lastSavedShapeRef.current = fix(newShape);
+            lastSavedShapeRef.current = fix(newShape);
 
-          setShape(newShape);
+            setShape(newShape);
 
-          console.log("[event] columns changed", { newColumns });
-        }}
-        customColumnsSettings={shape.map((column: Column, i: number) => {
-          console.log({ column });
-          return {
-            headerName: column.name,
-            isHeaderTextEditable: i >= builtInAttributes.length,
-            columnDropdown: {
-              isSortAvailable: false,
-              isDeleteAvailable: i >= builtInAttributes.length,
-              isInsertLeftAvailable: i >= builtInAttributes.length,
-              isInsertRightAvailable: i >= builtInAttributes.length - 1,
-              isMoveAvailable: i >= builtInAttributes.length + 1
-            },
-            isCellTextEditable: !(column.readOnly === false)
-          };
-        })}
-        // customColumnsSettings={(content[0] as any).map((c: any, i: number) => ({
-        //   headerName: c,
-        //   isHeaderTextEditable: c != "Name" && c != "Email",
-        //   columnDropdown: {
-        //     isSortAvailable: false,
-        //     isDeleteAvailable: true,
-        //     isInsertLeftAvailable: c != "Name" && c != "Email",
-        //     isInsertRightAvailable: i == (content[0] as any).length - 1,
-        //     isMoveAvailable: c != "Name" && c != "Email",
-        //   },
-        // })) as any} // @sampoder lets change this to use the `shape` variable instead of content, since we'll have more control over the attributes
-      />
+            console.log("[event] columns changed", { newColumns });
+          }}
+          customColumnsSettings={shape.map((column: Column, i: number) => {
+            console.log({ column });
+            return {
+              headerName: column.name,
+              isHeaderTextEditable: i >= builtInAttributes.length,
+              columnDropdown: {
+                isSortAvailable: false,
+                isDeleteAvailable: i >= builtInAttributes.length,
+                isInsertLeftAvailable: i >= builtInAttributes.length,
+                isInsertRightAvailable: i >= builtInAttributes.length - 1,
+                isMoveAvailable: i >= builtInAttributes.length + 1
+              },
+              availableDefaultColumnTypes: (i < builtInAttributes.length ? [column.type || 'text'] : undefined) as DEFAULT_COLUMN_TYPES[],
+              defaultColumnTypeName: column.type || 'text',
+              isCellTextEditable: !column.readOnly
+            };
+          })}
+          // customColumnsSettings={(content[0] as any).map((c: any, i: number) => ({
+          //   headerName: c,
+          //   isHeaderTextEditable: c != "Name" && c != "Email",
+          //   columnDropdown: {
+          //     isSortAvailable: false,
+          //     isDeleteAvailable: true,
+          //     isInsertLeftAvailable: c != "Name" && c != "Email",
+          //     isInsertRightAvailable: i == (content[0] as any).length - 1,
+          //     isMoveAvailable: c != "Name" && c != "Email",
+          //   },
+          // })) as any} // @sampoder lets change this to use the `shape` variable instead of content, since we'll have more control over the attributes
+        />
+      </div>
       <Debug data={{ shape }} />
     </>
   );
