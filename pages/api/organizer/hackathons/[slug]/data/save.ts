@@ -70,13 +70,7 @@ export default async function handler(
     let newAttendees: {[key: string]: string[]} = newData.content.reduce((a, v) => ({ ...a, [v[0]]: v}), {}) 
 
     currentAttendees.map(attendee => {
-      let now = newAttendees[attendee.id]
-      if(now[1] != attendee.email){
-
-      }
-      if(now[2] != attendee.email){
-        
-      }
+      
     })
 
     res.redirect(`/${slug}/dara`);
