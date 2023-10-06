@@ -138,6 +138,10 @@ function DataTable({
   );
 }
 
+function fix<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value));
+}
+
 export function NewDataTable(
   { attendees, attributes }: {
     attendees: AttendeeWithAttributes[];
@@ -157,7 +161,7 @@ export function NewDataTable(
     fromAttendee?: (attendee: Attendee) => string;
   }
 
-  const defaultShape: Column[] = [
+  const builtInAttributes: Column[] = [
     {
       type: 'text',
       name: 'Name',
@@ -167,7 +171,11 @@ export function NewDataTable(
       type: 'text',
       name: 'Email',
       fromAttendee: (attendee: Attendee) => attendee.email
-    },
+    }
+  ];
+
+  const defaultShape: Column[] = [
+    ...builtInAttributes,
     ...attributes.map((attribute: AttendeeAttribute) => ({
       type: 'text',
       name: attribute.name
@@ -195,93 +203,11 @@ export function NewDataTable(
     return contentArray;
   })];
 
-//   const defaultContent = [
-//     [
-//         "Name",
-//         "Email",
-//         "Favorite Color"
-//     ],
-//     [
-//         "Ian Madden",
-//         "ian@hackclub.com",
-//         "Pink"
-//     ],
-//     [
-//         "Sam Poder",
-//         "test@hackclub.com",
-//         null
-//     ],
-//     [
-//         "Sam Poder",
-//         "sam@hackclub.com",
-//         "Green"
-//     ],
-//     [
-//         "Sam Poder",
-//         "sampoder@hackclub.com",
-//         "Blue"
-//     ],
-//     [
-//         "Sam Poder",
-//         "poder@hackclub.com",
-//         "Purple"
-//     ],
-//     [
-//         "Sam Poder",
-//         "sam.r.poder@gmail.com",
-//         "Purple"
-//     ],
-//     [
-//         "Sam Poder",
-//         "sam.r.poder+1@gmail.com",
-//         "Purple"
-//     ],
-//     [
-//         "Sam Poder",
-//         "sampoder@berkeley.edu",
-//         "Pink"
-//     ],
-//     [
-//         "Sam Poder",
-//         "test@sampoder.com",
-//         "Red"
-//     ],
-//     [
-//         "Test",
-//         "test@test.test",
-//         "Test"
-//     ],
-//     [
-//         "Manu Gurudath ",
-//         "manusvathgurudath@gmail.com",
-//         "black"
-//     ],
-//     [
-//         "Sam Poder",
-//         "sam+1222@hackclub.com",
-//         "Green"
-//     ],
-//     [
-//         "sam",
-//         "tesss@sampoder.com",
-//         "green"
-//     ],
-//     [
-//         "Sam Poder",
-//         "tesssssssss@sampoder.com",
-//         "Green"
-//     ],
-//     [
-//         "rest in peace",
-//         "restinpeace@sampoder.com",
-//         "green"
-//     ]
-// ]
 
-  console.log('RENDER', defaultContent);
+  const lastSavedShapeRef = useRef(fix(defaultShape));
+  const latestShapeRef = useRef(fix(defaultShape));
 
-
-  const shapeRef = useRef(defaultShape);
+  const [shape, setShape] = useState(defaultShape);
 
   const [content, setContent] = useState([...defaultContent.map((s: any) => [...s])]);
   const contentRef = useRef([...defaultContent.map((s: any) => [...s])] as any);
@@ -298,10 +224,10 @@ export function NewDataTable(
         content={content as any}
         onContentUpdate={async (newContent) => {
           // return setContent(newContent as any);
-          const oldHeaders = JSON.parse(JSON.stringify(contentRef.current[0] as string[]));
+          const oldHeaders = fix(contentRef.current[0] as string[]);
           const newHeaders = newContent[0] as string[];
 
-          console.log({
+          console.log('[event] content update', {
             newHeaders,
             oldHeaders,
             defaultContent,
@@ -315,12 +241,12 @@ export function NewDataTable(
             for (let i = 0; i < newHeaders.length; i++) {
               const newHeader = newHeaders[i];
               if (!oldHeaders.includes(newHeader)) {
-                let tempShape = [...shapeRef.current];
+                let tempShape = [...latestShapeRef.current];
                 tempShape.splice(i, 0, {
                   type: 'text',
                   name: newHeader
                 })
-                shapeRef.current = tempShape;
+                latestShapeRef.current = tempShape;
                 // setShape(tempShape);
               }
             }
@@ -330,9 +256,9 @@ export function NewDataTable(
             for (let i = 0; i < oldHeaders.length; i++) {
               const oldHeader = oldHeaders[i];
               if (!newHeaders.includes(oldHeader)) {
-                let tempShape = [...shapeRef.current];
+                let tempShape = [...latestShapeRef.current];
                 delete tempShape[i];
-                shapeRef.current = tempShape;
+                latestShapeRef.current = tempShape;
                 // setShape(tempShape);
               }
             }
@@ -354,50 +280,56 @@ export function NewDataTable(
               }
             }
 
-            console.log({ differences });
-
             if(differences.length > 0){
-              console.log("we have a difference.")
+              console.log('[event] differences found', { differences });
             }
 
             if (differences.length == 1) {
               // a column was renamed
 
-              let tempShape = [...shapeRef.current];
+              let tempShape = [...latestShapeRef.current];
               tempShape[differences[0].index].name = differences[0].new;
-              shapeRef.current = tempShape;
+              latestShapeRef.current = tempShape;
 
             } else if (differences.length == 2) {
               // a column was moved
 
-              let tempShape = [...shapeRef.current];
+              let tempShape = [...latestShapeRef.current];
               let tempColumn = {...tempShape[differences[0].index]};
               tempShape[differences[0].index] == tempShape[differences[1].index];
               tempShape[differences[1].index] == tempColumn;
-              shapeRef.current = tempShape;
+              latestShapeRef.current = tempShape;
 
             } else if (differences.length > 2) {
               // some goofy shit happened that we don't understand
               
-              console.log("Good luck!");
+              console.error('Long differences length found')
             } else {
               // table body updated
               
-              console.log('Table body updated, hooray!');
+              console.log('[event] table body updated');
             }
           }
-          console.log("content changed");
+
           setContent(newContent as any);
-          console.log('fuck react :)');
-          
-          contentRef.current = JSON.parse(JSON.stringify(newContent)) as any;
-          // (window as any).stringifiedContent = JSON.stringify(newContent)
-          // setContent(newContent as any);
+
+          contentRef.current = fix(newContent) as any;
         }}
         displayAddNewColumn={false}
         onColumnsUpdate={(newColumns) => {
-          console.log("columns changed");
-          console.log(newColumns);
+          const oldShape = fix(lastSavedShapeRef.current);
+          const newShape = latestShapeRef.current;
+
+          const isNew = JSON.stringify(newShape) != JSON.stringify(oldShape);
+
+          if (!isNew) return false;
+
+
+          lastSavedShapeRef.current = fix(newShape);
+
+          setShape(newShape);
+
+          console.log("[event] columns changed", { newColumns });
         }}
         customColumnsSettings={(content[0] as any).map((c: any, i: number) => ({
           headerName: c,
@@ -431,8 +363,6 @@ export default function Hackathon({
       </>
     );
   }
-
-  console.log({ hackathon });
 
   return (
     <>
