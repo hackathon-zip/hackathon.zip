@@ -37,8 +37,7 @@ export default async function handler(
                 name: column.name,
                 type: column.type,
                 order: i,
-                hackathonId: hackathon.id,
-                
+                hackathonId: hackathon.id
             }))
             .filter((column) => column.id == "to-create")
             .map((x) => ({ ...x, id: undefined }));
@@ -54,18 +53,22 @@ export default async function handler(
                 (column) => column.id != "to-create" && column.id != "built-in"
             );
 
-        const createManyAttendeeAttributes = await prisma.$transaction(toCreateAttributes.map(x => prisma.attendeeAttribute.create({
-                data: x
-            })))
-        
-        let k: number = 0
-        
-        newData.shape.map(x => {
-            if(x.id == "to-create"){
-                x.id = createManyAttendeeAttributes[k].id
+        const createManyAttendeeAttributes = await prisma.$transaction(
+            toCreateAttributes.map((x) =>
+                prisma.attendeeAttribute.create({
+                    data: x
+                })
+            )
+        );
+
+        let k: number = 0;
+
+        newData.shape.map((x) => {
+            if (x.id == "to-create") {
+                x.id = createManyAttendeeAttributes[k].id;
             }
-            return x
-        })
+            return x;
+        });
 
         await prisma.$transaction(
             toUpdateAttributes.map((x) =>
@@ -186,7 +189,7 @@ export default async function handler(
                 })
             )
         );
-        
+
         await prisma.$transaction(
             toUpdateAttendees
                 .map((x) => {
