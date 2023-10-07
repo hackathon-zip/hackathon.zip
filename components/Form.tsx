@@ -1,5 +1,5 @@
 import { AutoComplete, Button, Input, Select, Text } from "@geist-ui/core";
-import React, { CSSProperties, useState } from "react";
+import React, { CSSProperties, ReactNode, useState } from "react";
 
 function Required() {
   return (
@@ -101,7 +101,7 @@ interface BaseFormElement {
 
 interface FormInput extends BaseFormElement {
   validate?: (value: string) => boolean;
-  description?: string;
+  description?: JSX.Element | (() => JSX.Element) | ReactNode | string;
   required?: boolean;
   name: string;
 }
@@ -347,6 +347,14 @@ export const Form = React.forwardRef(
                       {element.required && <Required />}
                     </Text>
                   )}
+
+                  {element.description && (
+                    <Text small type="secondary">
+                      {typeof element.description == "function"
+                        ? element.description()
+                        : element.description}
+                    </Text>
+                  )}
                 </Input>
               );
             } else if (formElement.type == "tuple") {
@@ -425,6 +433,7 @@ export const Form = React.forwardRef(
                     options={options}
                     crossOrigin
                     mb={1}
+                    aria-label={element.label}
                     width="100%"
                     onChange={(v) => updateValue(element.name, v)}
                     onSearch={searchHandler}

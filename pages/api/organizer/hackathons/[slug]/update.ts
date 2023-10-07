@@ -1,3 +1,7 @@
+import {
+    addDomainToVercel,
+    removeDomainFromVercelProject
+} from "@/lib/domains";
 import prisma from "@/lib/prisma";
 import { permitParams } from "@/lib/utils";
 import { getAuth } from "@clerk/nextjs/server";
@@ -68,7 +72,18 @@ export default async function handler(
             }
         });
 
-        console.log({ hackathon });
+        if (!newData.customDomain && hackathon.customDomain) {
+            await removeDomainFromVercelProject(hackathon.customDomain);
+        } else if (newData.customDomain && !hackathon.customDomain) {
+            await addDomainToVercel(newData.customDomain);
+        } else if (
+            newData.customDomain &&
+            hackathon.customDomain &&
+            newData.customDomain !== hackathon.customDomain
+        ) {
+            await removeDomainFromVercelProject(hackathon.customDomain);
+            await addDomainToVercel(newData.customDomain);
+        }
 
         res.redirect(`/${hackathon.slug}`);
     } catch (error) {
