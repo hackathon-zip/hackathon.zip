@@ -1,4 +1,4 @@
-import { Button, Input, Select, Text } from "@geist-ui/core";
+import { AutoComplete, Button, Input, Select, Text } from "@geist-ui/core";
 import React, { CSSProperties, useState } from "react";
 
 function Required() {
@@ -135,12 +135,23 @@ interface FormSelect extends FormInput {
   options: string[];
 }
 
+interface FormAutocomplete extends FormInput {
+  type: "autocomplete";
+  placeholder?: string;
+  options: {
+    label: string;
+    value: string;
+  }[];
+  defaultValue?: string;
+}
+
 export type FormElement =
   | FormTextInput
   | FormRadio
   | FormCheckbox
   | FormSelect
-  | FormTextInputTuple;
+  | FormTextInputTuple
+  | FormAutocomplete;
 
 export interface FormSchema {
   elements: Array<FormElement>;
@@ -203,7 +214,10 @@ export const Form = React.forwardRef(
             name,
             {
               value: input.defaultValue ?? "",
-              isValid: false,
+              isValid:
+                input.validate && input.defaultValue
+                  ? input.validate(input.defaultValue)
+                  : true,
               showWarning: false
             }
           ]
@@ -384,6 +398,38 @@ export const Form = React.forwardRef(
                       </Select.Option>
                     ))}
                   </Select>
+                </>
+              );
+            } else if (formElement.type == "autocomplete") {
+              const element = formElement as FormAutocomplete;
+
+              const [options, setOptions] = React.useState(element.options);
+              const searchHandler = (currentValue: string) => {
+                if (!currentValue) return setOptions([]);
+                const relatedOptions = element.options.filter((item) =>
+                  item.value.toLowerCase().includes(currentValue.toLowerCase())
+                );
+                setOptions(relatedOptions);
+              };
+
+              return (
+                <>
+                  {element.label && (
+                    <Text h5>
+                      {element.label}
+                      {element.required && <Required />}
+                    </Text>
+                  )}
+                  <AutoComplete
+                    placeholder={element.placeholder}
+                    options={options}
+                    crossOrigin
+                    mb={1}
+                    width="100%"
+                    onChange={(v) => updateValue(element.name, v)}
+                    onSearch={searchHandler}
+                    initialValue={element.defaultValue}
+                  />
                 </>
               );
             }

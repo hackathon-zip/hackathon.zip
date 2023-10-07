@@ -16,6 +16,25 @@ export default async function handler(
         const newData = req.body;
         const { slug } = req.query;
 
+        if (newData.startDate || newData.endDate) {
+            if (newData.timezone) {
+                // times are submitted in the hackathon's timezone
+                const tz = newData.timezone;
+                const startDate = new Date(newData.startDate);
+                const endDate = new Date(newData.endDate);
+                // convert to UTC
+                newData.startDate = startDate.toLocaleString("en-US", {
+                    timeZone: tz
+                });
+                newData.endDate = endDate.toLocaleString("en-US", {
+                    timeZone: tz
+                });
+            }
+            // convert to ISO-8601 format
+            newData.startDate = new Date(newData.startDate).toISOString();
+            newData.endDate = new Date(newData.endDate).toISOString();
+        }
+
         const hackathon = await prisma.hackathon.update({
             data: {
                 ...permitParams<Hackathon>(
@@ -38,7 +57,8 @@ export default async function handler(
                         "website",
                         "leadsEnabled",
                         "sponsorsEnabled",
-                        "customDomain"
+                        "customDomain",
+                        "timezone"
                     ],
                     newData
                 )
@@ -49,7 +69,6 @@ export default async function handler(
         });
 
         console.log({ hackathon });
-
         res.redirect(`/${hackathon.slug}`);
     } catch (error) {
         console.error(error);

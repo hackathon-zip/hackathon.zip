@@ -1,29 +1,11 @@
-import {
-  Button,
-  Card,
-  Drawer,
-  Fieldset,
-  Grid,
-  Input,
-  Page,
-  Text
-} from "@geist-ui/core";
-import { getAuth } from "@clerk/nextjs/server";
-import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import prisma from "@/lib/prisma";
-import { NextApiRequest } from "next";
-import { NextServerOptions } from "next/dist/server/next";
+import { getAuth } from "@clerk/nextjs/server";
+import { Page } from "@geist-ui/core";
+import type { GetServerSideProps } from "next";
 
-import type { Hackathon } from "@prisma/client";
-import { PlusCircle } from "@geist-ui/react-icons";
-import React, { useState } from "react";
-import type { ReactElement } from "react";
-import { Form } from "@/components/Form";
-import { delay } from "@/lib/utils";
-import Debug from "@/components/Debug";
-import Link from "next/link";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
+import type { Hackathon } from "@prisma/client";
+import type { ReactElement } from "react";
 
 export default function Hackathon({
   hackathon
@@ -44,11 +26,15 @@ export default function Hackathon({
         <h1>{hackathon?.name}</h1>
         <h3>
           {hackathon.startDate &&
-            new Date(hackathon.startDate).toLocaleString()}
+            new Date(hackathon.startDate).toLocaleString("en-US", {
+              timeZone: hackathon.timezone ?? undefined
+            })}
           {" to "}
           {hackathon.endDate &&
-            new Date(hackathon.endDate).toLocaleString()} at{" "}
-          {hackathon?.location}
+            new Date(hackathon.endDate).toLocaleString("en-US", {
+              timeZone: hackathon.timezone ?? undefined
+            })}{" "}
+          at {hackathon?.location}
         </h3>
         <code>/{hackathon?.slug}</code>
       </Page>

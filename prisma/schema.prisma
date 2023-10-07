@@ -22,6 +22,7 @@ model Hackathon {
   location  String
   startDate DateTime?
   endDate   DateTime?
+  timezone String?
   schedule  Schedule?
   signupForm  SignupForm?
   dashboard AttendeeDashboard?
