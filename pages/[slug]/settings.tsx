@@ -99,6 +99,12 @@ export default function Hackathon({
                   })),
                   placeholder: "America/Los_Angeles",
                   defaultValue: hackathon.timezone ?? undefined
+                },
+                {
+                  type: "text",
+                  label: "Venue & Location",
+                  name: "location",
+                  defaultValue: hackathon.location
                 }
               ],
               submitText: "Save"
