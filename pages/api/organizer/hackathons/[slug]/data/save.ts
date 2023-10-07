@@ -211,7 +211,7 @@ export default async function handler(
                 .flat()
         );
 
-        res.redirect(`/${slug}/dara`);
+        res.redirect(`/${slug}/data`);
     } catch (error) {
         console.error(error);
         return res.status(400).json({ error });
