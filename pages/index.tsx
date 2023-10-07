@@ -1,10 +1,7 @@
 import prisma from "@/lib/prisma";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { getAuth } from "@clerk/nextjs/server";
-import {
-    Button,
-    Page
-} from "@geist-ui/core";
+import { Button, Page } from "@geist-ui/core";
 import type { GetServerSideProps } from "next";
 
 import type { Hackathon } from "@prisma/client";

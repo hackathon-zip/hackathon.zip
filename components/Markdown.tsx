@@ -32,5 +32,5 @@ export default function Markdown({ code }: { code: string }) {
         __html: MarkdownIt().render(code)
       }}
     />
-  )
+  );
 }

@@ -10,7 +10,7 @@ import type {
   Attendee,
   AttendeeAttribute,
   AttendeeAttributeValue,
-  Hackathon,
+  Hackathon
 } from "@prisma/client";
 import { DEFAULT_COLUMN_TYPES } from "active-table/dist/enums/defaultColumnTypes";
 import dynamic from "next/dynamic";
@@ -28,7 +28,7 @@ type HackathonWithAttendees = Hackathon & {
 
 function DataTable({
   attendees,
-  attributes,
+  attributes
 }: {
   attendees: AttendeeWithAttributes[];
   attributes: AttendeeAttribute[];
@@ -40,10 +40,10 @@ function DataTable({
     };
   } = {
     name: {
-      label: "Name",
+      label: "Name"
     },
     email: {
-      label: "Email",
+      label: "Email"
     },
     checkedIn: {
       label: (
@@ -53,13 +53,13 @@ function DataTable({
             text="This column cannot be modified. To check in an attendee, use the Check-In system."
             style={{
               scale: "0.8",
-              marginLeft: "4px",
+              marginLeft: "4px"
             }}
             scale={2 / 3}
           >
             <HelpCircle
               style={{
-                scale: "0.2",
+                scale: "0.2"
               }}
             />
           </Tooltip>
@@ -69,37 +69,37 @@ function DataTable({
         return (
           <span
             style={{
-              pointerEvents: "none",
+              pointerEvents: "none"
             }}
           >
             <Checkbox checked={value} scale={3 / 2} style={{}} />
           </span>
         );
-      },
-    },
+      }
+    }
   };
   const columns = [
     ...Object.entries(builtinColumns).map(([prop, { label, render }]) => ({
       label,
       prop,
-      render,
+      render
     })),
     ...attributes.map((attribute) => ({
       label: attribute.name,
       prop: attribute.id,
       render: (value: any, rowData: any) => {
         return value;
-      },
-    })),
+      }
+    }))
   ];
   const dataSource = attendees.map((attendee) => {
     const row: any = {
-      key: attendee.id,
+      key: attendee.id
     };
     attendee.attributeValues.forEach(
       (attributeValue: AttendeeAttributeValue) => {
         row[attributeValue.formFieldId] = attributeValue.value;
-      },
+      }
     );
     for (const prop in builtinColumns) {
       row[prop] = attendee[prop as keyof Attendee];
@@ -114,7 +114,7 @@ function DataTable({
           if (dataIndex !== rowIndex) return item;
           return {
             ...item,
-            property: Math.random().toString(16).slice(-5),
+            property: Math.random().toString(16).slice(-5)
           };
         });
       });
@@ -144,57 +144,56 @@ function fix<T>(value: T): T {
   return JSON.parse(JSON.stringify(value));
 }
 
-
 export type Column = {
   type: string;
   name: string;
   id: string;
   fromAttendee?: (attendee: Attendee) => string;
   readOnly?: boolean;
-}
+};
 
-export function NewDataTable(
-  { attendees, attributes }: {
-    attendees: AttendeeWithAttributes[];
-    attributes: AttendeeAttribute[];
-  },
-) {
+export function NewDataTable({
+  attendees,
+  attributes
+}: {
+  attendees: AttendeeWithAttributes[];
+  attributes: AttendeeAttribute[];
+}) {
   const ActiveTable = dynamic(
     () => import("active-table-react").then((mod) => mod.ActiveTable),
     {
-      ssr: false,
-    },
+      ssr: false
+    }
   );
-
-  
 
   const builtInAttributes: Column[] = [
     {
-      type: 'text',
-      name: 'ID',
-      id: 'built-in',
+      type: "text",
+      name: "ID",
+      id: "built-in",
       fromAttendee: (attendee: Attendee) => attendee.id,
       readOnly: true
     },
     {
-      type: 'text',
-      name: 'Name',
-      id: 'built-in',
+      type: "text",
+      name: "Name",
+      id: "built-in",
       fromAttendee: (attendee: Attendee) => attendee.name,
       readOnly: false
     },
     {
-      type: 'text',
-      name: 'Email',
-      id: 'built-in',
+      type: "text",
+      name: "Email",
+      id: "built-in",
       fromAttendee: (attendee: Attendee) => attendee.email,
       readOnly: false
     },
     {
-      type: 'checkbox',
-      name: 'Checked In',
-      id: 'built-in',
-      fromAttendee: (attendee: Attendee) => attendee.checkedIn ? 'true' : 'false',
+      type: "checkbox",
+      name: "Checked In",
+      id: "built-in",
+      fromAttendee: (attendee: Attendee) =>
+        attendee.checkedIn ? "true" : "false",
       readOnly: true
     }
   ]; // these are separated that way we can use them when setting column settings
@@ -202,62 +201,76 @@ export function NewDataTable(
   const defaultShape: Column[] = [
     ...builtInAttributes,
     ...attributes.map((attribute: AttendeeAttribute) => ({
-      type: 'text',
+      type: "text",
       name: attribute.name,
       id: attribute.id
     }))
   ];
 
-  function getAttributeValue ({ attributeValues }: AttendeeWithAttributes, value: string) {
-    const attributeId = attributes.find((attribute: AttendeeAttribute) => attribute.name == value)?.id;
+  function getAttributeValue(
+    { attributeValues }: AttendeeWithAttributes,
+    value: string
+  ) {
+    const attributeId = attributes.find(
+      (attribute: AttendeeAttribute) => attribute.name == value
+    )?.id;
 
-    const attendeeAttribute = attributeValues.find((attributeValue: AttendeeAttributeValue) => attributeValue.formFieldId == attributeId);
+    const attendeeAttribute = attributeValues.find(
+      (attributeValue: AttendeeAttributeValue) =>
+        attributeValue.formFieldId == attributeId
+    );
 
     return attendeeAttribute?.value;
   }
-  
-  const defaultContent = [defaultShape.map((s: Column) => s.name), ...attendees.map((attendee: AttendeeWithAttributes) => {
-    const contentArray = [];
 
-    for (const column of defaultShape) {
-      if (column.fromAttendee)
-        contentArray.push(column.fromAttendee(attendee));
-      else
-        contentArray.push(getAttributeValue(attendee, column.name));
-    }
+  const defaultContent = [
+    defaultShape.map((s: Column) => s.name),
+    ...attendees.map((attendee: AttendeeWithAttributes) => {
+      const contentArray = [];
 
-    return contentArray;
-  })];
+      for (const column of defaultShape) {
+        if (column.fromAttendee)
+          contentArray.push(column.fromAttendee(attendee));
+        else contentArray.push(getAttributeValue(attendee, column.name));
+      }
 
+      return contentArray;
+    })
+  ];
 
   const lastSavedShapeRef = useRef(fix(defaultShape));
   const latestShapeRef = useRef(fix(defaultShape));
 
   const [shape, setShape] = useState(defaultShape);
 
-  console.log("INITIAL SHAPE", shape)
+  console.log("INITIAL SHAPE", shape);
 
-  const [content, setContent] = useState([...defaultContent.map((s: any) => [...s])]);
+  const [content, setContent] = useState([
+    ...defaultContent.map((s: any) => [...s])
+  ]);
   const contentRef = useRef([...defaultContent.map((s: any) => [...s])] as any);
   // (window as any).stringifiedContent = JSON.stringify(defaultContent)
-
 
   // useEffect(() => {
   //   contentRef.current = content;
   // }, [content]);
-    
+
   return (
     <>
       <div className="activetable__wrapper">
-        <style dangerouslySetInnerHTML={{ __html: `
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
           .activetable__wrapper > * > table {
             width: 100vw;
             margin: -10px
           }
-        ` }}></style>
+        `
+          }}
+        ></style>
         <ActiveTable
           tableStyle={{
-            width: '100%'
+            width: "100%"
           }}
           content={content as any}
           onContentUpdate={async (newContent) => {
@@ -265,13 +278,13 @@ export function NewDataTable(
             const oldHeaders = fix(contentRef.current[0] as string[]);
             const newHeaders = newContent[0] as string[];
 
-            console.log('[event] content update', {
+            console.log("[event] content update", {
               newHeaders,
               oldHeaders,
               defaultContent,
               defaultShape,
               attributes
-            })
+            });
 
             if (oldHeaders.length < newHeaders.length) {
               // a column was added
@@ -281,10 +294,10 @@ export function NewDataTable(
                 if (!oldHeaders.includes(newHeader)) {
                   let tempShape = [...latestShapeRef.current];
                   tempShape.splice(i, 0, {
-                    type: 'text',
+                    type: "text",
                     name: newHeader,
-                    id: 'to-create'
-                  })
+                    id: "to-create"
+                  });
                   latestShapeRef.current = tempShape;
                   // setShape(tempShape);
                 }
@@ -301,7 +314,6 @@ export function NewDataTable(
                   // setShape(tempShape);
                 }
               }
-
             } else if (oldHeaders.length == newHeaders.length) {
               let differences: {
                 old: string;
@@ -319,8 +331,8 @@ export function NewDataTable(
                 }
               }
 
-              if(differences.length > 0){
-                console.log('[event] differences found', { differences });
+              if (differences.length > 0) {
+                console.log("[event] differences found", { differences });
               }
 
               if (differences.length == 1) {
@@ -329,24 +341,23 @@ export function NewDataTable(
                 let tempShape = [...latestShapeRef.current];
                 tempShape[differences[0].index].name = differences[0].new;
                 latestShapeRef.current = tempShape;
-
               } else if (differences.length == 2) {
                 // a column was moved
 
                 let tempShape = [...latestShapeRef.current];
-                let tempColumn = {...tempShape[differences[0].index]};
-                tempShape[differences[0].index] == tempShape[differences[1].index];
+                let tempColumn = { ...tempShape[differences[0].index] };
+                tempShape[differences[0].index] ==
+                  tempShape[differences[1].index];
                 tempShape[differences[1].index] == tempColumn;
                 latestShapeRef.current = tempShape;
-
               } else if (differences.length > 2) {
                 // some goofy shit happened that we don't understand
-                
-                console.error('Long differences length found')
+
+                console.error("Long differences length found");
               } else {
                 // table body updated
-                
-                console.log('[event] table body updated');
+
+                console.log("[event] table body updated");
               }
             }
 
@@ -362,7 +373,6 @@ export function NewDataTable(
             const isNew = JSON.stringify(newShape) != JSON.stringify(oldShape);
 
             if (!isNew) return false;
-
 
             lastSavedShapeRef.current = fix(newShape);
 
@@ -382,8 +392,10 @@ export function NewDataTable(
                 isInsertRightAvailable: i >= builtInAttributes.length - 1,
                 isMoveAvailable: i >= builtInAttributes.length + 1
               },
-              availableDefaultColumnTypes: (i < builtInAttributes.length ? [column.type || 'text'] : undefined) as DEFAULT_COLUMN_TYPES[],
-              defaultColumnTypeName: column.type || 'text',
+              availableDefaultColumnTypes: (i < builtInAttributes.length
+                ? [column.type || "text"]
+                : undefined) as DEFAULT_COLUMN_TYPES[],
+              defaultColumnTypeName: column.type || "text",
               isCellTextEditable: !column.readOnly
             };
           })}
@@ -405,11 +417,10 @@ export function NewDataTable(
   );
 }
 
-export function DataTableTwo({}) {
-}
+export function DataTableTwo({}) {}
 
 export default function Hackathon({
-  hackathon,
+  hackathon
 }: {
   hackathon: null | HackathonWithAttendees;
 }): any {
@@ -450,34 +461,34 @@ export const getServerSideProps = (async (context) => {
         slug: context.params?.slug.toString(),
         OR: [
           {
-            ownerId: userId ?? undefined,
+            ownerId: userId ?? undefined
           },
           {
             collaboratorIds: {
-              has: userId,
-            },
-          },
-        ],
+              has: userId
+            }
+          }
+        ]
       },
       include: {
         attendeeAttributes: true,
         attendees: {
           include: {
-            attributeValues: true,
-          },
-        },
-      },
+            attributeValues: true
+          }
+        }
+      }
     });
     return {
       props: {
-        hackathon,
-      },
+        hackathon
+      }
     };
   } else {
     return {
       props: {
-        hackathon: null,
-      },
+        hackathon: null
+      }
     };
   }
 }) satisfies GetServerSideProps<{

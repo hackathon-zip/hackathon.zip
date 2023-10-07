@@ -20,7 +20,13 @@ import { NextApiRequest } from "next";
 import { NextServerOptions } from "next/dist/server/next";
 
 import { useRouter } from "next/router";
-import type { Hackathon, Attendee, SignupForm, SignupFormField, AttendeeAttribute } from "@prisma/client";
+import type {
+  Hackathon,
+  Attendee,
+  SignupForm,
+  SignupFormField,
+  AttendeeAttribute
+} from "@prisma/client";
 import { Form } from "@/components/Form";
 import type { FormElement } from "@/components/Form";
 import React, { useState } from "react";
@@ -31,7 +37,13 @@ import AttendeeLayout from "@/components/layouts/attendee/AttendeeLayout";
 export default function Attendee({
   hackathon
 }: {
-  hackathon: (Hackathon & { signupForm: SignupForm & { fields: (SignupFormField & { attribute: AttendeeAttribute })[] }  }) | null;
+  hackathon:
+    | (Hackathon & {
+        signupForm: SignupForm & {
+          fields: (SignupFormField & { attribute: AttendeeAttribute })[];
+        };
+      })
+    | null;
 }): any {
   if (!hackathon) {
     return (

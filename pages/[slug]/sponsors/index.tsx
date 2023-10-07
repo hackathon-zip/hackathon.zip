@@ -6,7 +6,7 @@ import {
   Page,
   Table,
   useModal,
-  useToasts,
+  useToasts
 } from "@geist-ui/core";
 import type { GetServerSideProps } from "next";
 
@@ -23,7 +23,7 @@ type HackathonWithSponsors = Hackathon & {
 };
 
 export default function Hackathon({
-  hackathon,
+  hackathon
 }: {
   hackathon: HackathonWithSponsors | null;
 }): any {
@@ -75,12 +75,12 @@ export default function Hackathon({
         ),
         amount: s.amountCash
           ? new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD",
-          }).format(s.amountCash)
-          : s.amountOther,
+              style: "currency",
+              currency: "USD"
+            }).format(s.amountCash)
+          : s.amountOther
       };
-    }),
+    })
   );
 
   return (
@@ -90,7 +90,7 @@ export default function Hackathon({
           style={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: "center"
           }}
         >
           <h1>Sponsors</h1>
@@ -115,7 +115,7 @@ export default function Hackathon({
                       label: "Name of sponsor",
                       name: "name",
                       placeholder: "Pied Piper",
-                      required: true,
+                      required: true
                     },
                     {
                       type: "text",
@@ -127,26 +127,26 @@ export default function Hackathon({
                         const regex =
                           /^((https?|ftp|smtp):\/\/)?(www.)?[a-z0-9]+\.[a-z]+(\/[a-zA-Z0-9#]+\/?)*$/;
                         return regex.test(value);
-                      },
+                      }
                     },
                     {
                       type: "text",
                       label: "Contact name",
                       name: "contactName",
                       placeholder: "Richard Hendricks",
-                      required: true,
+                      required: true
                     },
                     {
                       type: "email",
                       label: "Contact email",
                       name: "contactEmail",
-                      placeholder: "richard@piedpiper.com",
+                      placeholder: "richard@piedpiper.com"
                     },
                     {
                       type: "text",
                       label: "Contact phone number",
                       name: "contactPhone",
-                      placeholder: "800-867-5309",
+                      placeholder: "800-867-5309"
                     },
                     {
                       type: "number",
@@ -154,9 +154,9 @@ export default function Hackathon({
                       name: "amountCash",
                       placeholder: "10000",
                       required: true,
-                      inlineLabel: "$",
-                    },
-                  ],
+                      inlineLabel: "$"
+                    }
+                  ]
                 }}
                 submission={{
                   type: "controlled",
@@ -166,19 +166,19 @@ export default function Hackathon({
                       {
                         method: "POST",
                         headers: {
-                          "Content-Type": "application/json",
+                          "Content-Type": "application/json"
                         },
                         body: JSON.stringify({
-                          ...data,
-                        }),
-                      },
+                          ...data
+                        })
+                      }
                     ).then((r) => r.json());
 
                     if (res.error) {
                       setToast({
                         text: `Error: ${res.error.name}`,
                         delay: 2000,
-                        type: "error",
+                        type: "error"
                       });
                     } else {
                       setSponsors((s) => [
@@ -205,22 +205,22 @@ export default function Hackathon({
                           ),
                           amount: res.amountCash
                             ? new Intl.NumberFormat("en-US", {
-                              style: "currency",
-                              currency: "USD",
-                            }).format(res.amountCash)
-                            : res.amountOther,
-                        },
+                                style: "currency",
+                                currency: "USD"
+                              }).format(res.amountCash)
+                            : res.amountOther
+                        }
                       ]);
 
                       setToast({
                         text: "Sponsor added!",
                         delay: 2000,
-                        type: "success",
+                        type: "success"
                       });
                     }
 
                     setVisible(false);
-                  },
+                  }
                 }}
                 hideSubmit={true}
                 ref={formRef}
@@ -233,7 +233,7 @@ export default function Hackathon({
               onClick={() => {
                 formRef.current &&
                   formRef.current.dispatchEvent(
-                    new Event("submit", { cancelable: true, bubbles: true }),
+                    new Event("submit", { cancelable: true, bubbles: true })
                   );
               }}
             >
@@ -268,26 +268,26 @@ export const getServerSideProps = (async (context) => {
         slug: context.params?.slug.toString(),
         OR: [
           {
-            ownerId: userId ?? undefined,
+            ownerId: userId ?? undefined
           },
           {
             collaboratorIds: {
-              has: userId,
-            },
-          },
-        ],
-      },
+              has: userId
+            }
+          }
+        ]
+      }
     });
     return {
       props: {
-        hackathon,
-      },
+        hackathon
+      }
     };
   } else {
     return {
       props: {
-        hackathon: null,
-      },
+        hackathon: null
+      }
     };
   }
 }) satisfies GetServerSideProps<{
