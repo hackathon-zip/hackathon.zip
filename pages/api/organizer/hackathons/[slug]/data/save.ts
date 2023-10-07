@@ -186,6 +186,30 @@ export default async function handler(
                 })
             )
         );
+        
+        await prisma.$transaction(
+            toUpdateAttendees
+                .map((x) => {
+                    return x.attributes.map((y) => {
+                        return prisma.attendeeAttributeValue.create({
+                            data: {
+                                formField: {
+                                    connect: {
+                                        id: y.id
+                                    }
+                                },
+                                value: y.value,
+                                attendee: {
+                                    connect: {
+                                        email: x.email
+                                    }
+                                }
+                            }
+                        });
+                    });
+                })
+                .flat()
+        );
 
         res.redirect(`/${slug}/dara`);
     } catch (error) {
