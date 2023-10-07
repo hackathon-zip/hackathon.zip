@@ -1,19 +1,33 @@
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
-import { Card, Page, Text } from "@geist-ui/core";
+import {
+  Card,
+  Code,
+  Dot,
+  Modal,
+  Page,
+  Tag,
+  Text,
+  useModal
+} from "@geist-ui/core";
 import type { GetServerSideProps } from "next";
 
 import { Form } from "@/components/Form";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
+import { DomainResponse, getDomainResponse } from "@/lib/domains";
 import { delay } from "@/lib/utils";
 import type { Hackathon } from "@prisma/client";
 import { useRouter } from "next/router";
 import type { ReactElement } from "react";
 
+type HackathonWithDomainResponse = Hackathon & {
+  domainResponse?: DomainResponse;
+};
+
 export default function Hackathon({
   hackathon
 }: {
-  hackathon: Hackathon | null;
+  hackathon: HackathonWithDomainResponse | null;
 }): any {
   const router = useRouter();
 
@@ -105,6 +119,55 @@ export default function Hackathon({
                   label: "Venue & Location",
                   name: "location",
                   defaultValue: hackathon.location
+                },
+                {
+                  type: "text",
+                  label: "Custom Domain",
+                  name: "customDomain",
+                  defaultValue:
+                    hackathon.customDomain ?? `${hackathon.slug}.hackathon.zip`,
+                  inlineLabel: "https://",
+                  validate(value) {
+                    // allow only apex domains or subdomains, no paths or protocols
+                    const regex =
+                      /^((?!-)[A-Za-z0-9-]{1,63}(?<!-)\.)+[A-Za-z]{2,6}$/;
+                    return value == "" || regex.test(value);
+                  },
+                  description: () => {
+                    const { visible, setVisible, bindings } = useModal();
+                    return (
+                      <>
+                        {hackathon.domainResponse?.verified ? (
+                          <Tag type="success">
+                            <Dot type="success">Verified</Dot>
+                          </Tag>
+                        ) : (
+                          <>
+                            <Tag
+                              type="warning"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => setVisible(true)}
+                            >
+                              <Dot type="warning">Unverified</Dot>
+                            </Tag>
+                            <Modal {...bindings}>
+                              <Modal.Title>Verify Domain</Modal.Title>
+                              <Modal.Content>
+                                <Code block>{hackathon.domainResponse}</Code>
+                              </Modal.Content>
+                              <Modal.Action
+                                passive
+                                onClick={() => setVisible(false)}
+                              >
+                                Cancel
+                              </Modal.Action>
+                              <Modal.Action>Check</Modal.Action>
+                            </Modal>
+                          </>
+                        )}
+                      </>
+                    );
+                  }
                 }
               ],
               submitText: "Save"
@@ -148,7 +211,7 @@ export const getServerSideProps = (async (context) => {
   console.log({ userId });
 
   if (context.params?.slug) {
-    const hackathon = await prisma.hackathon.findUnique({
+    const h = await prisma.hackathon.findUnique({
       where: {
         slug: context.params?.slug.toString(),
         OR: [
@@ -163,9 +226,21 @@ export const getServerSideProps = (async (context) => {
         ]
       }
     });
+
+    if (!h) return { props: { hackathon: null } };
+
+    if (h.customDomain) {
+      const domainResponse = await getDomainResponse(h.customDomain);
+
+      const hackathon: HackathonWithDomainResponse = {
+        ...h,
+        domainResponse
+      };
+    }
+
     return {
       props: {
-        hackathon
+        hackathon: h
       }
     };
   } else {
@@ -176,5 +251,5 @@ export const getServerSideProps = (async (context) => {
     };
   }
 }) satisfies GetServerSideProps<{
-  hackathon: Hackathon | null;
+  hackathon: HackathonWithDomainResponse | null;
 }>;
