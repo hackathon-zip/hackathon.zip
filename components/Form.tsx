@@ -1,4 +1,5 @@
 import { AutoComplete, Button, Input, Select, Text } from "@geist-ui/core";
+import { ButtonTypes } from "@geist-ui/core/esm/button";
 import React, { CSSProperties, useState } from "react";
 
 function Required() {
@@ -182,7 +183,9 @@ export const Form = React.forwardRef(
       hideSubmit = false,
       style,
       additionalButtons,
-      clearValuesOnSuccesfulSubmit = false
+      clearValuesOnSuccesfulSubmit = false,
+      submitDisabledUntilValid = false,
+      submitButtonType = "success"
     }: {
       schema: FormSchema;
       submission: FormSubmission<any>;
@@ -190,6 +193,8 @@ export const Form = React.forwardRef(
       style?: CSSProperties | undefined;
       additionalButtons?: React.ReactNode;
       clearValuesOnSuccesfulSubmit?: boolean;
+      submitDisabledUntilValid?: boolean;
+      submitButtonType?: ButtonTypes;
     },
     ref
   ) => {
@@ -444,8 +449,9 @@ export const Form = React.forwardRef(
           >
             <Button
               loading={loading}
-              type={invalidFields.length ? "default" : "success"}
+              type={submitButtonType}
               htmlType="submit"
+              disabled={submitDisabledUntilValid && invalidFields.length > 0}
               onClick={(e) => {
                 if (invalidFields.length) {
                   for (const invalidField of invalidFields) {

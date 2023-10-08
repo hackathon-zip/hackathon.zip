@@ -99,7 +99,7 @@ export default function HackathonLayout({
         style={{
           background: theme === "light" ? "#fafafa" : "#101010",
           width: "calc(100vw - (100vw - 100%))",
-          height: "100%"
+          height: "auto"
         }}
       >
         {children}

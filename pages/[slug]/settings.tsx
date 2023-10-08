@@ -1,6 +1,16 @@
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
-import { Card, Page, Text } from "@geist-ui/core";
+import {
+  Button,
+  Fieldset,
+  Grid,
+  Modal,
+  Page,
+  Spacer,
+  Text,
+  useModal,
+  useTheme
+} from "@geist-ui/core";
 import type { GetServerSideProps } from "next";
 
 import { Form } from "@/components/Form";
@@ -17,6 +27,8 @@ export default function Hackathon({
 }): any {
   const router = useRouter();
 
+  const colorTheme = useTheme();
+
   if (!hackathon) {
     return (
       <>
@@ -29,8 +41,9 @@ export default function Hackathon({
     <>
       <Page>
         <Text h1>Settings</Text>
-        <Text h3>General</Text>
-        <Card>
+        <Fieldset>
+          <Fieldset.Title>General</Fieldset.Title>
+
           <Form
             schema={{
               elements: [
@@ -131,9 +144,123 @@ export default function Hackathon({
               maxWidth: "400px"
             }}
           />
-        </Card>
-        <code>/{hackathon?.slug}</code>
+        </Fieldset>
+
+        <Spacer />
+
+        <Fieldset
+          style={{
+            border: "1px solid " + colorTheme.palette.error
+          }}
+        >
+          <Fieldset.Title>Danger Zone</Fieldset.Title>
+          <Fieldset.Subtitle>
+            Don't be like Kenny Loggins. These actions are irreversible.
+          </Fieldset.Subtitle>
+
+          <Grid.Container gap={2} justify="center">
+            <Grid
+              xs={24}
+              md={12}
+              style={{
+                display: "flex",
+                flexWrap: "wrap"
+              }}
+            >
+              <Text h5 w="100%" my={0}>
+                Delete Hackathon
+              </Text>
+              <Text font="14px" w="100%" my={0}>
+                This will delete your hackathon and all associated data. This
+                action is irreversible.
+              </Text>
+            </Grid>
+
+            <Grid
+              xs={24}
+              md={12}
+              style={{
+                display: "flex",
+                justifyContent: "end"
+              }}
+            >
+              <DeleteHackathon hackathon={hackathon} />
+            </Grid>
+          </Grid.Container>
+        </Fieldset>
       </Page>
+    </>
+  );
+}
+
+function DeleteHackathon({ hackathon }: { hackathon: Hackathon }) {
+  const { visible, setVisible, bindings } = useModal();
+  const router = useRouter();
+
+  return (
+    <>
+      <Button type="error" ghost onClick={() => setVisible(true)}>
+        Delete Hackathon
+      </Button>
+      <Modal {...bindings}>
+        <Modal.Title>Confirm</Modal.Title>
+        <Modal.Subtitle>
+          Are you sure you want to delete this hackathon?
+        </Modal.Subtitle>
+        <Modal.Content>
+          <Text h5>Delete Hackathon</Text>
+          <Text font="14px">
+            This will delete your hackathon and all associated data. This action
+            is irreversible.
+          </Text>
+          <Form
+            submitDisabledUntilValid
+            submitButtonType="error"
+            schema={{
+              elements: [
+                {
+                  type: "text",
+                  name: "confirm",
+                  label: "Type the name of your hackathon to confirm",
+                  validate: (value) => value === hackathon.name
+                }
+              ],
+              submitText: "Delete Hackathon"
+            }}
+            submission={{
+              type: "controlled",
+              onSubmit: async (data) => {
+                if (data.confirm === hackathon.name) {
+                  await fetch(`/api/hackathons/${hackathon.slug}`, {
+                    method: "DELETE",
+                    headers: {
+                      "Content-Type": "application/json"
+                    }
+                  });
+                  setVisible(false);
+                  router.push("/dashboard");
+                }
+              }
+            }}
+            style={{
+              maxWidth: "400px"
+            }}
+            additionalButtons={
+              <>
+                <Button
+                  auto
+                  type="abort"
+                  onClick={() => {
+                    setVisible(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+              </>
+            }
+          />
+        </Modal.Content>
+      </Modal>
     </>
   );
 }

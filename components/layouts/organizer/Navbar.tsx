@@ -171,25 +171,27 @@ export default function Navbar({
             );
           }}
           style={{
-            background: theme === "dark" ? "#131313" : "#ffffff",
-            marginBottom: "-10px"
+            background: theme === "dark" ? "#131313" : "#ffffff"
           }}
           value={feature ?? "dashboard"}
         >
           {NavbarTabs.map((tab) => (
             <Tabs.Item label={tab.label} value={tab.value} />
           ))}
-
-          <span className="tab-styles-locator" />
-          <style
-            dangerouslySetInnerHTML={{
-              __html: `
+        </Tabs>
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
               .tab-styles-locator {
                 display: none;
               }
   
               :has(> .tab-styles-locator) {
                 display: none;
+              }
+
+              .tabs > .content {
+                padding-top: 0px !important;
               }
   
               .select-content {
@@ -201,9 +203,8 @@ export default function Navbar({
                 gap: 4px;
               }
             `
-            }}
-          />
-        </Tabs>
+          }}
+        />
       </div>
     </div>
   );
