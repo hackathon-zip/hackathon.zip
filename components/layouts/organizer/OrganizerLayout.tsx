@@ -1,4 +1,5 @@
 import { useMyHackathons } from "@/hooks/data/hackathons";
+import { useTheme } from "@/hooks/useTheme";
 import useUrlState from "@/hooks/useUrlState";
 import { Button, Popover, Spinner } from "@geist-ui/core";
 import { ChevronUpDown } from "@geist-ui/react-icons";
@@ -30,6 +31,8 @@ export default function HackathonLayout({
   const [breadcrumbs, setBreadcrumbs] = useState<
     { value: React.ReactNode; href?: string }[]
   >([]);
+
+  const { theme } = useTheme();
 
   useEffect(() => {
     setFeature(f);
@@ -94,7 +97,7 @@ export default function HackathonLayout({
 
       <div
         style={{
-          background: "#fafafa",
+          background: theme === "light" ? "#fafafa" : "#101010",
           width: "calc(100vw - (100vw - 100%))",
           height: "100%"
         }}

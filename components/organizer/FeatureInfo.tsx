@@ -1,3 +1,4 @@
+import { useTheme } from "@/hooks/useTheme";
 import { Button, Card, Display, Text } from "@geist-ui/core";
 import { Icon } from "@geist-ui/react-icons";
 import { Hackathon } from "@prisma/client";
@@ -33,7 +34,7 @@ export default function FeatureInfo({
   hackathonSlug: string;
 }) {
   const [loading, setLoading] = useState(false);
-
+  const { theme } = useTheme();
   const router = useRouter();
 
   const enableFeature = async () => {
@@ -60,7 +61,7 @@ export default function FeatureInfo({
   return (
     <>
       <Display
-        shadow
+        shadow={theme !== "dark"}
         caption={
           <Text h3 style={{ lineHeight: "30px" }}>
             {featureDescription}
@@ -75,7 +76,9 @@ export default function FeatureInfo({
             alignItems: "center",
             justifyContent: "center",
             flexDirection: "column",
-            gap: "10px"
+            gap: "10px",
+            border: theme === "dark" ? "1px solid #333333" : undefined,
+            borderRadius: "8px"
           }}
         >
           <Icon size={60} />

@@ -1,7 +1,9 @@
 import { useScrollPosition } from "@/hooks/useScrollPosition";
+import { useTheme } from "@/hooks/useTheme";
 import useUrlState from "@/hooks/useUrlState";
 import { ClerkLoaded, UserButton } from "@clerk/nextjs";
-import { Breadcrumbs, Tabs } from "@geist-ui/core";
+import { Breadcrumbs, Select, Tabs } from "@geist-ui/core";
+import { Moon, Sun } from "@geist-ui/react-icons";
 import HomeIcon from "@geist-ui/react-icons/home";
 import { useRouter } from "next/router";
 import { ReactNode } from "react";
@@ -65,6 +67,7 @@ export default function Navbar({
   breadcrumbs?: { value: ReactNode; href?: string }[];
 }) {
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
 
   const { hackathon: activeHackathonSlug, feature } = useUrlState([
     "hackathon",
@@ -94,7 +97,7 @@ export default function Navbar({
           justifyContent: "space-between",
           boxSizing: "border-box",
           padding: "0px 12px",
-          background: "#ffffff"
+          background: theme === "dark" ? "#131313" : "#ffffff"
         }}
       >
         <div
@@ -116,7 +119,36 @@ export default function Navbar({
                 <Breadcrumbs.Item>Page</Breadcrumbs.Item> */}
           </Breadcrumbs>
         </div>
-        <div>
+        <div
+          style={{
+            display: "flex",
+            gap: "16px",
+            alignItems: "center"
+          }}
+        >
+          <Select
+            h="28px"
+            pure
+            onChange={(value) => {
+              setTheme(value as "light" | "dark");
+            }}
+            value={theme}
+            title="Switch Theme"
+            style={{
+              minWidth: "85px"
+            }}
+          >
+            <Select.Option value="light">
+              <span className="select-content">
+                <Sun size={14} /> Light
+              </span>
+            </Select.Option>
+            <Select.Option value="dark">
+              <span className="select-content">
+                <Moon size={14} /> Dark
+              </span>
+            </Select.Option>
+          </Select>
           <ClerkLoaded>
             <UserButton
               signInUrl="/sign-in"
@@ -139,7 +171,7 @@ export default function Navbar({
             );
           }}
           style={{
-            background: "#ffffff",
+            background: theme === "dark" ? "#131313" : "#ffffff",
             marginBottom: "-10px"
           }}
           value={feature ?? "dashboard"}
@@ -152,14 +184,23 @@ export default function Navbar({
           <style
             dangerouslySetInnerHTML={{
               __html: `
-            .tab-styles-locator {
+              .tab-styles-locator {
                 display: none;
-            }
-
-            :has(> .tab-styles-locator) {
+              }
+  
+              :has(> .tab-styles-locator) {
                 display: none;
-            }
-          `
+              }
+  
+              .select-content {
+                width: auto;
+                height: 18px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 4px;
+              }
+            `
             }}
           />
         </Tabs>
