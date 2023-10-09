@@ -1,8 +1,13 @@
 import prisma from "@/lib/prisma";
 import { Column } from "@/pages/[slug]/data";
 import { getAuth } from "@clerk/nextjs/server";
-import { NextApiRequest, NextApiResponse } from "next";
 import type { AttendeeAttributeValue } from "@prisma/client";
+import { NextApiRequest, NextApiResponse } from "next";
+
+function c<T>(x: T): T {
+    console.log(x);
+    return x;
+}
 
 export default async function handler(
     req: NextApiRequest,
@@ -92,10 +97,12 @@ export default async function handler(
             }
         });
 
-        let newAttendees: { [key: string]: string[] } = newData.content.reduce(
+    
+        let newAttendees: { [key: string]: string[] } = newData.content.slice(1).reduce(
             (a, v) => ({ ...a, [v[0]]: v }),
             {}
         );
+
 
         let toUpdateAttendees: {
             id: string;
@@ -106,6 +113,9 @@ export default async function handler(
 
         currentAttendees.map((attendee) => {
             let newAttendee = newAttendees[attendee.id];
+            if(newAttendee == undefined){
+                return // TO IMPLEMENT: DELETING
+            }
             let oldAttributes: { [key: string]: AttendeeAttributeValue[] } =
                 attendee.attributeValues.reduce(
                     (a, v) => ({ ...a, [v.formFieldId]: v }),
@@ -120,11 +130,11 @@ export default async function handler(
                     .slice(4)
                     .map((x) => oldAttributes[x.id] || "undefined")
             ];
-            if (newAttendee !== oldAttendee) {
-                // this logic needs checking
+            if (oldAttendee != newAttendee) {
+                // this logic needs checking newAttendee !== oldAttendee
                 toUpdateAttendees.push({
                     id: attendee.id,
-                    email: newAttendee[1],
+                    email: newAttendee[3],
                     name: newAttendee[2],
                     attributes: newAttendee.slice(4).map((attribute, i) => ({
                         id: newData.shape[4 + i].id,
@@ -134,6 +144,8 @@ export default async function handler(
             }
             delete newAttendees[attendee.id];
         });
+
+        console.log("TO UPDATE", toUpdateAttendees)
 
         let toCreateAttendees = Object.values(newAttendees).map((x) => ({
             email: x[1],
@@ -151,6 +163,8 @@ export default async function handler(
                 hackathonId: hackathon.id
             }))
         });
+
+        console.log(toCreateAttendees)
 
         await prisma.$transaction(
             toCreateAttendees
@@ -176,6 +190,20 @@ export default async function handler(
                 .flat()
         );
 
+        toUpdateAttendees.map((x) =>
+                console.log({
+                    where: {
+                        id: x.id
+                    },
+                    data: {
+                        email: x.email,
+                        name: x.name
+                    }
+                })
+            )
+
+        console.log(toUpdateAttendees)
+
         await prisma.$transaction(
             toUpdateAttendees.map((x) =>
                 prisma.attendee.update({
@@ -193,7 +221,7 @@ export default async function handler(
         await prisma.$transaction(
             toUpdateAttendees
                 .map((x) => {
-                    return x.attributes.map((y) => {
+                    return x.attributes.filter(b => b.value != null).map((y) => {
                         return prisma.attendeeAttributeValue.create({
                             data: {
                                 formField: {
@@ -212,6 +240,7 @@ export default async function handler(
                     });
                 })
                 .flat()
+                .filter(x => x != null)
         );
 
         res.redirect(`/${slug}/data`);

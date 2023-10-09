@@ -1,11 +1,12 @@
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
-import { Button, Checkbox, Page, Table, Tooltip } from "@geist-ui/core";
+import { Button, Page } from "@geist-ui/core";
 import type { GetServerSideProps } from "next";
+import { useRouter } from "next/router";
 
+import { css } from "@/components/CSS";
 import Debug from "@/components/Debug";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
-import { HelpCircle } from "@geist-ui/react-icons";
 import type {
   Attendee,
   AttendeeAttribute,
@@ -15,7 +16,7 @@ import type {
 import { DEFAULT_COLUMN_TYPES } from "active-table/dist/enums/defaultColumnTypes";
 import dynamic from "next/dynamic";
 import type { ReactElement } from "react";
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 type AttendeeWithAttributes = Attendee & {
   attributeValues: AttendeeAttributeValue[];
@@ -25,120 +26,6 @@ type HackathonWithAttendees = Hackathon & {
   attendeeAttributes: AttendeeAttribute[];
   attendees: AttendeeWithAttributes[];
 };
-
-function DataTable({
-  attendees,
-  attributes
-}: {
-  attendees: AttendeeWithAttributes[];
-  attributes: AttendeeAttribute[];
-}) {
-  const builtinColumns: {
-    [key in keyof Attendee]?: {
-      label: JSX.Element | string;
-      render?: (value: any, rowData: any) => JSX.Element;
-    };
-  } = {
-    name: {
-      label: "Name"
-    },
-    email: {
-      label: "Email"
-    },
-    checkedIn: {
-      label: (
-        <>
-          Checked In
-          <Tooltip
-            text="This column cannot be modified. To check in an attendee, use the Check-In system."
-            style={{
-              scale: "0.8",
-              marginLeft: "4px"
-            }}
-            scale={2 / 3}
-          >
-            <HelpCircle
-              style={{
-                scale: "0.2"
-              }}
-            />
-          </Tooltip>
-        </>
-      ),
-      render: (value: any, rowData: any) => {
-        return (
-          <span
-            style={{
-              pointerEvents: "none"
-            }}
-          >
-            <Checkbox checked={value} scale={3 / 2} style={{}} />
-          </span>
-        );
-      }
-    }
-  };
-  const columns = [
-    ...Object.entries(builtinColumns).map(([prop, { label, render }]) => ({
-      label,
-      prop,
-      render
-    })),
-    ...attributes.map((attribute) => ({
-      label: attribute.name,
-      prop: attribute.id,
-      render: (value: any, rowData: any) => {
-        return value;
-      }
-    }))
-  ];
-  const dataSource = attendees.map((attendee) => {
-    const row: any = {
-      key: attendee.id
-    };
-    attendee.attributeValues.forEach(
-      (attributeValue: AttendeeAttributeValue) => {
-        row[attributeValue.formFieldId] = attributeValue.value;
-      }
-    );
-    for (const prop in builtinColumns) {
-      row[prop] = attendee[prop as keyof Attendee];
-    }
-    return row;
-  });
-  const [data, setData] = React.useState(dataSource);
-  const renderAction = (value: any, rowData: any, rowIndex: any) => {
-    const updateHandler = () => {
-      setData((last) => {
-        return last.map((item, dataIndex) => {
-          if (dataIndex !== rowIndex) return item;
-          return {
-            ...item,
-            property: Math.random().toString(16).slice(-5)
-          };
-        });
-      });
-    };
-    return (
-      <Button
-        type="secondary"
-        auto
-        scale={1 / 3}
-        font="12px"
-        onClick={updateHandler}
-      >
-        Update
-      </Button>
-    );
-  };
-  return (
-    <Table data={data} onChange={(value) => setData(value)}>
-      {columns.map((column, index) => (
-        <Table.Column key={index} {...(column as any)} />
-      ))}
-    </Table>
-  );
-}
 
 function fix<T>(value: T): T {
   return JSON.parse(JSON.stringify(value));
@@ -152,7 +39,7 @@ export type Column = {
   readOnly?: boolean;
 };
 
-export function NewDataTable({
+export function DataTable({
   attendees,
   attributes
 }: {
@@ -187,6 +74,13 @@ export function NewDataTable({
       id: "built-in",
       fromAttendee: (attendee: Attendee) => attendee.email,
       readOnly: false
+    },
+    {
+      type: "Date m-d-y",
+      name: "Registered At",
+      id: "built-in",
+      fromAttendee: (attendee: Attendee) => attendee.createdAt.toLocaleDateString().split('/').join('-'),
+      readOnly: true
     },
     {
       type: "checkbox",
@@ -255,8 +149,46 @@ export function NewDataTable({
   //   contentRef.current = content;
   // }, [content]);
 
+  const router = useRouter();
+
+  const saveData = async () => {
+
+    await fetch(`/api/hackathons/${router.query.slug}/data/save`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        shape: shape,
+        content: contentRef.current
+      })
+    }).then((res) => res.text());
+  };
+
   return (
     <>
+
+      <Page className="data--page">
+        <h1>Attendees</h1>
+
+        {css`
+          .data--page, .data--page main {
+            height: 200px!important;
+            min-height: unset!important;
+          }
+
+          .data--page main {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+          }
+        `}
+
+
+        <Button onClick={() => saveData()} type="success">Save</Button>
+      </Page>
+
       <div className="activetable__wrapper">
         <style
           dangerouslySetInnerHTML={{
@@ -417,8 +349,6 @@ export function NewDataTable({
   );
 }
 
-export function DataTableTwo({}) {}
-
 export default function Hackathon({
   hackathon
 }: {
@@ -434,14 +364,10 @@ export default function Hackathon({
 
   return (
     <>
-      <Page>
-        <h1>Attendees</h1>
-
-        <NewDataTable
+        <DataTable
           attendees={hackathon.attendees}
           attributes={hackathon.attendeeAttributes}
         />
-      </Page>
     </>
   );
 }

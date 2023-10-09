@@ -205,6 +205,8 @@ model Attendee {
   hackathonId String
   hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
   tokens      Token[]
+
+  createdAt DateTime @default(now())
 }
 
 model Token {
