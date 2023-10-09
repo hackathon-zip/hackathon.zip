@@ -178,7 +178,7 @@ function Data ({ hackathon, attendees, attributes }: { hackathon: HackathonWithA
                   name: attribute.id,
                   defaultValue: drawerAttendee ? (drawerAttendee as any)[attribute.id] : ""
                 }
-              )),
+              )) as any,
               ...attributes.map(attribute => (
                 {
                   type: "text",
@@ -186,7 +186,7 @@ function Data ({ hackathon, attendees, attributes }: { hackathon: HackathonWithA
                   name: `custom-${attribute.id}`,
                   defaultValue: drawerAttendee?.attributeValues.filter(x => x.formFieldId == attribute.id)[0]?.value || ""
                 }
-              ))
+              )) as any
             ],
             submitText: drawerAttendee?.id == "create" ? `Create New Attendee` : `Update ${drawerAttendee?.name}'s Record`
           }}
