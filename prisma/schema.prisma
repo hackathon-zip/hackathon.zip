@@ -187,9 +187,9 @@ model AttendeeAttributeValue {
   id          String            @id @default(uuid())
   value       String
   attendeeId  String
-  attendee    Attendee          @relation(fields: [attendeeId], references: [id])
+  attendee    Attendee          @relation(fields: [attendeeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   formFieldId String
-  formField   AttendeeAttribute @relation(fields: [formFieldId], references: [id])
+  formField   AttendeeAttribute @relation(fields: [formFieldId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Attendee {
@@ -214,5 +214,5 @@ model Token {
   magicKey   String?  @unique @default(cuid())
   createdAt  DateTime @default(now())
   attendeeId String
-  attendee   Attendee @relation(fields: [attendeeId], references: [id])
+  attendee   Attendee @relation(fields: [attendeeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }

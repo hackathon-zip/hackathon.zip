@@ -3,6 +3,7 @@ import { Column } from "@/pages/[slug]/data";
 import { getAuth } from "@clerk/nextjs/server";
 import type { AttendeeAttributeValue } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
+import { v4 as uuidv4 } from 'uuid';
 
 function c<T>(x: T): T {
     console.log(x);
@@ -20,7 +21,7 @@ export default async function handler(
         let newData = req.body as { shape: Column[]; content: string[][] };
         const { slug } = req.query;
 
-        const hackathon = await prisma.hackathon.findUnique({
+        let hackathon = await prisma.hackathon.findUnique({
             where: {
                 slug: slug as string
             }
@@ -134,8 +135,8 @@ export default async function handler(
                 // this logic needs checking newAttendee !== oldAttendee
                 toUpdateAttendees.push({
                     id: attendee.id,
-                    email: newAttendee[3],
-                    name: newAttendee[2],
+                    email: newAttendee[2],
+                    name: newAttendee[1],
                     attributes: newAttendee.slice(4).map((attribute, i) => ({
                         id: newData.shape[4 + i].id,
                         value: attribute
@@ -148,47 +149,36 @@ export default async function handler(
         console.log("TO UPDATE", toUpdateAttendees)
 
         let toCreateAttendees = Object.values(newAttendees).map((x) => ({
-            email: x[1],
-            name: x[2],
+            email: x[2],
+            name: x[1],
             attributes: x.slice(4).map((attribute, i) => ({
                 id: newData.shape[4 + i].id,
                 value: attribute
-            }))
+            })),
+            id: uuidv4()
         }));
-
-        await prisma.attendee.createMany({
-            data: toCreateAttendees.map((x) => ({
-                email: x.email,
-                name: x.name,
-                hackathonId: hackathon.id
-            }))
-        });
-
-        console.log(toCreateAttendees)
 
         await prisma.$transaction(
             toCreateAttendees
                 .map((x) => {
-                    return x.attributes.map((y) => {
-                        return prisma.attendeeAttributeValue.create({
-                            data: {
-                                formField: {
-                                    connect: {
-                                        id: y.id
-                                    }
-                                },
-                                value: y.value,
-                                attendee: {
-                                    connect: {
-                                        email: x.email
-                                    }
-                                }
-                            }
-                        });
+                    return prisma.attendee.create({
+                        data: {
+                            id: x.id,
+                            email: x.email,
+                            name: x.name,
+                            hackathonId: hackathon.id,
+                            attributeValues: {
+                                create: x.attributes.filter(b => b.value != null && b.id != "built-in").map((y) => ({
+                                    id: `${y.id}-${x.id}`,
+                                    formFieldId: y.id,
+                                    value: y.value
+                            }))
+                        }
+                        }
                     });
-                })
-                .flat()
-        );
+                }))
+
+    
 
         toUpdateAttendees.map((x) =>
                 console.log({
@@ -202,7 +192,6 @@ export default async function handler(
                 })
             )
 
-        console.log(toUpdateAttendees)
 
         await prisma.$transaction(
             toUpdateAttendees.map((x) =>
@@ -218,23 +207,27 @@ export default async function handler(
             )
         );
 
+        console.log("FIRST TO UPDATE:")
+        console.log(toUpdateAttendees[0].attributes.filter(b => b.value != null && b.id != "built-in"))
+
         await prisma.$transaction(
             toUpdateAttendees
                 .map((x) => {
-                    return x.attributes.filter(b => b.value != null).map((y) => {
-                        return prisma.attendeeAttributeValue.create({
-                            data: {
-                                formField: {
-                                    connect: {
-                                        id: y.id
-                                    }
-                                },
+                    return x.attributes.filter(b => b.value != null && b.id != "built-in").map((y) => {
+                        return prisma.attendeeAttributeValue.upsert({
+                            create: {
+                                id: `${y.id}-${x.id}`,
+                                formFieldId: y.id,
                                 value: y.value,
-                                attendee: {
-                                    connect: {
-                                        email: x.email
-                                    }
-                                }
+                                attendeeId: x.id
+                            },
+                            update: {
+                                value: y.value
+                            },
+                            where: {
+                                id: `${y.id}-${x.id}`,
+                                formFieldId: y.id,
+                                attendeeId: x.id
                             }
                         });
                     });
@@ -242,6 +235,25 @@ export default async function handler(
                 .flat()
                 .filter(x => x != null)
         );
+
+        hackathon = await prisma.hackathon.findUnique({
+            where: {
+              slug: slug as string,
+            },
+            include: {
+              attendeeAttributes: true,
+              attendees: {
+                include: {
+                  attributeValues: true
+                }
+              }
+            }
+          });
+
+        res.json({
+            attendeeAttributes: hackathon.attendeeAttributes,
+            attendees: hackathon.attendees
+        })
 
         res.redirect(`/${slug}/data`);
     } catch (error) {

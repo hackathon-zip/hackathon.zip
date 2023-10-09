@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
-import { Button, Page } from "@geist-ui/core";
+import { Button, Page, useToasts } from "@geist-ui/core";
 import type { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 
@@ -8,10 +8,10 @@ import { css } from "@/components/CSS";
 import Debug from "@/components/Debug";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import type {
-  Attendee,
-  AttendeeAttribute,
-  AttendeeAttributeValue,
-  Hackathon
+    Attendee,
+    AttendeeAttribute,
+    AttendeeAttributeValue,
+    Hackathon
 } from "@prisma/client";
 import { DEFAULT_COLUMN_TYPES } from "active-table/dist/enums/defaultColumnTypes";
 import dynamic from "next/dynamic";
@@ -38,6 +38,40 @@ export type Column = {
   fromAttendee?: (attendee: Attendee) => string;
   readOnly?: boolean;
 };
+
+function SaveButton ({ saveData }: { saveData: () => Promise<any> }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(0);
+
+  const toasts = useToasts();
+  const router = useRouter()
+
+  return (
+    <Button onClick={async () => {
+      setLoading(true);
+      try {
+        await saveData();
+        setLoading(false);
+        router.reload()
+      } catch (err) {
+        const id = Math.random();
+        setLoading(false);
+        setError(id);
+        setTimeout(() => {
+          setError(prev => {
+            if (prev == id) return 0;
+            return prev;
+          });
+        }, 1000);
+        toasts.setToast({
+          text: "Error saving data",
+          type: "error"
+        });
+        console.error(err);
+      }
+    }} loading={loading} type={error ? "error-light" : "success"}>Save</Button>
+  )
+}
 
 export function DataTable({
   attendees,
@@ -114,23 +148,27 @@ export function DataTable({
         attributeValue.formFieldId == attributeId
     );
 
-    return attendeeAttribute?.value;
+    return attendeeAttribute?.value || "";
   }
 
-  const defaultContent = [
-    defaultShape.map((s: Column) => s.name),
-    ...attendees.map((attendee: AttendeeWithAttributes) => {
-      const contentArray = [];
+  const generateDefaultContent = (shape: Column[], attendees: AttendeeWithAttributes[]) => {
+    return [
+      shape.map((s: Column) => s.name),
+      ...attendees.map((attendee: AttendeeWithAttributes) => {
+        const contentArray = [];
+  
+        for (const column of defaultShape) {
+          if (column.fromAttendee)
+            contentArray.push(column.fromAttendee(attendee));
+          else contentArray.push(getAttributeValue(attendee, column.name) || "");
+        }
+  
+        return contentArray;
+      })
+    ];
+  }
 
-      for (const column of defaultShape) {
-        if (column.fromAttendee)
-          contentArray.push(column.fromAttendee(attendee));
-        else contentArray.push(getAttributeValue(attendee, column.name));
-      }
-
-      return contentArray;
-    })
-  ];
+  const defaultContent = generateDefaultContent(defaultShape, attendees)
 
   const lastSavedShapeRef = useRef(fix(defaultShape));
   const latestShapeRef = useRef(fix(defaultShape));
@@ -152,8 +190,7 @@ export function DataTable({
   const router = useRouter();
 
   const saveData = async () => {
-
-    await fetch(`/api/hackathons/${router.query.slug}/data/save`, {
+    let res = await fetch(`/api/hackathons/${router.query.slug}/data/save`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -162,7 +199,17 @@ export function DataTable({
         shape: shape,
         content: contentRef.current
       })
-    }).then((res) => res.text());
+    }).then((res) => res.json());
+    let thisShape = [
+      ...builtInAttributes,
+      ...res.attributes.map((attribute: AttendeeAttribute) => ({
+        type: "text",
+        name: attribute.name,
+        id: attribute.id
+      }))
+    ];
+    
+   
   };
 
   return (
@@ -186,7 +233,7 @@ export function DataTable({
         `}
 
 
-        <Button onClick={() => saveData()} type="success">Save</Button>
+        <SaveButton saveData={saveData} />
       </Page>
 
       <div className="activetable__wrapper">
@@ -345,6 +392,8 @@ export function DataTable({
         />
       </div>
       <Debug data={{ shape }} />
+      <Debug data={{ content }} />
+      <Debug data={{ attendees }} />
     </>
   );
 }

@@ -31,7 +31,8 @@
         "resend": "^1.1.0",
         "superjson": "^1.13.3",
         "swr": "^2.2.4",
-        "typescript": "5.2.2"
+        "typescript": "5.2.2",
+        "uuid": "^9.0.1"
     },
     "devDependencies": {
         "@types/markdown-it": "^13.0.2",

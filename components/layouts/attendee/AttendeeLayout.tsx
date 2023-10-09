@@ -1,21 +1,19 @@
-import {
-  Grid,
-  Card,
-  Text,
-  Divider,
-  Link,
-  useModal,
-  Button,
-  Modal,
-  Input,
-  useToasts
-} from "@geist-ui/core";
-import { useRef } from "react";
-import NextLink from "next/link";
-import type { Hackathon, Attendee } from "@prisma/client";
-import { useRouter } from "next/router";
-import Head from "next/head";
 import { Form } from "@/components/Form";
+import {
+    Button,
+    Card,
+    Divider,
+    Grid,
+    Link,
+    Modal,
+    Text,
+    useModal,
+    useToasts
+} from "@geist-ui/core";
+import type { Attendee, Hackathon } from "@prisma/client";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import { useRef } from "react";
 
 export default function AttendeeLayout({
   children,

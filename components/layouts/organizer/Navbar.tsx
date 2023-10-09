@@ -21,7 +21,7 @@ export const NavbarTabs = [
   },
   {
     label: "Registration",
-    value: "registration"
+    value: "register"
   },
   {
     label: "Check-In",
