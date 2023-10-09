@@ -1,14 +1,14 @@
 import { Form } from "@/components/Form";
 import {
-    Button,
-    Card,
-    Divider,
-    Grid,
-    Link,
-    Modal,
-    Text,
-    useModal,
-    useToasts
+  Button,
+  Card,
+  Divider,
+  Grid,
+  Link,
+  Modal,
+  Text,
+  useModal,
+  useToasts
 } from "@geist-ui/core";
 import type { Attendee, Hackathon } from "@prisma/client";
 import Head from "next/head";

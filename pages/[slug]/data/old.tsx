@@ -8,10 +8,10 @@ import { css } from "@/components/CSS";
 import Debug from "@/components/Debug";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import type {
-    Attendee,
-    AttendeeAttribute,
-    AttendeeAttributeValue,
-    Hackathon
+  Attendee,
+  AttendeeAttribute,
+  AttendeeAttributeValue,
+  Hackathon
 } from "@prisma/client";
 import { DEFAULT_COLUMN_TYPES } from "active-table/dist/enums/defaultColumnTypes";
 import dynamic from "next/dynamic";
@@ -39,38 +39,44 @@ export type Column = {
   readOnly?: boolean;
 };
 
-function SaveButton ({ saveData }: { saveData: () => Promise<any> }) {
+function SaveButton({ saveData }: { saveData: () => Promise<any> }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(0);
 
   const toasts = useToasts();
-  const router = useRouter()
+  const router = useRouter();
 
   return (
-    <Button onClick={async () => {
-      setLoading(true);
-      try {
-        await saveData();
-        setLoading(false);
-        router.reload()
-      } catch (err) {
-        const id = Math.random();
-        setLoading(false);
-        setError(id);
-        setTimeout(() => {
-          setError(prev => {
-            if (prev == id) return 0;
-            return prev;
+    <Button
+      onClick={async () => {
+        setLoading(true);
+        try {
+          await saveData();
+          setLoading(false);
+          router.reload();
+        } catch (err) {
+          const id = Math.random();
+          setLoading(false);
+          setError(id);
+          setTimeout(() => {
+            setError((prev) => {
+              if (prev == id) return 0;
+              return prev;
+            });
+          }, 1000);
+          toasts.setToast({
+            text: "Error saving data",
+            type: "error"
           });
-        }, 1000);
-        toasts.setToast({
-          text: "Error saving data",
-          type: "error"
-        });
-        console.error(err);
-      }
-    }} loading={loading} type={error ? "error-light" : "success"}>Save</Button>
-  )
+          console.error(err);
+        }
+      }}
+      loading={loading}
+      type={error ? "error-light" : "success"}
+    >
+      Save
+    </Button>
+  );
 }
 
 export function DataTable({
@@ -113,7 +119,8 @@ export function DataTable({
       type: "Date m-d-y",
       name: "Registered At",
       id: "built-in",
-      fromAttendee: (attendee: Attendee) => attendee.createdAt.toLocaleDateString().split('/').join('-'),
+      fromAttendee: (attendee: Attendee) =>
+        attendee.createdAt.toLocaleDateString().split("/").join("-"),
       readOnly: true
     },
     {
@@ -151,24 +158,28 @@ export function DataTable({
     return attendeeAttribute?.value || "";
   }
 
-  const generateDefaultContent = (shape: Column[], attendees: AttendeeWithAttributes[]) => {
+  const generateDefaultContent = (
+    shape: Column[],
+    attendees: AttendeeWithAttributes[]
+  ) => {
     return [
       shape.map((s: Column) => s.name),
       ...attendees.map((attendee: AttendeeWithAttributes) => {
         const contentArray = [];
-  
+
         for (const column of defaultShape) {
           if (column.fromAttendee)
             contentArray.push(column.fromAttendee(attendee));
-          else contentArray.push(getAttributeValue(attendee, column.name) || "");
+          else
+            contentArray.push(getAttributeValue(attendee, column.name) || "");
         }
-  
+
         return contentArray;
       })
     ];
-  }
+  };
 
-  const defaultContent = generateDefaultContent(defaultShape, attendees)
+  const defaultContent = generateDefaultContent(defaultShape, attendees);
 
   const lastSavedShapeRef = useRef(fix(defaultShape));
   const latestShapeRef = useRef(fix(defaultShape));
@@ -208,20 +219,18 @@ export function DataTable({
         id: attribute.id
       }))
     ];
-    
-   
   };
 
   return (
     <>
-
       <Page className="data--page">
         <h1>Attendees</h1>
 
         {css`
-          .data--page, .data--page main {
-            height: 200px!important;
-            min-height: unset!important;
+          .data--page,
+          .data--page main {
+            height: 200px !important;
+            min-height: unset !important;
           }
 
           .data--page main {
@@ -231,7 +240,6 @@ export function DataTable({
             align-items: center;
           }
         `}
-
 
         <SaveButton saveData={saveData} />
       </Page>
@@ -413,10 +421,10 @@ export default function Hackathon({
 
   return (
     <>
-        <DataTable
-          attendees={hackathon.attendees}
-          attributes={hackathon.attendeeAttributes}
-        />
+      <DataTable
+        attendees={hackathon.attendees}
+        attributes={hackathon.attendeeAttributes}
+      />
     </>
   );
 }

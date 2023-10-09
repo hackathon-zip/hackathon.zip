@@ -1,10 +1,10 @@
 import {
-    Button,
-    Modal,
-    Page,
-    Table,
-    useModal,
-    useToasts
+  Button,
+  Modal,
+  Page,
+  Table,
+  useModal,
+  useToasts
 } from "@geist-ui/core";
 
 import { Form } from "@/components/Form";

@@ -2,7 +2,16 @@ import { css } from "@/components/CSS";
 import Debug from "@/components/Debug";
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
-import { Button, Card, Drawer, Page, Table, Text, useToasts } from "@geist-ui/core";
+import {
+  Button,
+  Card,
+  Drawer,
+  Page,
+  Table,
+  Text,
+  useToasts,
+  Grid
+} from "@geist-ui/core";
 import type { GetServerSideProps } from "next";
 import { useState } from "react";
 
@@ -36,9 +45,11 @@ export type Column = {
 
 export type BuiltInColumn = Column & {
   fromAttendee: (attendee: Attendee) => string;
-  customRender?: (value: string, attendee?: Attendee | AttendeeWithAttributes) => JSX.Element | string;
+  customRender?: (
+    value: string,
+    attendee?: Attendee | AttendeeWithAttributes
+  ) => JSX.Element | string;
 };
-
 
 const builtInAttributes: BuiltInColumn[] = [
   {
@@ -59,9 +70,10 @@ const builtInAttributes: BuiltInColumn[] = [
     type: "Date m-d-y",
     name: "Registered At",
     id: "built-in",
-    fromAttendee: (attendee: Attendee) => new Date(attendee.createdAt).toLocaleDateString().split('/').join('-'),
+    fromAttendee: (attendee: Attendee) =>
+      new Date(attendee.createdAt).toLocaleDateString().split("/").join("-"),
     readOnly: true
-  },
+  }
   /*{
     type: "checkbox",
     name: "Checked In",
@@ -73,182 +85,298 @@ const builtInAttributes: BuiltInColumn[] = [
   }*/
 ]; // these are separated that way we can use them when setting column settings
 
-function Data ({ hackathon, attendees, attributes }: { hackathon: HackathonWithAttendees, attendees: AttendeeWithAttributes[], attributes: AttendeeAttribute[] }) {
+function Data({
+  hackathon,
+  attendees,
+  attributes
+}: {
+  hackathon: HackathonWithAttendees;
+  attendees: AttendeeWithAttributes[];
+  attributes: AttendeeAttribute[];
+}) {
   const { width } = useViewport(false);
   const sliceNum = Math.ceil((Math.max(width || 100_000, 1000) - 1000) / 350);
-  const { setToast } = useToasts()
+  const { setToast } = useToasts();
 
-  const generateData = (attendees: AttendeeWithAttributes[]) => attendees.sort((a: AttendeeWithAttributes, b: AttendeeWithAttributes) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()).map((attendee: AttendeeWithAttributes, i: number) => {
-    const output: any = {
-      $i: i,
-      $attendee: attendee
-    };
+  const generateData = (attendees: AttendeeWithAttributes[]) =>
+    attendees
+      .sort(
+        (a: AttendeeWithAttributes, b: AttendeeWithAttributes) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      )
+      .map((attendee: AttendeeWithAttributes, i: number) => {
+        const output: any = {
+          $i: i,
+          $attendee: attendee
+        };
 
-    for (const { name, fromAttendee } of builtInAttributes) {
-      output[name] = fromAttendee(attendee);
-    }
+        for (const { name, fromAttendee } of builtInAttributes) {
+          output[name] = fromAttendee(attendee);
+        }
 
-    for (const attribute of attributes) {
-      const attributeId = attributes.find(
-        (attribute_: AttendeeAttribute) => attribute_.name == attribute.name
-      )?.id;
-    
-      const attendeeAttribute = attendee.attributeValues.find(
-        (attributeValue: AttendeeAttributeValue) =>
-          attributeValue.formFieldId == attributeId
-      );
-      
-      output[attribute.name] = attendeeAttribute?.value || "";
-    }
+        for (const attribute of attributes) {
+          const attributeId = attributes.find(
+            (attribute_: AttendeeAttribute) => attribute_.name == attribute.name
+          )?.id;
 
-    return output;
-  });
+          const attendeeAttribute = attendee.attributeValues.find(
+            (attributeValue: AttendeeAttributeValue) =>
+              attributeValue.formFieldId == attributeId
+          );
 
-  const data = generateData(attendees)
+          output[attribute.name] = attendeeAttribute?.value || "";
+        }
+
+        return output;
+      });
+
+  const data = generateData(attendees);
   let createNew = (() => {
     const output: any = {};
 
     let first = true;
 
     for (const { name, fromAttendee } of builtInAttributes) {
-      output[name] = first ? <span style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px'
-      }}>
-        <Plus size={20} />Create New Attendee
-      </span> : '';
+      output[name] = first ? (
+        <span
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px"
+          }}
+        >
+          <Plus size={20} />
+          Create New Attendee
+        </span>
+      ) : (
+        ""
+      );
       first = false;
     }
 
     for (const attribute of attributes) {
-      output[attribute.name] = '';
+      output[attribute.name] = "";
     }
 
     return output;
-  })()
+  })();
 
-  
+  type DrawerAttendeeTuple = [boolean, AttendeeWithAttributes | null];
 
-  type DrawerAttendeeTuple = [boolean, AttendeeWithAttributes | null]
+  const [[drawerOpen, drawerAttendee], setDrawerAttendee] =
+    useState<DrawerAttendeeTuple>([false, null]);
 
-  const [[drawerOpen, drawerAttendee], setDrawerAttendee] = useState<DrawerAttendeeTuple>([false, null]);
-  
   const [statefulData_, setStatefulData] = useState(data);
-  console.log({ statefulData_});
-  const statefulData = statefulData_.sort((a: any, b: any) => new Date(a.$attendee.createdAt).getTime() - new Date(b.$attendee.createdAt).getTime());
+  console.log({ statefulData_ });
+  const statefulData = statefulData_.sort(
+    (a: any, b: any) =>
+      new Date(a.$attendee.createdAt).getTime() -
+      new Date(b.$attendee.createdAt).getTime()
+  );
   // const statefulData = statefulData_.sort((a: any, b: any)x => a.$attendee.createdAt - b.$attendee.createdAt);
 
   const renderActions = (value: any, rowData: any, rowIndex: any) => {
-    const [loading, setLoading] = useState(false)
-    if (rowIndex == data.length - 1) return <></>;
-    return <Button type="error" loading={loading} auto scale={1/3} font="12px" onClick={async event => {
-      event.stopPropagation();
-      setLoading(true)
-      let res = await fetch(`/api/hackathons/${hackathon.slug}/data/${rowData.Email}/delete`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-      }).then((r) => r.json());
-      setLoading(false)
-      if (res.error) {
-        setToast({ text: res.error, delay: 2000 });
-      } else {
-        setToast({
-          text: `Succesfully deleted ${rowData.Name}'s record.`,
-          delay: 2000
-        });
-        setStatefulData(generateData([...attendees.filter(a => a.email != rowData.Email)]))
-      }
-    }}>Delete</Button>
-  }
-
-  return width && (
-    <>
-      <Drawer visible={drawerOpen} onClose={() => setDrawerAttendee(([_, attendee]: DrawerAttendeeTuple) => [false, attendee])} placement="right" style={{ maxWidth: '500px' }}>
-        <Drawer.Content>
-          {drawerAttendee?.id == "create" && <Text h3>New Attendee</Text>}
-          <Form schema={{
-            elements: [
-              ...builtInAttributes.filter(x => x.id != "built-in").map(attribute => (
+    const [loading, setLoading] = useState(false);
+    return (
+      <>
+        {rowIndex != statefulData.length && (
+          <Button
+            type="error"
+            loading={loading}
+            auto
+            scale={1 / 3}
+            font="12px"
+            onClick={async (event) => {
+              event.stopPropagation();
+              setLoading(true);
+              let res = await fetch(
+                `/api/hackathons/${hackathon.slug}/data/${rowData.Email}/delete`,
                 {
-                  type: "text",
-                  label: attribute.name,
-                  name: attribute.id,
-                  defaultValue: drawerAttendee ? (drawerAttendee as any)[attribute.id] : ""
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json"
+                  }
                 }
-              )) as any,
-              ...attributes.map(attribute => (
-                {
-                  type: "text",
-                  label: attribute.name,
-                  name: `custom-${attribute.id}`,
-                  defaultValue: drawerAttendee?.attributeValues.filter(x => x.formFieldId == attribute.id)[0]?.value || ""
-                }
-              )) as any
-            ],
-            submitText: drawerAttendee?.id == "create" ? `Create New Attendee` : `Update ${drawerAttendee?.name}'s Record`
-          }}
-          
-          submission={{
-            type: "controlled",
-            onSubmit: async (data) => {
-              let res = await fetch(drawerAttendee?.id == "create" ? `/api/hackathons/${hackathon.slug}/data/create` :  `/api/hackathons/${hackathon.slug}/data/${drawerAttendee?.id}/update`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                  ...data
-                })
-              }).then((r) => r.json());
+              ).then((r) => r.json());
+              setLoading(false);
               if (res.error) {
                 setToast({ text: res.error, delay: 2000 });
               } else {
                 setToast({
-                  text: `Succesfully ${drawerAttendee?.id == "create" ? "created" : "updated"} ${res.attendee.name}'s record.`,
+                  text: `Succesfully deleted ${rowData.Name}'s record.`,
                   delay: 2000
                 });
-                setStatefulData(generateData([...attendees.map(a => a.id != res.attendee.id ? a : res.attendee)]))
-                setDrawerAttendee(([_, attendee]: DrawerAttendeeTuple) => [false, attendee])
+                setStatefulData(
+                  generateData([
+                    ...attendees.filter((a) => a.email != rowData.Email)
+                  ])
+                );
               }
-            }
+            }}
+          >
+            Delete
+          </Button>
+        )}
+      </>
+    );
+  };
+
+  return (
+    width && (
+      <>
+        <Drawer
+          visible={drawerOpen}
+          onClose={() =>
+            setDrawerAttendee(([_, attendee]: DrawerAttendeeTuple) => [
+              false,
+              attendee
+            ])
+          }
+          placement="right"
+          style={{ maxWidth: "500px" }}
+        >
+          <Drawer.Content>
+            {drawerAttendee?.id == "create" && <Text h3>New Attendee</Text>}
+            <Form
+              schema={{
+                elements: [
+                  ...(builtInAttributes
+                    .filter((x) => x.id != "built-in")
+                    .map((attribute) => ({
+                      type: "text",
+                      label: attribute.name,
+                      name: attribute.id,
+                      defaultValue: drawerAttendee
+                        ? (drawerAttendee as any)[attribute.id]
+                        : ""
+                    })) as any),
+                  ...(attributes.map((attribute) => ({
+                    type: "text",
+                    label: attribute.name,
+                    name: `custom-${attribute.id}`,
+                    defaultValue:
+                      drawerAttendee?.attributeValues.filter(
+                        (x) => x.formFieldId == attribute.id
+                      )[0]?.value || ""
+                  })) as any)
+                ],
+                submitText:
+                  drawerAttendee?.id == "create"
+                    ? `Create New Attendee`
+                    : `Update ${drawerAttendee?.name}'s Record`
+              }}
+              submission={{
+                type: "controlled",
+                onSubmit: async (data) => {
+                  let res = await fetch(
+                    drawerAttendee?.id == "create"
+                      ? `/api/hackathons/${hackathon.slug}/data/create`
+                      : `/api/hackathons/${hackathon.slug}/data/${drawerAttendee?.id}/update`,
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json"
+                      },
+                      body: JSON.stringify({
+                        ...data
+                      })
+                    }
+                  ).then((r) => r.json());
+                  if (res.error) {
+                    setToast({ text: res.error, delay: 2000 });
+                  } else {
+                    setToast({
+                      text: `Succesfully ${
+                        drawerAttendee?.id == "create" ? "created" : "updated"
+                      } ${res.attendee.name}'s record.`,
+                      delay: 2000
+                    });
+                    setStatefulData(
+                      generateData([
+                        ...attendees.map((a) =>
+                          a.id != res.attendee.id ? a : res.attendee
+                        )
+                      ])
+                    );
+                    setDrawerAttendee(([_, attendee]: DrawerAttendeeTuple) => [
+                      false,
+                      attendee
+                    ]);
+                  }
+                }
+              }}
+            />
+            <Debug data={{ drawerAttendee }} />
+          </Drawer.Content>
+        </Drawer>
+        {css`
+          .attendees-data-table {
+            --table-font-size: calc(1 * 11pt) !important;
+          }
+          .attendees-data-table-row {
+            cursor: pointer;
+          }
+          .attendees-data-table-row > td > div.cell {
+            min-height: calc(2.525 * var(--table-font-size));
+          }
+        `}
+        <Table
+          className="attendees-data-table"
+          data={[...statefulData, createNew]}
+          rowClassName={() => "attendees-data-table-row"}
+          onRow={(e) => {
+            console.log(e, "@");
+            if (e.$i === undefined)
+              return setDrawerAttendee([
+                true,
+                {
+                  id: "create",
+                  name: "",
+                  email: "",
+                  hackathonId: "",
+                  checkedIn: false,
+                  createdAt: new Date(),
+                  checkInKey: "",
+                  attributeValues: []
+                }
+              ]);
+            const attendee = attendees[e.$i];
+            setDrawerAttendee([true, attendee]);
           }}
-          
+        >
+          {builtInAttributes.map((column: BuiltInColumn) => (
+            <Table.Column
+              prop={column.name}
+              label={column.name}
+              render={
+                column.customRender
+                  ? (((value: string, _: unknown, index: number) => {
+                      return column.customRender?.(value, attendees[index]);
+                    }) as any)
+                  : undefined
+              }
+            />
+          ))}
+          {attributes
+            .slice(0, sliceNum)
+            .map((attribute: AttendeeAttribute, i: number) => (
+              <Table.Column
+                prop={attribute.name}
+                label={attribute.name}
+                key={attribute.name}
+                className={`attendees-data-table-column-custom-${i}`}
+              />
+            ))}
+          <Table.Column
+            prop="operation"
+            label="danger zone"
+            render={renderActions}
+            width={100}
           />
-          <Debug data={{ drawerAttendee }} />
-        </Drawer.Content>
-      </Drawer>
-      {css`
-        .attendees-data-table {
-          --table-font-size: calc(1 * 11pt)!important;
-        }
-        .attendees-data-table-row {
-          cursor: pointer;
-        }
-        .attendees-data-table-row > td > div.cell {
-          min-height: calc(2.525 * var(--table-font-size));
-        }
-      `}
-      <Table className="attendees-data-table" data={[...statefulData, createNew]} rowClassName={() => "attendees-data-table-row"} onRow={e => {
-        console.log(e, '@')
-        if (e.$i === undefined) return setDrawerAttendee([true, {id: "create", name: "", email: "", hackathonId: "", checkedIn: false, createdAt: new Date(), checkInKey: "", attributeValues: []}]);
-        const attendee = attendees[e.$i];
-        setDrawerAttendee([true, attendee]);
-      }}>
-        {builtInAttributes.map((column: BuiltInColumn) => (
-          <Table.Column prop={column.name} label={column.name} render={column.customRender ? (((value: string, _: unknown, index: number) => {
-            return column.customRender?.(value, attendees[index]);
-          }) as any) : undefined} />
-        ))}
-        {attributes.slice(0, sliceNum).map((attribute: AttendeeAttribute, i: number) => (
-          <Table.Column prop={attribute.name} label={attribute.name} key={attribute.name} className={`attendees-data-table-column-custom-${i}`} />
-        ))}
-        <Table.Column prop="operation" label="danger zone" render={renderActions} width={100} />
-      </Table>
-    </>
-  )
+        </Table>
+      </>
+    )
+  );
 }
 
 export default function Hackathon({
@@ -263,17 +391,56 @@ export default function Hackathon({
       </>
     );
   }
-
+  const [drawerOpen, setDrawerOpen] = useState(false);
   return (
     <>
       <Page>
-        <h1>Attendees</h1>
-
-        <Card style={{
-          margin: '-16px'
-        }}>
-        <Data hackathon={hackathon} attendees={hackathon.attendees} attributes={hackathon.attendeeAttributes} />
+        <Grid.Container justify="space-between" alignItems="center" mb={1}>
+          <h1>Attendees</h1>
+          <Button type="success" onClick={() => setDrawerOpen(true)}>
+            Edit Schema
+          </Button>
+        </Grid.Container>
+        <Card
+          style={{
+            margin: "-16px"
+          }}
+        >
+          <Data
+            hackathon={hackathon}
+            attendees={hackathon.attendees}
+            attributes={hackathon.attendeeAttributes}
+          />
         </Card>
+        <Drawer
+          visible={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          placement="right"
+          style={{ maxWidth: "500px" }}
+        >
+          <Drawer.Content>
+            <Text h3>Edit Schema</Text>
+            <Form
+              schema={{
+                elements: [
+                  ...(hackathon.attendeeAttributes.map((attribute) => ({
+                    type: "text",
+                    label: attribute.name,
+                    name: `custom-${attribute.id}`,
+                    defaultValue: ""
+                  })) as any)
+                ],
+                submitText: `Edit Schema`
+              }}
+              submission={{
+                type: "controlled",
+                onSubmit: async (data) => {
+                  return null;
+                }
+              }}
+            />
+          </Drawer.Content>
+        </Drawer>
       </Page>
     </>
   );
@@ -311,9 +478,9 @@ export const getServerSideProps = (async (context) => {
           },
           orderBy: [
             {
-              createdAt: 'desc',
-            },
-          ],
+              createdAt: "desc"
+            }
+          ]
         }
       }
     });

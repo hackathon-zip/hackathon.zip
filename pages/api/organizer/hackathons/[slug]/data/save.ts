@@ -5,7 +5,7 @@ import { Column } from "@/pages/[slug]/data";
 import { getAuth } from "@clerk/nextjs/server";
 import type { AttendeeAttributeValue } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 function c<T>(x: T): T {
     console.log(x);
@@ -100,12 +100,9 @@ export default async function handler(
             }
         });
 
-    
-        let newAttendees: { [key: string]: string[] } = newData.content.slice(1).reduce(
-            (a, v) => ({ ...a, [v[0]]: v }),
-            {}
-        );
-
+        let newAttendees: { [key: string]: string[] } = newData.content
+            .slice(1)
+            .reduce((a, v) => ({ ...a, [v[0]]: v }), {});
 
         let toUpdateAttendees: {
             id: string;
@@ -116,8 +113,8 @@ export default async function handler(
 
         currentAttendees.map((attendee) => {
             let newAttendee = newAttendees[attendee.id];
-            if(newAttendee == undefined){
-                return // TO IMPLEMENT: DELETING
+            if (newAttendee == undefined) {
+                return; // TO IMPLEMENT: DELETING
             }
             let oldAttributes: { [key: string]: AttendeeAttributeValue[] } =
                 attendee.attributeValues.reduce(
@@ -148,7 +145,7 @@ export default async function handler(
             delete newAttendees[attendee.id];
         });
 
-        console.log("TO UPDATE", toUpdateAttendees)
+        console.log("TO UPDATE", toUpdateAttendees);
 
         let toCreateAttendees = Object.values(newAttendees).map((x) => ({
             email: x[2],
@@ -161,39 +158,40 @@ export default async function handler(
         }));
 
         await prisma.$transaction(
-            toCreateAttendees
-                .map((x) => {
-                    return prisma.attendee.create({
-                        data: {
-                            id: x.id,
-                            email: x.email,
-                            name: x.name,
-                            hackathonId: hackathon.id,
-                            attributeValues: {
-                                create: x.attributes.filter(b => b.value != null && b.id != "built-in").map((y) => ({
+            toCreateAttendees.map((x) => {
+                return prisma.attendee.create({
+                    data: {
+                        id: x.id,
+                        email: x.email,
+                        name: x.name,
+                        hackathonId: hackathon.id,
+                        attributeValues: {
+                            create: x.attributes
+                                .filter(
+                                    (b) => b.value != null && b.id != "built-in"
+                                )
+                                .map((y) => ({
                                     id: `${y.id}-${x.id}`,
                                     formFieldId: y.id,
                                     value: y.value
-                            }))
+                                }))
                         }
-                        }
-                    });
-                }))
-
-    
+                    }
+                });
+            })
+        );
 
         toUpdateAttendees.map((x) =>
-                console.log({
-                    where: {
-                        id: x.id
-                    },
-                    data: {
-                        email: x.email,
-                        name: x.name
-                    }
-                })
-            )
-
+            console.log({
+                where: {
+                    id: x.id
+                },
+                data: {
+                    email: x.email,
+                    name: x.name
+                }
+            })
+        );
 
         await prisma.$transaction(
             toUpdateAttendees.map((x) =>
@@ -209,53 +207,59 @@ export default async function handler(
             )
         );
 
-        console.log("FIRST TO UPDATE:")
-        console.log(toUpdateAttendees[0].attributes.filter(b => b.value != null && b.id != "built-in"))
+        console.log("FIRST TO UPDATE:");
+        console.log(
+            toUpdateAttendees[0].attributes.filter(
+                (b) => b.value != null && b.id != "built-in"
+            )
+        );
 
         await prisma.$transaction(
             toUpdateAttendees
                 .map((x) => {
-                    return x.attributes.filter(b => b.value != null && b.id != "built-in").map((y) => {
-                        return prisma.attendeeAttributeValue.upsert({
-                            create: {
-                                id: `${y.id}-${x.id}`,
-                                formFieldId: y.id,
-                                value: y.value,
-                                attendeeId: x.id
-                            },
-                            update: {
-                                value: y.value
-                            },
-                            where: {
-                                id: `${y.id}-${x.id}`,
-                                formFieldId: y.id,
-                                attendeeId: x.id
-                            }
+                    return x.attributes
+                        .filter((b) => b.value != null && b.id != "built-in")
+                        .map((y) => {
+                            return prisma.attendeeAttributeValue.upsert({
+                                create: {
+                                    id: `${y.id}-${x.id}`,
+                                    formFieldId: y.id,
+                                    value: y.value,
+                                    attendeeId: x.id
+                                },
+                                update: {
+                                    value: y.value
+                                },
+                                where: {
+                                    id: `${y.id}-${x.id}`,
+                                    formFieldId: y.id,
+                                    attendeeId: x.id
+                                }
+                            });
                         });
-                    });
                 })
                 .flat()
-                .filter(x => x != null)
+                .filter((x) => x != null)
         );
 
         hackathon = await prisma.hackathon.findUnique({
             where: {
-              slug: slug as string,
+                slug: slug as string
             },
             include: {
-              attendeeAttributes: true,
-              attendees: {
-                include: {
-                  attributeValues: true
+                attendeeAttributes: true,
+                attendees: {
+                    include: {
+                        attributeValues: true
+                    }
                 }
-              }
             }
-          });
+        });
 
         res.json({
             attendeeAttributes: hackathon.attendeeAttributes,
             attendees: hackathon.attendees
-        })
+        });
 
         res.redirect(`/${slug}/data`);
     } catch (error) {
