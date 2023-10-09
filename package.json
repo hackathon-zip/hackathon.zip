@@ -36,6 +36,7 @@
     },
     "devDependencies": {
         "@types/markdown-it": "^13.0.2",
+        "@types/uuid": "^9.0.5",
         "prettier": "^3.0.3",
         "prisma": "^5.3.1"
     }

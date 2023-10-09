@@ -431,6 +431,11 @@
   resolved "https://registry.npmjs.org/@types/unist/-/unist-2.0.8.tgz"
   integrity sha512-d0XxK3YTObnWVp6rZuev3c49+j4Lo8g4L1ZRm9z5L0xpoZycUPshHgczK5gsUMaZOstjVYYi09p5gYvUtfChYw==
 
+"@types/uuid@^9.0.5":
+  version "9.0.5"
+  resolved "https://registry.npmjs.org/@types/uuid/-/uuid-9.0.5.tgz"
+  integrity sha512-xfHdwa1FMJ082prjSJpoEI57GZITiQz10r3vEJCHa2khEFQjKy91aWKz6+zybzssCvXUwE1LQWgWVwZ4nYUvHQ==
+
 abbrev@^1.0.0:
   version "1.1.1"
   resolved "https://registry.npmjs.org/abbrev/-/abbrev-1.1.1.tgz"
