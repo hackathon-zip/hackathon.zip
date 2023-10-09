@@ -1,22 +1,22 @@
-import prisma from "@/lib/prisma";
-import { getAuth } from "@clerk/nextjs/server";
-import { Button, Page, useToasts } from "@geist-ui/core";
-import type { GetServerSideProps } from "next";
-import { useRouter } from "next/router";
-
 import { css } from "@/components/CSS";
 import Debug from "@/components/Debug";
+import prisma from "@/lib/prisma";
+import { getAuth } from "@clerk/nextjs/server";
+import { Button, Card, Drawer, Page, Table, Text, useToasts } from "@geist-ui/core";
+import type { GetServerSideProps } from "next";
+import { useState } from "react";
+
+import { Form } from "@/components/Form";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
+import useViewport from "@/hooks/useViewport";
+import { Plus } from "@geist-ui/react-icons";
 import type {
-    Attendee,
-    AttendeeAttribute,
-    AttendeeAttributeValue,
-    Hackathon
+  Attendee,
+  AttendeeAttribute,
+  AttendeeAttributeValue,
+  Hackathon
 } from "@prisma/client";
-import { DEFAULT_COLUMN_TYPES } from "active-table/dist/enums/defaultColumnTypes";
-import dynamic from "next/dynamic";
 import type { ReactElement } from "react";
-import { useRef, useState } from "react";
 
 type AttendeeWithAttributes = Attendee & {
   attributeValues: AttendeeAttributeValue[];
@@ -27,375 +27,228 @@ type HackathonWithAttendees = Hackathon & {
   attendees: AttendeeWithAttributes[];
 };
 
-function fix<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value));
-}
-
 export type Column = {
   type: string;
   name: string;
   id: string;
-  fromAttendee?: (attendee: Attendee) => string;
   readOnly?: boolean;
 };
 
-function SaveButton ({ saveData }: { saveData: () => Promise<any> }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(0);
+export type BuiltInColumn = Column & {
+  fromAttendee: (attendee: Attendee) => string;
+  customRender?: (value: string, attendee?: Attendee | AttendeeWithAttributes) => JSX.Element | string;
+};
 
-  const toasts = useToasts();
-  const router = useRouter()
 
-  return (
-    <Button onClick={async () => {
-      setLoading(true);
-      try {
-        await saveData();
-        setLoading(false);
-        router.reload()
-      } catch (err) {
-        const id = Math.random();
-        setLoading(false);
-        setError(id);
-        setTimeout(() => {
-          setError(prev => {
-            if (prev == id) return 0;
-            return prev;
-          });
-        }, 1000);
-        toasts.setToast({
-          text: "Error saving data",
-          type: "error"
-        });
-        console.error(err);
-      }
-    }} loading={loading} type={error ? "error-light" : "success"}>Save</Button>
-  )
-}
+const builtInAttributes: BuiltInColumn[] = [
+  {
+    type: "text",
+    name: "Name",
+    id: "name",
+    fromAttendee: (attendee: Attendee) => attendee.name,
+    readOnly: false
+  },
+  {
+    type: "text",
+    name: "Email",
+    id: "email",
+    fromAttendee: (attendee: Attendee) => attendee.email,
+    readOnly: false
+  },
+  {
+    type: "Date m-d-y",
+    name: "Registered At",
+    id: "built-in",
+    fromAttendee: (attendee: Attendee) => new Date(attendee.createdAt).toLocaleDateString().split('/').join('-'),
+    readOnly: true
+  },
+  /*{
+    type: "checkbox",
+    name: "Checked In",
+    id: "built-in",
+    fromAttendee: (attendee: Attendee) =>
+      attendee.checkedIn ? "true" : "false",
+    customRender: (value: string) => value,
+    readOnly: true
+  }*/
+]; // these are separated that way we can use them when setting column settings
 
-export function DataTable({
-  attendees,
-  attributes
-}: {
-  attendees: AttendeeWithAttributes[];
-  attributes: AttendeeAttribute[];
-}) {
-  const ActiveTable = dynamic(
-    () => import("active-table-react").then((mod) => mod.ActiveTable),
-    {
-      ssr: false
+function Data ({ hackathon, attendees, attributes }: { hackathon: HackathonWithAttendees, attendees: AttendeeWithAttributes[], attributes: AttendeeAttribute[] }) {
+  const { width } = useViewport(false);
+  const sliceNum = Math.ceil((Math.max(width || 100_000, 1000) - 1000) / 350);
+  const { setToast } = useToasts()
+
+  const generateData = (attendees: AttendeeWithAttributes[]) => attendees.sort((a: AttendeeWithAttributes, b: AttendeeWithAttributes) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()).map((attendee: AttendeeWithAttributes, i: number) => {
+    const output: any = {
+      $i: i,
+      $attendee: attendee
+    };
+
+    for (const { name, fromAttendee } of builtInAttributes) {
+      output[name] = fromAttendee(attendee);
     }
-  );
 
-  const builtInAttributes: Column[] = [
-    {
-      type: "text",
-      name: "ID",
-      id: "built-in",
-      fromAttendee: (attendee: Attendee) => attendee.id,
-      readOnly: true
-    },
-    {
-      type: "text",
-      name: "Name",
-      id: "built-in",
-      fromAttendee: (attendee: Attendee) => attendee.name,
-      readOnly: false
-    },
-    {
-      type: "text",
-      name: "Email",
-      id: "built-in",
-      fromAttendee: (attendee: Attendee) => attendee.email,
-      readOnly: false
-    },
-    {
-      type: "Date m-d-y",
-      name: "Registered At",
-      id: "built-in",
-      fromAttendee: (attendee: Attendee) => attendee.createdAt.toLocaleDateString().split('/').join('-'),
-      readOnly: true
-    },
-    {
-      type: "checkbox",
-      name: "Checked In",
-      id: "built-in",
-      fromAttendee: (attendee: Attendee) =>
-        attendee.checkedIn ? "true" : "false",
-      readOnly: true
-    }
-  ]; // these are separated that way we can use them when setting column settings
-
-  const defaultShape: Column[] = [
-    ...builtInAttributes,
-    ...attributes.map((attribute: AttendeeAttribute) => ({
-      type: "text",
-      name: attribute.name,
-      id: attribute.id
-    }))
-  ];
-
-  function getAttributeValue(
-    { attributeValues }: AttendeeWithAttributes,
-    value: string
-  ) {
-    const attributeId = attributes.find(
-      (attribute: AttendeeAttribute) => attribute.name == value
-    )?.id;
-
-    const attendeeAttribute = attributeValues.find(
-      (attributeValue: AttendeeAttributeValue) =>
-        attributeValue.formFieldId == attributeId
-    );
-
-    return attendeeAttribute?.value || "";
-  }
-
-  const generateDefaultContent = (shape: Column[], attendees: AttendeeWithAttributes[]) => {
-    return [
-      shape.map((s: Column) => s.name),
-      ...attendees.map((attendee: AttendeeWithAttributes) => {
-        const contentArray = [];
-  
-        for (const column of defaultShape) {
-          if (column.fromAttendee)
-            contentArray.push(column.fromAttendee(attendee));
-          else contentArray.push(getAttributeValue(attendee, column.name) || "");
-        }
-  
-        return contentArray;
-      })
-    ];
-  }
-
-  const defaultContent = generateDefaultContent(defaultShape, attendees)
-
-  const lastSavedShapeRef = useRef(fix(defaultShape));
-  const latestShapeRef = useRef(fix(defaultShape));
-
-  const [shape, setShape] = useState(defaultShape);
-
-  console.log("INITIAL SHAPE", shape);
-
-  const [content, setContent] = useState([
-    ...defaultContent.map((s: any) => [...s])
-  ]);
-  const contentRef = useRef([...defaultContent.map((s: any) => [...s])] as any);
-  // (window as any).stringifiedContent = JSON.stringify(defaultContent)
-
-  // useEffect(() => {
-  //   contentRef.current = content;
-  // }, [content]);
-
-  const router = useRouter();
-
-  const saveData = async () => {
-    let res = await fetch(`/api/hackathons/${router.query.slug}/data/save`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        shape: shape,
-        content: contentRef.current
-      })
-    }).then((res) => res.json());
-    let thisShape = [
-      ...builtInAttributes,
-      ...res.attributes.map((attribute: AttendeeAttribute) => ({
-        type: "text",
-        name: attribute.name,
-        id: attribute.id
-      }))
-    ];
+    for (const attribute of attributes) {
+      const attributeId = attributes.find(
+        (attribute_: AttendeeAttribute) => attribute_.name == attribute.name
+      )?.id;
     
-   
-  };
+      const attendeeAttribute = attendee.attributeValues.find(
+        (attributeValue: AttendeeAttributeValue) =>
+          attributeValue.formFieldId == attributeId
+      );
+      
+      output[attribute.name] = attendeeAttribute?.value || "";
+    }
 
-  return (
+    return output;
+  });
+
+  const data = generateData(attendees)
+  let createNew = (() => {
+    const output: any = {};
+
+    let first = true;
+
+    for (const { name, fromAttendee } of builtInAttributes) {
+      output[name] = first ? <span style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px'
+      }}>
+        <Plus size={20} />Create New Attendee
+      </span> : '';
+      first = false;
+    }
+
+    for (const attribute of attributes) {
+      output[attribute.name] = '';
+    }
+
+    return output;
+  })()
+
+  
+
+  type DrawerAttendeeTuple = [boolean, AttendeeWithAttributes | null]
+
+  const [[drawerOpen, drawerAttendee], setDrawerAttendee] = useState<DrawerAttendeeTuple>([false, null]);
+  
+  const [statefulData_, setStatefulData] = useState(data);
+  console.log({ statefulData_});
+  const statefulData = statefulData_.sort((a: any, b: any) => new Date(a.$attendee.createdAt).getTime() - new Date(b.$attendee.createdAt).getTime());
+  // const statefulData = statefulData_.sort((a: any, b: any)x => a.$attendee.createdAt - b.$attendee.createdAt);
+
+  const renderActions = (value: any, rowData: any, rowIndex: any) => {
+    const [loading, setLoading] = useState(false)
+    if (rowIndex == data.length - 1) return <></>;
+    return <Button type="error" loading={loading} auto scale={1/3} font="12px" onClick={async event => {
+      event.stopPropagation();
+      setLoading(true)
+      let res = await fetch(`/api/hackathons/${hackathon.slug}/data/${rowData.Email}/delete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+      }).then((r) => r.json());
+      setLoading(false)
+      if (res.error) {
+        setToast({ text: res.error, delay: 2000 });
+      } else {
+        setToast({
+          text: `Succesfully deleted ${rowData.Name}'s record.`,
+          delay: 2000
+        });
+        setStatefulData(generateData([...attendees.filter(a => a.email != rowData.Email)]))
+      }
+    }}>Delete</Button>
+  }
+
+  return width && (
     <>
-
-      <Page className="data--page">
-        <h1>Attendees</h1>
-
-        {css`
-          .data--page, .data--page main {
-            height: 200px!important;
-            min-height: unset!important;
-          }
-
-          .data--page main {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
-          }
-        `}
-
-
-        <SaveButton saveData={saveData} />
-      </Page>
-
-      <div className="activetable__wrapper">
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-          .activetable__wrapper > * > table {
-            width: 100vw;
-            margin: -10px
-          }
-        `
+      <Drawer visible={drawerOpen} onClose={() => setDrawerAttendee(([_, attendee]: DrawerAttendeeTuple) => [false, attendee])} placement="right" style={{ maxWidth: '500px' }}>
+        <Drawer.Content>
+          {drawerAttendee?.id == "create" && <Text h3>New Attendee</Text>}
+          <Form schema={{
+            elements: [
+              ...builtInAttributes.filter(x => x.id != "built-in").map(attribute => (
+                {
+                  type: "text",
+                  label: attribute.name,
+                  name: attribute.id,
+                  defaultValue: drawerAttendee ? (drawerAttendee as any)[attribute.id] : ""
+                }
+              )) as any,
+              ...attributes.map(attribute => (
+                {
+                  type: "text",
+                  label: attribute.name,
+                  name: `custom-${attribute.id}`,
+                  defaultValue: drawerAttendee?.attributeValues.filter(x => x.formFieldId == attribute.id)[0]?.value || ""
+                }
+              )) as any
+            ],
+            submitText: drawerAttendee?.id == "create" ? `Create New Attendee` : `Update ${drawerAttendee?.name}'s Record`
           }}
-        ></style>
-        <ActiveTable
-          tableStyle={{
-            width: "100%"
-          }}
-          content={content as any}
-          onContentUpdate={async (newContent) => {
-            // return setContent(newContent as any);
-            const oldHeaders = fix(contentRef.current[0] as string[]);
-            const newHeaders = newContent[0] as string[];
-
-            console.log("[event] content update", {
-              newHeaders,
-              oldHeaders,
-              defaultContent,
-              defaultShape,
-              attributes
-            });
-
-            if (oldHeaders.length < newHeaders.length) {
-              // a column was added
-
-              for (let i = 0; i < newHeaders.length; i++) {
-                const newHeader = newHeaders[i];
-                if (!oldHeaders.includes(newHeader)) {
-                  let tempShape = [...latestShapeRef.current];
-                  tempShape.splice(i, 0, {
-                    type: "text",
-                    name: newHeader,
-                    id: "to-create"
-                  });
-                  latestShapeRef.current = tempShape;
-                  // setShape(tempShape);
-                }
-              }
-            } else if (oldHeaders.length > newHeaders.length) {
-              // a column was removed
-
-              for (let i = 0; i < oldHeaders.length; i++) {
-                const oldHeader = oldHeaders[i];
-                if (!newHeaders.includes(oldHeader)) {
-                  let tempShape = [...latestShapeRef.current];
-                  delete tempShape[i];
-                  latestShapeRef.current = tempShape;
-                  // setShape(tempShape);
-                }
-              }
-            } else if (oldHeaders.length == newHeaders.length) {
-              let differences: {
-                old: string;
-                new: string;
-                index: number;
-              }[] = [];
-
-              for (let i = 0; i < oldHeaders.length; i++) {
-                if (oldHeaders[i] != newHeaders[i]) {
-                  differences.push({
-                    old: oldHeaders[i],
-                    new: newHeaders[i],
-                    index: i
-                  });
-                }
-              }
-
-              if (differences.length > 0) {
-                console.log("[event] differences found", { differences });
-              }
-
-              if (differences.length == 1) {
-                // a column was renamed
-
-                let tempShape = [...latestShapeRef.current];
-                tempShape[differences[0].index].name = differences[0].new;
-                latestShapeRef.current = tempShape;
-              } else if (differences.length == 2) {
-                // a column was moved
-
-                let tempShape = [...latestShapeRef.current];
-                let tempColumn = { ...tempShape[differences[0].index] };
-                tempShape[differences[0].index] ==
-                  tempShape[differences[1].index];
-                tempShape[differences[1].index] == tempColumn;
-                latestShapeRef.current = tempShape;
-              } else if (differences.length > 2) {
-                // some goofy shit happened that we don't understand
-
-                console.error("Long differences length found");
+          
+          submission={{
+            type: "controlled",
+            onSubmit: async (data) => {
+              let res = await fetch(drawerAttendee?.id == "create" ? `/api/hackathons/${hackathon.slug}/data/create` :  `/api/hackathons/${hackathon.slug}/data/${drawerAttendee?.id}/update`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  ...data
+                })
+              }).then((r) => r.json());
+              if (res.error) {
+                setToast({ text: res.error, delay: 2000 });
               } else {
-                // table body updated
-
-                console.log("[event] table body updated");
+                setToast({
+                  text: `Succesfully ${drawerAttendee?.id == "create" ? "created" : "updated"} ${res.attendee.name}'s record.`,
+                  delay: 2000
+                });
+                setStatefulData(generateData([...attendees.map(a => a.id != res.attendee.id ? a : res.attendee)]))
+                setDrawerAttendee(([_, attendee]: DrawerAttendeeTuple) => [false, attendee])
               }
             }
-
-            setContent(newContent as any);
-
-            contentRef.current = fix(newContent) as any;
           }}
-          displayAddNewColumn={false}
-          onColumnsUpdate={(newColumns) => {
-            const oldShape = fix(lastSavedShapeRef.current);
-            const newShape = latestShapeRef.current;
-
-            const isNew = JSON.stringify(newShape) != JSON.stringify(oldShape);
-
-            if (!isNew) return false;
-
-            lastSavedShapeRef.current = fix(newShape);
-
-            setShape(newShape);
-
-            console.log("[event] columns changed", { newColumns });
-          }}
-          customColumnsSettings={shape.map((column: Column, i: number) => {
-            console.log({ column });
-            return {
-              headerName: column.name,
-              isHeaderTextEditable: i >= builtInAttributes.length,
-              columnDropdown: {
-                isSortAvailable: false,
-                isDeleteAvailable: i >= builtInAttributes.length,
-                isInsertLeftAvailable: i >= builtInAttributes.length,
-                isInsertRightAvailable: i >= builtInAttributes.length - 1,
-                isMoveAvailable: i >= builtInAttributes.length + 1
-              },
-              availableDefaultColumnTypes: (i < builtInAttributes.length
-                ? [column.type || "text"]
-                : undefined) as DEFAULT_COLUMN_TYPES[],
-              defaultColumnTypeName: column.type || "text",
-              isCellTextEditable: !column.readOnly
-            };
-          })}
-          // customColumnsSettings={(content[0] as any).map((c: any, i: number) => ({
-          //   headerName: c,
-          //   isHeaderTextEditable: c != "Name" && c != "Email",
-          //   columnDropdown: {
-          //     isSortAvailable: false,
-          //     isDeleteAvailable: true,
-          //     isInsertLeftAvailable: c != "Name" && c != "Email",
-          //     isInsertRightAvailable: i == (content[0] as any).length - 1,
-          //     isMoveAvailable: c != "Name" && c != "Email",
-          //   },
-          // })) as any} // @sampoder lets change this to use the `shape` variable instead of content, since we'll have more control over the attributes
-        />
-      </div>
-      <Debug data={{ shape }} />
-      <Debug data={{ content }} />
-      <Debug data={{ attendees }} />
+          
+          />
+          <Debug data={{ drawerAttendee }} />
+        </Drawer.Content>
+      </Drawer>
+      {css`
+        .attendees-data-table {
+          --table-font-size: calc(1 * 11pt)!important;
+        }
+        .attendees-data-table-row {
+          cursor: pointer;
+        }
+        .attendees-data-table-row > td > div.cell {
+          min-height: calc(2.525 * var(--table-font-size));
+        }
+      `}
+      <Table className="attendees-data-table" data={[...statefulData, createNew]} rowClassName={() => "attendees-data-table-row"} onRow={e => {
+        console.log(e, '@')
+        if (e.$i === undefined) return setDrawerAttendee([true, {id: "create", name: "", email: "", hackathonId: "", checkedIn: false, createdAt: new Date(), checkInKey: "", attributeValues: []}]);
+        const attendee = attendees[e.$i];
+        setDrawerAttendee([true, attendee]);
+      }}>
+        {builtInAttributes.map((column: BuiltInColumn) => (
+          <Table.Column prop={column.name} label={column.name} render={column.customRender ? (((value: string, _: unknown, index: number) => {
+            return column.customRender?.(value, attendees[index]);
+          }) as any) : undefined} />
+        ))}
+        {attributes.slice(0, sliceNum).map((attribute: AttendeeAttribute, i: number) => (
+          <Table.Column prop={attribute.name} label={attribute.name} key={attribute.name} className={`attendees-data-table-column-custom-${i}`} />
+        ))}
+        <Table.Column prop="operation" label="danger zone" render={renderActions} width={100} />
+      </Table>
     </>
-  );
+  )
 }
 
 export default function Hackathon({
@@ -413,10 +266,15 @@ export default function Hackathon({
 
   return (
     <>
-        <DataTable
-          attendees={hackathon.attendees}
-          attributes={hackathon.attendeeAttributes}
-        />
+      <Page>
+        <h1>Attendees</h1>
+
+        <Card style={{
+          margin: '-16px'
+        }}>
+        <Data hackathon={hackathon} attendees={hackathon.attendees} attributes={hackathon.attendeeAttributes} />
+        </Card>
+      </Page>
     </>
   );
 }
@@ -450,7 +308,12 @@ export const getServerSideProps = (async (context) => {
         attendees: {
           include: {
             attributeValues: true
-          }
+          },
+          orderBy: [
+            {
+              createdAt: 'desc',
+            },
+          ],
         }
       }
     });
