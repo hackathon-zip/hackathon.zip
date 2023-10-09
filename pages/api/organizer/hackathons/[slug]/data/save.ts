@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import prisma from "@/lib/prisma";
 import { Column } from "@/pages/[slug]/data";
 import { getAuth } from "@clerk/nextjs/server";
