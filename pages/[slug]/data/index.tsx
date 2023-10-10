@@ -581,7 +581,67 @@ export default function Hackathon({
     );
   }
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const properties = ["type", "name", "attributes", "add:"]
+  
+  const properties = (attribute: AttendeeAttribute) => {
+    return [
+      {
+        type: "text",
+        miniLabel: "Property Name:",
+        label: attribute.name, // @ts-ignore
+        name: `custom-${attribute.id}-name`,
+        mt: 2,
+        mb: 0.5,
+        defaultValue: attribute["name"]
+      },
+      {
+        type: "select",
+        options: ["text", "select"],
+        miniLabel: "Property Type:",
+        name: `custom-${attribute.id}-type`,
+        mb: 0.3, // @ts-ignore
+        defaultValue: attribute["type"]
+      },
+      {
+        type: "select",
+        multipleSelect: true,
+        options: [],
+        miniLabel: "Available Options:",
+        name: `custom-${attribute.id}-options`,
+        disabled: true,
+        useValuesAsOptions: true,
+        mt: 0.5,
+        mb: 0.1, // @ts-ignore
+        defaultValue: [...attribute["options"]],
+        visible: (data: { [key: string]: { value: string } }) => {
+          return data[`custom-${attribute.id}-type`].value === "select"
+        }
+      },
+      {
+        type: "text",
+        name: `custom-${attribute.id}-add-option`,
+        mb: 0.5, // @ts-ignore
+        visible: (data: { [key: string]: { value: string } }) => {
+          return data[`custom-${attribute.id}-type`].value === "select"
+        },
+        placeholder: "Add an option...",
+        onKeyup: (event: any, updateValue: any, getValue: any) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            let toAdd = getValue(`custom-${attribute.id}-add-option`)
+            updateValue(
+              `custom-${attribute.id}-options`, 
+              [...getValue(`custom-${attribute.id}-options`).filter((x: any) => x != toAdd), toAdd]
+            )
+            updateValue(
+              `custom-${attribute.id}-add-option`, 
+              ``
+            )
+          }
+        }
+      }
+    ]
+  }
+  
   return (
     <>
       <Page>
@@ -606,37 +666,14 @@ export default function Hackathon({
           visible={drawerOpen}
           onClose={() => setDrawerOpen(false)}
           placement="right"
-          style={{ maxWidth: "500px" }}
+          style={{ width: "500px" }}
         >
           <Drawer.Content>
             <Text h3>Edit Schema</Text>
             <Form
               schema={{
                 elements: [
-                  ...(hackathon.attendeeAttributes.map((attribute) => properties.map((property, i) => ({
-                    type: property == "type" || property == "attributes" ? "select" : "text",
-                    multipleSelect: property == "attributes",
-                    options: property == "type" ? ["text", "select"] : ["Test", "1000", "123"],
-                    inlineLabel: property,
-                    label: i == 0 ? attribute.name : undefined, // @ts-ignore
-                    name: `custom-${attribute.id}-${property}`,
-                    mt: i == 0 ? 1 : 0,
-                    disabled: property == "attributes",
-                    useValuesAsOptions: property == "attributes",
-                    mb: 0.5, // @ts-ignore
-                    defaultValue: property == "attributes" ? ["Test", "1000", "123"] : attribute[property],
-                    visible: property === "attributes" ? (data: { [key: string]: { value: string } }) => {
-                      console.log(data[`custom-${attribute.id}-type`])
-                      console.log(data[`custom-${attribute.id}-type`].value)
-                      return data[`custom-${attribute.id}-type`].value === "select"
-                    } : () => true,
-                    onKeyup: property === "add:" ? (event: any, updateValue: any, getValue: any) => {
-                      event.preventDefault()
-                      if (event.key === "Enter") {
-                        updateValue(`custom-${attribute.id}-attributes`, [...getValue(`custom-${attribute.id}-attributes`), getValue(`custom-${attribute.id}-add:`)])
-                      }
-                    } : () => null
-                  })) as any)).flat()
+                  ...(hackathon.attendeeAttributes.map((attribute) => properties(attribute)).flat())
                 ],
                 submitText: `Edit Schema`
               }}

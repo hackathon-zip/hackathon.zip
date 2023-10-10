@@ -98,6 +98,7 @@ function InputTuple({
 interface BaseFormElement {
   type: string;
   label?: string;
+  miniLabel?: string;
   labelPosition?: string;
   mt?: number
   mb?: number
@@ -246,7 +247,7 @@ export const Form = React.forwardRef(
       const element = inputFields[name] as FormTextInput;
       setValues((old: any) => {
 
-        old[name].value = Array.isArray(old[name].value) ? value.split(",") : value;
+        old[name].value = Array.isArray(old[name]?.value) && !Array.isArray(value) ! ? value.split(",") : value;
         console.log(value)
         if (element.required) {
           if (value) {
@@ -361,11 +362,19 @@ export const Form = React.forwardRef(
                   mb={typeof element.mb == "undefined" ? 1 : element.mb}
                   placeholder={element.placeholder}
                   htmlType={(element as FormTextInput).type}
+                  onKeyPress={(event) => event.key === "Enter" && event.preventDefault()}
+                  onKeyDown={(event) => event.key === "Enter" && event.preventDefault()}
                   onKeyUp={(event) => element.onKeyup?.(event, updateValue, getValue)}
                 >
                   {element.label && (
                     <Text h5>
                       {element.label}
+                      {element.required && <Required />}
+                    </Text>
+                  )}
+                  {element.miniLabel && (
+                    <Text small  mb={0.5} style={{display: 'block', fontSize: '13px'}}>
+                      {element.miniLabel}
                       {element.required && <Required />}
                     </Text>
                   )}
@@ -396,8 +405,14 @@ export const Form = React.forwardRef(
               return (
                 <>
                   {element.label && (
-                    <Text h5>
+                    <Text h5 mt={element.mt || 0}>
                       {element.label}
+                      {element.required && <Required />}
+                    </Text>
+                  )}
+                  {element.miniLabel && (
+                    <Text small mt={element.mt || 0} mb={0.5} style={{display: 'block', fontSize: '13px'}}>
+                      {element.miniLabel}
                       {element.required && <Required />}
                     </Text>
                   )}
@@ -409,6 +424,8 @@ export const Form = React.forwardRef(
                     multiple={element.multipleSelect || false}
                     value={getValue(element.name)}
                     initialValue={getValue(element.name)}
+                    mt={element.mt && !element.label && !element.miniLabel ? element.mt : 0}
+                    mb={typeof element.mb == "undefined" ? 1 : element.mb}
                     onChange={(v) =>
                       updateValue(
                         element.name,
