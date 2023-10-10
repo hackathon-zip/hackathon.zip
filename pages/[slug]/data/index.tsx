@@ -629,7 +629,7 @@ export default function Hackathon({
               schema={{
                 elements: [
                   ...(hackathon.attendeeAttributes.map((attribute) => properties(attribute)).flat())
-                ],
+                ] as any,
                 submitText: `Edit Schema`
               }}
               gap={1}
