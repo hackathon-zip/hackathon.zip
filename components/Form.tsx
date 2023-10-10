@@ -248,7 +248,11 @@ export const Form = React.forwardRef(
     function updateValue(name: string, value: string) {
       const element = inputFields[name] as FormTextInput;
       setValues((old: any) => {
-
+        if(!old[name]){
+          old[name] = {
+            value: ""
+          }
+        }
         old[name].value = Array.isArray(old[name]?.value) && !Array.isArray(value) ! ? value.split(",") : value;
         console.log(value)
         if (element.required) {
@@ -274,12 +278,12 @@ export const Form = React.forwardRef(
     }
 
     function getValue(name: string) {
-      const value = values[name].value || "";
+      const value = values[name]?.value || "";
       return value;
     }
 
     function getWarningStatus(name: string) {
-      const value = values[name].showWarning;
+      const value = values[name]?.showWarning;
       return value;
     }
 
@@ -435,7 +439,7 @@ export const Form = React.forwardRef(
                       )
                     }
                   >
-                    {(element.useValuesAsOptions ? getValue(element.name) : element.options).map((option: string) => (
+                    {(element.useValuesAsOptions ? getValue(element.name) || [] : element.options).map((option: string) => (
                       <Select.Option key={option} value={option}>
                         {option}
                       </Select.Option>
@@ -482,11 +486,11 @@ export const Form = React.forwardRef(
               display: hideSubmit ? "none" : "flex",
               flexDirection: "row",
               gap: "16px",
-              alignItems: "center"
+              alignItems: "center",
+              marginTop: buttonMt
             }}
           >
             <Button
-              mt={buttonMt}
               loading={loading}
               type={submitButtonType}
               htmlType="submit"

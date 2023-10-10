@@ -19,6 +19,7 @@ import type {
 import { useRouter } from "next/router";
 import type { ReactElement } from "react";
 import { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 type AttendeeWithAttributes = Attendee & {
   attributeValues: AttendeeAttributeValue[];
@@ -542,7 +543,7 @@ export default function Hackathon({
       {
         type: "text",
         miniLabel: "Property Name:",
-        label: attribute.name, // @ts-ignore
+        label: attribute.name == "" ? attribute.id : attribute.name, // @ts-ignore
         name: `${attribute.id}_name`,
         mt: hackathon.attendeeAttributes[0].id == attribute.id? 0.5 :  1.5,
         mb: 0.5,
@@ -568,7 +569,7 @@ export default function Hackathon({
         mb: 0.1, // @ts-ignore
         defaultValue: [...attribute["options"]],
         visible: (data: { [key: string]: { value: string } }) => {
-          return data[`${attribute.id}_type`].value === "select"
+          return data[`${attribute.id}_type`]?.value === "select"
         }
       },
       {
@@ -576,16 +577,20 @@ export default function Hackathon({
         name: `${attribute.id}_add-option`,
         mb: 0.5, // @ts-ignore
         visible: (data: { [key: string]: { value: string } }) => {
-          return data[`${attribute.id}_type`].value === "select"
+          return data[`${attribute.id}_type`]?.value === "select"
         },
         placeholder: "Add an option...",
         onKeyup: (event: any, updateValue: any, getValue: any) => {
           if (event.key === "Enter") {
             event.preventDefault();
             let toAdd = getValue(`${attribute.id}_add-option`)
+            console.log(getValue(`${attribute.id}_options`))
+            let previousValues = Array.isArray(getValue(`${attribute.id}_options`)) ?  getValue(`${attribute.id}_options`) : []
+            console.log("THE LENGTH:")
+            console.log(previousValues.length)
             updateValue(
               `${attribute.id}_options`, 
-              [...getValue(`${attribute.id}_options`).filter((x: any) => x != toAdd), toAdd]
+              [...previousValues.filter((x: any) => x != toAdd), toAdd]
             )
             updateValue(
               `${attribute.id}_add-option`, 
@@ -598,6 +603,10 @@ export default function Hackathon({
   }
   
   const router = useRouter();
+  
+  const [schemaFormElements, setSchemaFormElements] = useState([
+      ...(hackathon.attendeeAttributes.map((attribute) => properties(attribute)).flat())
+    ])
   
   return (
     <>
@@ -629,13 +638,28 @@ export default function Hackathon({
             <Text h3>Edit Schema</Text>
             <Form
               schema={{
-                elements: [
-                  ...(hackathon.attendeeAttributes.map((attribute) => properties(attribute)).flat())
-                ] as any,
+                elements: schemaFormElements as any,
                 submitText: `Edit Schema`
               }}
               gap={1}
-              buttonMt={1}
+              buttonMt={16}
+              additionalButtons={
+                <Button onClick={() => {
+                  setSchemaFormElements([
+                    ...schemaFormElements,
+                    ...properties({
+                      id: uuidv4(),
+                      name: "",
+                      type: "text",
+                      options: [],
+                      order: 1,
+                      hackathonId: ""
+                    })
+                  ])
+                }}>
+                  Add A Field
+                </Button>
+              }
               submission={{
                 type: "controlled",
                 onSubmit: async (data) => {
