@@ -597,6 +597,8 @@ export default function Hackathon({
     ]
   }
   
+  const router = useRouter();
+  
   return (
     <>
       <Page>
@@ -649,7 +651,7 @@ export default function Hackathon({
                       })
                     }
                   ).then((r) => r.json());
-                  console.log(res)
+                  router.reload()
                 }
               }}
             />

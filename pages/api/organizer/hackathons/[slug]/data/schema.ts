@@ -44,5 +44,12 @@ export default async function handler(
 				}
 			})})
 		)
-		res.json({ body: req.body, attributes });
+		let updatedAttributes = await prisma.attendeeAttribute.findMany({
+			where: {
+				hackathon: {
+					slug: req.query.slug as string
+				}
+			}
+		})
+		res.json({ attributes: updatedAttributes });
 }
