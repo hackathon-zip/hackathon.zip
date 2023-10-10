@@ -101,6 +101,9 @@ interface BaseFormElement {
   labelPosition?: string;
   mt?: number
   mb?: number
+  disabled?: true
+  visible?: (data: {[key: string]: string}) => boolean
+  onKeyup?: (event: any, updateValue: any, getValue: any) => null
 }
 
 interface FormInput extends BaseFormElement {
@@ -137,6 +140,8 @@ interface FormSelect extends FormInput {
   type: "select";
   placeholder?: string;
   options: string[];
+  multipleSelect?: boolean;
+  useValuesAsOptions?: boolean;
 }
 
 interface FormAutocomplete extends FormInput {
@@ -240,7 +245,9 @@ export const Form = React.forwardRef(
     function updateValue(name: string, value: string) {
       const element = inputFields[name] as FormTextInput;
       setValues((old: any) => {
-        old[name].value = value;
+
+        old[name].value = Array.isArray(old[name].value) ? value.split(",") : value;
+        console.log(value)
         if (element.required) {
           if (value) {
             if (element.validate) {
@@ -331,6 +338,9 @@ export const Form = React.forwardRef(
               })}
         >
           {schema.elements.map((formElement: FormElement) => {
+            if( typeof formElement.visible != "undefined" && !formElement.visible(values)){
+              return <></>
+            }
             if (
               "date text email password number"
                 .split(" ")
@@ -351,6 +361,7 @@ export const Form = React.forwardRef(
                   mb={typeof element.mb == "undefined" ? 1 : element.mb}
                   placeholder={element.placeholder}
                   htmlType={(element as FormTextInput).type}
+                  onKeyUp={(event) => element.onKeyup?.(event, updateValue, getValue)}
                 >
                   {element.label && (
                     <Text h5>
@@ -393,9 +404,11 @@ export const Form = React.forwardRef(
                   <Select
                     placeholder={element.placeholder}
                     width="100%"
-                    disabled={loading}
+                    disabled={loading || element.disabled}
                     aria-label={element.label}
+                    multiple={element.multipleSelect || false}
                     value={getValue(element.name)}
+                    initialValue={getValue(element.name)}
                     onChange={(v) =>
                       updateValue(
                         element.name,
@@ -403,7 +416,7 @@ export const Form = React.forwardRef(
                       )
                     }
                   >
-                    {element.options.map((option) => (
+                    {(element.useValuesAsOptions ? getValue(element.name) : element.options).map((option: string) => (
                       <Select.Option key={option} value={option}>
                         {option}
                       </Select.Option>

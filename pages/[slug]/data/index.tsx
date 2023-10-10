@@ -1,7 +1,7 @@
 import { css } from "@/components/CSS";
-import Debug from "@/components/Debug";
 import type { GetServerSideProps } from "next";
 
+import Debug from "@/components/Debug";
 import { Form } from "@/components/Form";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import { useDomId } from "@/hooks/useDomId";
@@ -10,7 +10,7 @@ import prisma from "@/lib/prisma";
 import { delay } from "@/lib/utils";
 import { getAuth } from "@clerk/nextjs/server";
 import { Button, Card, Drawer, Grid, Input, Page, Table, Text, useToasts } from "@geist-ui/core";
-import { CheckCircle, Edit, Plus } from "@geist-ui/react-icons";
+import { CheckCircle, Edit, Edit3, Plus } from "@geist-ui/react-icons";
 import type {
   Attendee,
   AttendeeAttribute,
@@ -44,7 +44,7 @@ export type BuiltInColumn = Column & {
   ) => JSX.Element | string;
 };
 
-function EditableValue ({ name, initialValue, save, style }: { name: string, initialValue: string, save?: (value: string) => any | Promise<any>, style?: StyleHTMLAttributes<any> }) {
+function EditableValue({ name, initialValue, save, style }: { name: string, initialValue: string, save?: (value: string) => any | Promise<any>, style?: StyleHTMLAttributes<any> }) {
   const [value, setValue] = useState(initialValue);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -86,14 +86,15 @@ function EditableValue ({ name, initialValue, save, style }: { name: string, ini
         padding: '0px',
         ...style
       }} className={className}>
-        <Input disabled={isLoading} ref={ref} value={value} onChange={e => setValue(e.target.value)} crossOrigin onBlur={() => disableEditing()} onKeyUp={e => {
+        <Input placeholder={initialValue || '(no value)'} disabled={isLoading} ref={ref} value={value} onChange={e => setValue(e.target.value)} crossOrigin onBlur={() => disableEditing()} onKeyUp={e => {
           if (e.key == 'Enter') return disableEditing();
         }} />
         <span className="static-value" onDoubleClick={() => enableEditing()} style={{
           margin: '0px',
           padding: '0px',
+          color: value ? undefined : '#3b4858',
         }}>
-          {value}
+          {value || '(no value)'}
         </span>
 
         <span style={{
@@ -102,7 +103,7 @@ function EditableValue ({ name, initialValue, save, style }: { name: string, ini
         }} onClick={() => isEditing ? disableEditing() : enableEditing()}>
           {isEditing ? <CheckCircle size={16} /> : <Edit size={16} />}
         </span>
-        
+
         {css`
           .${className} .input-wrapper {
             height: unset!important;
@@ -165,6 +166,196 @@ const builtInAttributes: BuiltInColumn[] = [
   }*/
 ]; // these are separated that way we can use them when setting column settings
 
+class DrawerData {
+  #setIsOpen: (isOpen: boolean) => void;
+  #setAttendee: (attendee: AttendeeWithAttributes) => void;
+  isOpen: boolean;
+  attendee?: AttendeeWithAttributes | undefined;
+
+  constructor({
+    isOpen,
+    attendee,
+    setIsOpen,
+    setAttendee
+  }: {
+    isOpen: boolean;
+    attendee: AttendeeWithAttributes | undefined;
+    setIsOpen: (isOpen: boolean) => void;
+    setAttendee: (attendee: AttendeeWithAttributes) => void;
+  }) {
+    this.isOpen = isOpen;
+    this.attendee = attendee;
+
+    this.#setIsOpen = setIsOpen;
+    this.#setAttendee = setAttendee;
+  }
+
+  open () {
+    this.#setIsOpen(true);
+  }
+
+  close () {
+    this.#setIsOpen(false);
+  }
+
+  setAttendee (attendee: AttendeeWithAttributes) {
+    this.#setAttendee(attendee);
+  }
+
+  clearAttendee () {
+    this.#setAttendee(undefined as any);
+  }
+}
+
+function useDrawer(): DrawerData {
+  const [isOpen, setIsOpen] = useState(false);
+  const [attendee, setAttendee] = useState<AttendeeWithAttributes | undefined>(undefined);
+
+  return new DrawerData({
+    isOpen,
+    attendee,
+    setIsOpen,
+    setAttendee
+  });
+}
+
+function EditDrawer({
+  drawer,
+  attendeeAttributes,
+  hackathon
+}: {
+  drawer: DrawerData;
+  attendeeAttributes: AttendeeAttribute[];
+  hackathon: Hackathon | HackathonWithAttendees;
+}) {
+  const { attendee, isOpen } = drawer;
+  const { setToast } = useToasts();
+
+  return (
+
+    <Drawer
+    visible={isOpen}
+    onClose={() =>
+      drawer.close()
+    }
+    placement="right"
+    style={{ maxWidth: "500px" }}
+  >
+    <Drawer.Content>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: '12px',
+        marginBottom: '16px',
+      }}>
+        <Text h3 my={0}>
+          {attendee?.id == "create" ? "New Attendee" : attendee?.name}
+        </Text>
+        <a style={{
+          cursor: 'pointer',
+          color: '#666',
+          display: 'flex',
+        }}>
+          <Edit3 />
+        </a>
+      </div>
+
+
+
+      <Grid.Container gap={2} mb={1} justify="space-between">
+        {builtInAttributes.filter(x => x.id != "built-in" && x.name !== "Name").map(attribute => (
+          <Grid xs={12}>
+            <EditableValue name={attribute.name} initialValue={attendee ? (attendee as any)[attribute.id] : ""} save={async () => {
+              await delay(500);
+            }} />
+          </Grid>
+        ))}
+      </Grid.Container>
+
+      <Grid.Container gap={2} mb={1} justify="space-between">
+        {attendeeAttributes.map(attribute => (
+          <Grid xs={12}>
+            <EditableValue name={attribute.name} initialValue={attendee?.attributeValues.filter(x => x.formFieldId == attribute.id)[0]?.value || ""} save={async () => {
+              await delay(500);
+            }} />
+          </Grid>
+        ))}
+      </Grid.Container>
+
+      <Form
+        schema={{
+          elements: [
+            ...(builtInAttributes
+              .filter((x) => x.id != "built-in")
+              .map((attribute) => ({
+                type: "text",
+                label: attribute.name,
+                name: attribute.id,
+                defaultValue: attendee
+                  ? (attendee as any)[attribute.id]
+                  : ""
+              })) as any),
+            ...(attendeeAttributes.map((attribute) => ({
+              type: "text",
+              label: attribute.name,
+              name: `custom-${attribute.id}`,
+              defaultValue:
+                attendee?.attributeValues.filter(
+                  (x) => x.formFieldId == attribute.id
+                )[0]?.value || ""
+            })) as any)
+          ],
+          submitText:
+            attendee?.id == "create"
+              ? `Create New Attendee`
+              : `Update ${attendee?.name}'s Record`
+        }}
+        submission={{
+          type: "controlled",
+          onSubmit: async (data) => {
+            let res = await fetch(
+              attendee?.id == "create"
+                ? `/api/hackathons/${hackathon.slug}/data/create`
+                : `/api/hackathons/${hackathon.slug}/data/${attendee?.id}/update`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  ...data
+                })
+              }
+            ).then((r) => r.json());
+            if (res.error) {
+              setToast({ text: res.error, delay: 2000 });
+            } else {
+              setToast({
+                text: `Succesfully ${attendee?.id == "create" ? "created" : "updated"
+                  } ${res.attendee.name}'s record.`,
+                delay: 2000
+              });
+              // setStatefulData(
+              //   generateData([
+              //     ...attendees.map((a) =>
+              //       a.id != res.attendee.id ? a : res.attendee
+              //     )
+              //   ])
+              // );
+              drawer.setAttendee(attendee as any);
+              drawer.close();
+            }
+          }
+        }}
+      />
+      <Debug data={{ attendee }} />
+    </Drawer.Content>
+  </Drawer>
+  )
+}
+
+
 function Data({
   hackathon,
   attendees,
@@ -177,6 +368,8 @@ function Data({
   const { width } = useViewport(false);
   const sliceNum = Math.ceil((Math.max(width || 100_000, 1000) - 1000) / 350);
   const { setToast } = useToasts();
+
+  const drawer = useDrawer();
 
   const generateData = (attendees: AttendeeWithAttributes[]) =>
     attendees
@@ -243,8 +436,7 @@ function Data({
 
   type DrawerAttendeeTuple = [boolean, AttendeeWithAttributes | null];
 
-  const [[drawerOpen, drawerAttendee], setDrawerAttendee] =
-    useState<DrawerAttendeeTuple>([false, null]);
+
 
   const [statefulData_, setStatefulData] = useState(data);
   console.log({ statefulData_ });
@@ -304,104 +496,7 @@ function Data({
   return (
     width && (
       <>
-        <Drawer
-          visible={drawerOpen}
-          onClose={() =>
-            setDrawerAttendee(([_, attendee]: DrawerAttendeeTuple) => [
-              false,
-              attendee
-            ])
-          }
-          placement="right"
-          style={{ maxWidth: "500px" }}
-        >
-          <Drawer.Content>
-            {drawerAttendee?.id == "create" && <Text h3>New Attendee</Text>}
-
-          {builtInAttributes.filter(x => x.id != "built-in").map(attribute => (
-            <EditableValue name={attribute.name} initialValue={drawerAttendee ? (drawerAttendee as any)[attribute.id] : "(no value)"} save={async () => {
-              await delay(500);
-            }} />
-          ))}
-
-          {attributes.map(attribute => (
-            <EditableValue name={attribute.name} initialValue={drawerAttendee?.attributeValues.filter(x => x.formFieldId == attribute.id)[0]?.value || "(no value)"} save={async () => {
-              await delay(500);
-            }} />
-          ))}
-
-            <Form
-              schema={{
-                elements: [
-                  ...(builtInAttributes
-                    .filter((x) => x.id != "built-in")
-                    .map((attribute) => ({
-                      type: "text",
-                      label: attribute.name,
-                      name: attribute.id,
-                      defaultValue: drawerAttendee
-                        ? (drawerAttendee as any)[attribute.id]
-                        : ""
-                    })) as any),
-                  ...(attributes.map((attribute) => ({
-                    type: "text",
-                    label: attribute.name,
-                    name: `custom-${attribute.id}`,
-                    defaultValue:
-                      drawerAttendee?.attributeValues.filter(
-                        (x) => x.formFieldId == attribute.id
-                      )[0]?.value || ""
-                  })) as any)
-                ],
-                submitText:
-                  drawerAttendee?.id == "create"
-                    ? `Create New Attendee`
-                    : `Update ${drawerAttendee?.name}'s Record`
-              }}
-              submission={{
-                type: "controlled",
-                onSubmit: async (data) => {
-                  let res = await fetch(
-                    drawerAttendee?.id == "create"
-                      ? `/api/hackathons/${hackathon.slug}/data/create`
-                      : `/api/hackathons/${hackathon.slug}/data/${drawerAttendee?.id}/update`,
-                    {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json"
-                      },
-                      body: JSON.stringify({
-                        ...data
-                      })
-                    }
-                  ).then((r) => r.json());
-                  if (res.error) {
-                    setToast({ text: res.error, delay: 2000 });
-                  } else {
-                    setToast({
-                      text: `Succesfully ${
-                        drawerAttendee?.id == "create" ? "created" : "updated"
-                      } ${res.attendee.name}'s record.`,
-                      delay: 2000
-                    });
-                    setStatefulData(
-                      generateData([
-                        ...attendees.map((a) =>
-                          a.id != res.attendee.id ? a : res.attendee
-                        )
-                      ])
-                    );
-                    setDrawerAttendee(([_, attendee]: DrawerAttendeeTuple) => [
-                      false,
-                      attendee
-                    ]);
-                  }
-                }
-              }}
-            />
-            <Debug data={{ drawerAttendee }} />
-          </Drawer.Content>
-        </Drawer>
+        <EditDrawer drawer={drawer} attendeeAttributes={attributes} hackathon={hackathon} />
         {css`
           .attendees-data-table {
             --table-font-size: calc(1 * 11pt) !important;
@@ -419,22 +514,23 @@ function Data({
           rowClassName={() => "attendees-data-table-row"}
           onRow={(e) => {
             console.log(e, "@");
-            if (e.$i === undefined)
-              return setDrawerAttendee([
-                true,
-                {
-                  id: "create",
-                  name: "",
-                  email: "",
-                  hackathonId: "",
-                  checkedIn: false,
-                  createdAt: new Date(),
-                  checkInKey: "",
-                  attributeValues: []
-                }
-              ]);
+            if (e.$i === undefined) {
+              drawer.open();
+              drawer.setAttendee({
+                id: "create",
+                name: "",
+                email: "",
+                hackathonId: "",
+                checkedIn: false,
+                createdAt: new Date(),
+                checkInKey: "",
+                attributeValues: []
+              });
+            }
             const attendee = attendees[e.$i];
-            setDrawerAttendee([true, attendee]);
+
+            drawer.open();
+            drawer.setAttendee(attendee);
           }}
         >
           {builtInAttributes.map((column: BuiltInColumn) => (
@@ -444,8 +540,8 @@ function Data({
               render={
                 column.customRender
                   ? (((value: string, _: unknown, index: number) => {
-                      return column.customRender?.(value, attendees[index]);
-                    }) as any)
+                    return column.customRender?.(value, attendees[index]);
+                  }) as any)
                   : undefined
               }
             />
@@ -485,7 +581,7 @@ export default function Hackathon({
     );
   }
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const properties = ["name", "type"]
+  const properties = ["type", "name", "attributes", "add:"]
   return (
     <>
       <Page>
@@ -518,17 +614,30 @@ export default function Hackathon({
               schema={{
                 elements: [
                   ...(hackathon.attendeeAttributes.map((attribute) => properties.map((property, i) => ({
-                    type: property == "type" ? "select" : "text",
-                    options: property == "type" ? ["text", "select"] : [],
+                    type: property == "type" || property == "attributes" ? "select" : "text",
+                    multipleSelect: property == "attributes",
+                    options: property == "type" ? ["text", "select"] : ["Test", "1000", "123"],
                     inlineLabel: property,
-                    label: i == 0 ? attribute.name : undefined,
-                    name: `custom-${attribute.id}-${attribute[property]}`,
+                    label: i == 0 ? attribute.name : undefined, // @ts-ignore
+                    name: `custom-${attribute.id}-${property}`,
                     mt: i == 0 ? 1 : 0,
-                    mb: 0.5,
-                    defaultValue: attribute[property],
+                    disabled: property == "attributes",
+                    useValuesAsOptions: property == "attributes",
+                    mb: 0.5, // @ts-ignore
+                    defaultValue: property == "attributes" ? ["Test", "1000", "123"] : attribute[property],
+                    visible: property === "attributes" ? (data: { [key: string]: { value: string } }) => {
+                      console.log(data[`custom-${attribute.id}-type`])
+                      console.log(data[`custom-${attribute.id}-type`].value)
+                      return data[`custom-${attribute.id}-type`].value === "select"
+                    } : () => true,
+                    onKeyup: property === "add:" ? (event: any, updateValue: any, getValue: any) => {
+                      event.preventDefault()
+                      if (event.key === "Enter") {
+                        updateValue(`custom-${attribute.id}-attributes`, [...getValue(`custom-${attribute.id}-attributes`), getValue(`custom-${attribute.id}-add:`)])
+                      }
+                    } : () => null
                   })) as any)).flat()
                 ],
-                
                 submitText: `Edit Schema`
               }}
               gap={1}
@@ -542,6 +651,21 @@ export default function Hackathon({
           </Drawer.Content>
         </Drawer>
       </Page>
+      {css`
+          .select.multiple .icon{
+            display: none;
+          }
+          .select.multiple.active {
+            border: 1px solid #eaeaea!important;
+          }
+          .select.multiple {
+            cursor: default!important;
+          }
+          .select.multiple .option {
+            cursor: default!important;
+            color: black!important;
+          }
+        `}
     </>
   );
 }
