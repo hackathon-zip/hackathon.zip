@@ -2,23 +2,23 @@ import { css } from "@/components/CSS";
 import type { GetServerSideProps } from "next";
 
 import Debug from "@/components/Debug";
+import EditableValue from "@/components/EditableValue";
 import { Form } from "@/components/Form";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
-import { useDomId } from "@/hooks/useDomId";
 import useViewport from "@/hooks/useViewport";
 import prisma from "@/lib/prisma";
-import { delay } from "@/lib/utils";
 import { getAuth } from "@clerk/nextjs/server";
-import { Button, Card, Drawer, Grid, Input, Page, Table, Text, useToasts } from "@geist-ui/core";
-import { CheckCircle, Edit, Edit3, Plus } from "@geist-ui/react-icons";
+import { Button, Card, Drawer, Grid, Page, Table, Text, useToasts } from "@geist-ui/core";
+import { Edit3, Plus } from "@geist-ui/react-icons";
 import type {
   Attendee,
   AttendeeAttribute,
   AttendeeAttributeValue,
   Hackathon
 } from "@prisma/client";
-import type { ReactElement, StyleHTMLAttributes } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/router";
+import type { ReactElement } from "react";
+import { useState } from "react";
 
 type AttendeeWithAttributes = Attendee & {
   attributeValues: AttendeeAttributeValue[];
@@ -43,94 +43,6 @@ export type BuiltInColumn = Column & {
     attendee?: Attendee | AttendeeWithAttributes
   ) => JSX.Element | string;
 };
-
-function EditableValue({ name, initialValue, save, style }: { name: string, initialValue: string, save?: (value: string) => any | Promise<any>, style?: StyleHTMLAttributes<any> }) {
-  const [value, setValue] = useState(initialValue);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const className = useDomId('Editable value');
-  const ref = useRef<HTMLInputElement>(null);
-
-  const enableEditing = () => setIsEditing(true);
-  const disableEditing = async () => {
-    setIsLoading(true);
-    if (save) await save(value);
-    setIsEditing(false);
-    setIsLoading(false);
-  }
-
-  useEffect(() => {
-    if (isEditing) {
-      ref.current?.focus();
-      ref.current?.select();
-    }
-  }, [isEditing]);
-
-  return (
-    <span style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'flex-start',
-      gap: '8px',
-    }}>
-      <Text small mb="-8px" style={{
-        textTransform: 'uppercase',
-        color: '#666',
-      }}>{name}</Text>
-      <span style={{
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        margin: '0px',
-        padding: '0px',
-        ...style
-      }} className={className}>
-        <Input placeholder={initialValue || '(no value)'} disabled={isLoading} ref={ref} value={value} onChange={e => setValue(e.target.value)} crossOrigin onBlur={() => disableEditing()} onKeyUp={e => {
-          if (e.key == 'Enter') return disableEditing();
-        }} />
-        <span className="static-value" onDoubleClick={() => enableEditing()} style={{
-          margin: '0px',
-          padding: '0px',
-          color: value ? undefined : '#3b4858',
-        }}>
-          {value || '(no value)'}
-        </span>
-
-        <span style={{
-          cursor: 'pointer',
-          marginLeft: '8px'
-        }} onClick={() => isEditing ? disableEditing() : enableEditing()}>
-          {isEditing ? <CheckCircle size={16} /> : <Edit size={16} />}
-        </span>
-
-        {css`
-          .${className} .input-wrapper {
-            height: unset!important;
-            padding: 3px;
-            margin: -3px;
-          }
-          .${className} .input-wrapper input {
-            font-size: 16px!important;
-            margin: 0px;
-            padding: 0px;
-          }
-          .${className} .input-container {
-            height: unset!important;
-          }
-          .${className} .input-container {
-            ${!isEditing ? `display: none;` : ``}
-          }
-          .${className} .static-value {
-            border-bottom: 1px solid transparent;
-            border-top: 1px solid transparent;
-            ${isEditing ? `display: none;` : ``}
-          }
-        `}
-      </span>
-    </span>
-  )
-}
 
 const builtInAttributes: BuiltInColumn[] = [
   {
@@ -222,14 +134,22 @@ function useDrawer(): DrawerData {
 function EditDrawer({
   drawer,
   attendeeAttributes,
-  hackathon
+  hackathon,
+  setStatefulData,
+  generateData,
+  attendees
 }: {
   drawer: DrawerData;
   attendeeAttributes: AttendeeAttribute[];
   hackathon: Hackathon | HackathonWithAttendees;
+  setStatefulData: (data: any) => void;
+  generateData: (attendees: AttendeeWithAttributes[]) => any;
+  attendees: AttendeeWithAttributes[];
 }) {
   const { attendee, isOpen } = drawer;
   const { setToast } = useToasts();
+
+  const router = useRouter();
 
   return (
 
@@ -266,8 +186,7 @@ function EditDrawer({
       <Grid.Container gap={2} mb={1} justify="space-between">
         {builtInAttributes.filter(x => x.id != "built-in" && x.name !== "Name").map(attribute => (
           <Grid xs={12}>
-            <EditableValue name={attribute.name} initialValue={attendee ? (attendee as any)[attribute.id] : ""} save={async () => {
-              await delay(500);
+            <EditableValue name={attribute.name} initialValue={attendee ? (attendee as any)[attribute.id] : ""} save={async value => {
             }} />
           </Grid>
         ))}
@@ -276,8 +195,40 @@ function EditDrawer({
       <Grid.Container gap={2} mb={1} justify="space-between">
         {attendeeAttributes.map(attribute => (
           <Grid xs={12}>
-            <EditableValue name={attribute.name} initialValue={attendee?.attributeValues.filter(x => x.formFieldId == attribute.id)[0]?.value || ""} save={async () => {
-              await delay(500);
+            <EditableValue name={attribute.name} initialValue={attendee?.attributeValues.filter(x => x.formFieldId == attribute.id)[0]?.value || ""} save={async value => {
+              const { id } = attribute;
+
+              const response = await fetch(
+              `/api/hackathons/${hackathon.slug}/data/${attendee?.id}/attributes/update`,
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify({
+                    attributeId: id,
+                    attendeeId: attendee?.id,
+                    value
+                  })
+                }
+              ).then((r) => r.json());
+
+              const newAttendee = {
+                ...drawer.attendee as any,
+                attributeValues: [
+                  ...drawer.attendee?.attributeValues.filter(x => x.formFieldId != id) || [],
+                  {
+                    attendeeId: attendee?.id,
+                    formFieldId: id,
+                    value
+                  }
+                ]
+              };
+
+              drawer.setAttendee(newAttendee);
+              
+              router.reload(); // Temporary
+              // TODO: Remove this and store updates in state
             }} />
           </Grid>
         ))}
@@ -496,7 +447,11 @@ function Data({
   return (
     width && (
       <>
-        <EditDrawer drawer={drawer} attendeeAttributes={attributes} hackathon={hackathon} />
+        <EditDrawer drawer={drawer} attendeeAttributes={attributes} hackathon={hackathon} {...{
+          generateData,
+          setStatefulData,
+          attendees
+        }} />
         {css`
           .attendees-data-table {
             --table-font-size: calc(1 * 11pt) !important;
