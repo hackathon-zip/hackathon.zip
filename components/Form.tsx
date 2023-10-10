@@ -195,7 +195,8 @@ export const Form = React.forwardRef(
       clearValuesOnSuccesfulSubmit = false,
       submitDisabledUntilValid = false,
       submitButtonType = "success",
-      gap = 1
+      gap = 1,
+      buttonMt = 0
     }: {
       schema: FormSchema;
       submission: FormSubmission<any>;
@@ -206,6 +207,7 @@ export const Form = React.forwardRef(
       submitDisabledUntilValid?: boolean;
       submitButtonType?: ButtonTypes;
       gap?: number;
+      buttonMt?: number;
     },
     ref
   ) => {
@@ -411,7 +413,7 @@ export const Form = React.forwardRef(
                     </Text>
                   )}
                   {element.miniLabel && (
-                    <Text small mt={element.mt || 0} mb={0.5} style={{display: 'block', fontSize: '13px'}}>
+                    <Text small mt={element.mt || 0} mb={0.5} style={{display: 'block', fontSize: '13px', color: '#333'}}>
                       {element.miniLabel}
                       {element.required && <Required />}
                     </Text>
@@ -484,6 +486,7 @@ export const Form = React.forwardRef(
             }}
           >
             <Button
+              mt={buttonMt}
               loading={loading}
               type={submitButtonType}
               htmlType="submit"

@@ -544,7 +544,7 @@ export default function Hackathon({
         miniLabel: "Property Name:",
         label: attribute.name, // @ts-ignore
         name: `custom-${attribute.id}-name`,
-        mt: 2,
+        mt: hackathon.attendeeAttributes[0].id == attribute.id? 0.5 :  1.5,
         mb: 0.5,
         defaultValue: attribute["name"]
       },
@@ -633,6 +633,7 @@ export default function Hackathon({
                 submitText: `Edit Schema`
               }}
               gap={1}
+              buttonMt={1}
               submission={{
                 type: "controlled",
                 onSubmit: async (data) => {
@@ -652,6 +653,10 @@ export default function Hackathon({
           }
           .select.multiple {
             cursor: default!important;
+          }
+          .select-dropdown {
+            border: 1px solid black!important;
+            padding: 0!important;
           }
           .select.multiple .option {
             cursor: default!important;
