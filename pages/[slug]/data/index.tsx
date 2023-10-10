@@ -1,31 +1,24 @@
 import { css } from "@/components/CSS";
 import Debug from "@/components/Debug";
-import prisma from "@/lib/prisma";
-import { getAuth } from "@clerk/nextjs/server";
-import {
-  Button,
-  Card,
-  Drawer,
-  Page,
-  Table,
-  Text,
-  useToasts,
-  Grid
-} from "@geist-ui/core";
 import type { GetServerSideProps } from "next";
-import { useState } from "react";
 
 import { Form } from "@/components/Form";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
+import { useDomId } from "@/hooks/useDomId";
 import useViewport from "@/hooks/useViewport";
-import { Plus } from "@geist-ui/react-icons";
+import prisma from "@/lib/prisma";
+import { delay } from "@/lib/utils";
+import { getAuth } from "@clerk/nextjs/server";
+import { Button, Card, Drawer, Grid, Input, Page, Table, Text, useToasts } from "@geist-ui/core";
+import { CheckCircle, Edit, Plus } from "@geist-ui/react-icons";
 import type {
   Attendee,
   AttendeeAttribute,
   AttendeeAttributeValue,
   Hackathon
 } from "@prisma/client";
-import type { ReactElement } from "react";
+import type { ReactElement, StyleHTMLAttributes } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type AttendeeWithAttributes = Attendee & {
   attributeValues: AttendeeAttributeValue[];
@@ -50,6 +43,93 @@ export type BuiltInColumn = Column & {
     attendee?: Attendee | AttendeeWithAttributes
   ) => JSX.Element | string;
 };
+
+function EditableValue ({ name, initialValue, save, style }: { name: string, initialValue: string, save?: (value: string) => any | Promise<any>, style?: StyleHTMLAttributes<any> }) {
+  const [value, setValue] = useState(initialValue);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const className = useDomId('Editable value');
+  const ref = useRef<HTMLInputElement>(null);
+
+  const enableEditing = () => setIsEditing(true);
+  const disableEditing = async () => {
+    setIsLoading(true);
+    if (save) await save(value);
+    setIsEditing(false);
+    setIsLoading(false);
+  }
+
+  useEffect(() => {
+    if (isEditing) {
+      ref.current?.focus();
+      ref.current?.select();
+    }
+  }, [isEditing]);
+
+  return (
+    <span style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      gap: '8px',
+    }}>
+      <Text small mb="-8px" style={{
+        textTransform: 'uppercase',
+        color: '#666',
+      }}>{name}</Text>
+      <span style={{
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        margin: '0px',
+        padding: '0px',
+        ...style
+      }} className={className}>
+        <Input disabled={isLoading} ref={ref} value={value} onChange={e => setValue(e.target.value)} crossOrigin onBlur={() => disableEditing()} onKeyUp={e => {
+          if (e.key == 'Enter') return disableEditing();
+        }} />
+        <span className="static-value" onDoubleClick={() => enableEditing()} style={{
+          margin: '0px',
+          padding: '0px',
+        }}>
+          {value}
+        </span>
+
+        <span style={{
+          cursor: 'pointer',
+          marginLeft: '8px'
+        }} onClick={() => isEditing ? disableEditing() : enableEditing()}>
+          {isEditing ? <CheckCircle size={16} /> : <Edit size={16} />}
+        </span>
+        
+        {css`
+          .${className} .input-wrapper {
+            height: unset!important;
+            padding: 3px;
+            margin: -3px;
+          }
+          .${className} .input-wrapper input {
+            font-size: 16px!important;
+            margin: 0px;
+            padding: 0px;
+          }
+          .${className} .input-container {
+            height: unset!important;
+          }
+          .${className} .input-container {
+            ${!isEditing ? `display: none;` : ``}
+          }
+          .${className} .static-value {
+            border-bottom: 1px solid transparent;
+            border-top: 1px solid transparent;
+            ${isEditing ? `display: none;` : ``}
+          }
+        `}
+      </span>
+    </span>
+  )
+}
 
 const builtInAttributes: BuiltInColumn[] = [
   {
@@ -237,6 +317,19 @@ function Data({
         >
           <Drawer.Content>
             {drawerAttendee?.id == "create" && <Text h3>New Attendee</Text>}
+
+          {builtInAttributes.filter(x => x.id != "built-in").map(attribute => (
+            <EditableValue name={attribute.name} initialValue={drawerAttendee ? (drawerAttendee as any)[attribute.id] : "(no value)"} save={async () => {
+              await delay(500);
+            }} />
+          ))}
+
+          {attributes.map(attribute => (
+            <EditableValue name={attribute.name} initialValue={drawerAttendee?.attributeValues.filter(x => x.formFieldId == attribute.id)[0]?.value || "(no value)"} save={async () => {
+              await delay(500);
+            }} />
+          ))}
+
             <Form
               schema={{
                 elements: [
