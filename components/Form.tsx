@@ -98,6 +98,9 @@ function InputTuple({
 interface BaseFormElement {
   type: string;
   label?: string;
+  labelPosition?: string;
+  mt?: number
+  mb?: number
 }
 
 interface FormInput extends BaseFormElement {
@@ -185,7 +188,8 @@ export const Form = React.forwardRef(
       additionalButtons,
       clearValuesOnSuccesfulSubmit = false,
       submitDisabledUntilValid = false,
-      submitButtonType = "success"
+      submitButtonType = "success",
+      gap = 1
     }: {
       schema: FormSchema;
       submission: FormSubmission<any>;
@@ -195,6 +199,7 @@ export const Form = React.forwardRef(
       clearValuesOnSuccesfulSubmit?: boolean;
       submitDisabledUntilValid?: boolean;
       submitButtonType?: ButtonTypes;
+      gap?: number;
     },
     ref
   ) => {
@@ -342,7 +347,8 @@ export const Form = React.forwardRef(
                   label={element.inlineLabel}
                   name={element.name}
                   width="100%"
-                  mb={1}
+                  mt={element.mt || 0}
+                  mb={typeof element.mb == "undefined" ? 1 : element.mb}
                   placeholder={element.placeholder}
                   htmlType={(element as FormTextInput).type}
                 >

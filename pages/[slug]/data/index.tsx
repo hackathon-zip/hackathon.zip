@@ -392,6 +392,7 @@ export default function Hackathon({
     );
   }
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const properties = ["name", "type"]
   return (
     <>
       <Page>
@@ -423,15 +424,21 @@ export default function Hackathon({
             <Form
               schema={{
                 elements: [
-                  ...(hackathon.attendeeAttributes.map((attribute) => ({
-                    type: "text",
-                    label: attribute.name,
-                    name: `custom-${attribute.id}`,
-                    defaultValue: ""
-                  })) as any)
+                  ...(hackathon.attendeeAttributes.map((attribute) => properties.map((property, i) => ({
+                    type: property == "type" ? "select" : "text",
+                    options: property == "type" ? ["text", "select"] : [],
+                    inlineLabel: property,
+                    label: i == 0 ? attribute.name : undefined,
+                    name: `custom-${attribute.id}-${attribute[property]}`,
+                    mt: i == 0 ? 1 : 0,
+                    mb: 0.5,
+                    defaultValue: attribute[property],
+                  })) as any)).flat()
                 ],
+                
                 submitText: `Edit Schema`
               }}
+              gap={1}
               submission={{
                 type: "controlled",
                 onSubmit: async (data) => {
