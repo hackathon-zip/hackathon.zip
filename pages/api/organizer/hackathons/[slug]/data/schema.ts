@@ -9,6 +9,40 @@ export default async function handler(
 ) {
 		const { userId } = getAuth(req);
 		if (!userId) return res.status(401).json({ error: "Unauthorized" });
-		console.log(req.body)
-		res.json({ body: req.body });
+		let attributes: { [key: string]: { name?: string; type?: string; options?: string[]} } = {};
+		Object.keys(req.body).map(key => {
+			let attributeId = key.split("_")[0]
+			let property = key.split("_")[1]
+			if(property == "add-option") return
+			if(!attributes[attributeId]){
+				attributes[attributeId] = {}
+			} // @ts-ignore
+			attributes[attributeId][property] = req.body[key]
+		})
+		await prisma.$transaction(
+			Object.keys(attributes).map(key => {
+				return prisma.attendeeAttribute.upsert({
+				where: {
+					id: key
+				},
+				create: {
+					id: key,
+					name: attributes[key].name as string,
+					type: attributes[key].type as string,
+					order: 1,
+					hackathon: {
+						connect: {
+							slug: req.query.slug as string
+						}
+					},
+					options: attributes[key].options
+				},
+				update: {
+					name: attributes[key].name,
+					type: attributes[key].type,
+					options: attributes[key].options
+				}
+			})})
+		)
+		res.json({ body: req.body, attributes });
 }

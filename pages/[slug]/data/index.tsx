@@ -543,7 +543,7 @@ export default function Hackathon({
         type: "text",
         miniLabel: "Property Name:",
         label: attribute.name, // @ts-ignore
-        name: `custom-${attribute.id}-name`,
+        name: `${attribute.id}_name`,
         mt: hackathon.attendeeAttributes[0].id == attribute.id? 0.5 :  1.5,
         mb: 0.5,
         defaultValue: attribute["name"]
@@ -552,7 +552,7 @@ export default function Hackathon({
         type: "select",
         options: ["text", "select"],
         miniLabel: "Property Type:",
-        name: `custom-${attribute.id}-type`,
+        name: `${attribute.id}_type`,
         mb: 0.3, // @ts-ignore
         defaultValue: attribute["type"]
       },
@@ -561,34 +561,34 @@ export default function Hackathon({
         multipleSelect: true,
         options: [],
         miniLabel: "Available Options:",
-        name: `custom-${attribute.id}-options`,
+        name: `${attribute.id}_options`,
         disabled: true,
         useValuesAsOptions: true,
         mt: 0.5,
         mb: 0.1, // @ts-ignore
         defaultValue: [...attribute["options"]],
         visible: (data: { [key: string]: { value: string } }) => {
-          return data[`custom-${attribute.id}-type`].value === "select"
+          return data[`${attribute.id}_type`].value === "select"
         }
       },
       {
         type: "text",
-        name: `custom-${attribute.id}-add-option`,
+        name: `${attribute.id}_add-option`,
         mb: 0.5, // @ts-ignore
         visible: (data: { [key: string]: { value: string } }) => {
-          return data[`custom-${attribute.id}-type`].value === "select"
+          return data[`${attribute.id}_type`].value === "select"
         },
         placeholder: "Add an option...",
         onKeyup: (event: any, updateValue: any, getValue: any) => {
           if (event.key === "Enter") {
             event.preventDefault();
-            let toAdd = getValue(`custom-${attribute.id}-add-option`)
+            let toAdd = getValue(`${attribute.id}_add-option`)
             updateValue(
-              `custom-${attribute.id}-options`, 
-              [...getValue(`custom-${attribute.id}-options`).filter((x: any) => x != toAdd), toAdd]
+              `${attribute.id}_options`, 
+              [...getValue(`${attribute.id}_options`).filter((x: any) => x != toAdd), toAdd]
             )
             updateValue(
-              `custom-${attribute.id}-add-option`, 
+              `${attribute.id}_add-option`, 
               ``
             )
           }
@@ -635,9 +635,22 @@ export default function Hackathon({
               gap={1}
               buttonMt={1}
               submission={{
-                type: "request",
-                method: "POST",
-                action: `/api/hackathons/${hackathon.slug}/data/schema`
+                type: "controlled",
+                onSubmit: async (data) => {
+                  let res = await fetch(
+                    `/api/hackathons/${hackathon.slug}/data/schema`,
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json"
+                      },
+                      body: JSON.stringify({
+                        ...data
+                      })
+                    }
+                  ).then((r) => r.json());
+                  console.log(res)
+                }
               }}
             />
           </Drawer.Content>
