@@ -635,10 +635,9 @@ export default function Hackathon({
               gap={1}
               buttonMt={1}
               submission={{
-                type: "controlled",
-                onSubmit: async (data) => {
-                  return null;
-                }
+                type: "request",
+                method: "POST",
+                action: `/api/hackathons/${hackathon.slug}/data/schema`
               }}
             />
           </Drawer.Content>
