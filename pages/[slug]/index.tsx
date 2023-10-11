@@ -7,6 +7,10 @@ import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import type { Hackathon } from "@prisma/client";
 import type { ReactElement } from "react";
 
+type DataPoint = {
+  
+}
+
 export default function Hackathon({
   hackathon
 }: {
