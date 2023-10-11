@@ -101,15 +101,21 @@ function ui$getContrastingColor(hex: string): string {
     // Function to convert hex to RGB
     function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
         let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? {
-            r: parseInt(result[1], 16),
-            g: parseInt(result[2], 16),
-            b: parseInt(result[3], 16)
-        } : null;
+        return result
+            ? {
+                  r: parseInt(result[1], 16),
+                  g: parseInt(result[2], 16),
+                  b: parseInt(result[3], 16)
+              }
+            : null;
     }
 
     // Calculate luminance value
-    function calculateLuminance(rgb: { r: number; g: number; b: number }): number {
+    function calculateLuminance(rgb: {
+        r: number;
+        g: number;
+        b: number;
+    }): number {
         return 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
     }
 
@@ -137,16 +143,26 @@ export function sl(message: string, color?: string, invert: boolean = false) {
         font-size: 14px;
     `;
 
-    if (invert) return styledLog(message, `color: ${color}; background-color: ${contrastingColor}; ${otherStyles}`);
+    if (invert)
+        return styledLog(
+            message,
+            `color: ${color}; background-color: ${contrastingColor}; ${otherStyles}`
+        );
 
-    styledLog(message, `color: ${color}; background-color: ${contrastingColor}; ${otherStyles}`);
+    styledLog(
+        message,
+        `color: ${color}; background-color: ${contrastingColor}; ${otherStyles}`
+    );
 }
 
 type SortFunction<ArrayItem> = (a: ArrayItem, b: ArrayItem) => number;
 
 export type MinimumSize1Array<T> = [T, ...T[]];
 
-export function orderedSort<ArrayItem>(array: ArrayItem[], ...sortFunctions: MinimumSize1Array<SortFunction<ArrayItem>>) {
+export function orderedSort<ArrayItem>(
+    array: ArrayItem[],
+    ...sortFunctions: MinimumSize1Array<SortFunction<ArrayItem>>
+) {
     return array.sort((a, b) => {
         for (const sortFunction of sortFunctions) {
             if (sortFunction) {

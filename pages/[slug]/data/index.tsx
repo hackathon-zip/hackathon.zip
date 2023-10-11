@@ -8,8 +8,17 @@ import useViewport from "@/hooks/useViewport";
 import prisma from "@/lib/prisma";
 import { orderedSort, sl } from "@/lib/utils";
 import { getAuth } from "@clerk/nextjs/server";
-import { Button, Card, Drawer, Grid, Page, Table, Text, useToasts } from "@geist-ui/core";
-import { Edit3, Plus } from "@geist-ui/react-icons";
+import {
+  Button,
+  Card,
+  Drawer,
+  Grid,
+  Page,
+  Table,
+  Text,
+  useToasts
+} from "@geist-ui/core";
+import { Delete, Edit3, Plus } from "@geist-ui/react-icons";
 import type {
   Attendee,
   AttendeeAttribute,
@@ -20,7 +29,6 @@ import md5 from "md5";
 import { useRouter } from "next/router";
 import type { ReactElement } from "react";
 import { useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 
 type AttendeeWithAttributes = Attendee & {
   attributeValues: AttendeeAttributeValue[];
@@ -104,26 +112,28 @@ class DrawerData {
     this.#setAttendee = setAttendee;
   }
 
-  open () {
+  open() {
     this.#setIsOpen(true);
   }
 
-  close () {
+  close() {
     this.#setIsOpen(false);
   }
 
-  setAttendee (attendee: AttendeeWithAttributes) {
+  setAttendee(attendee: AttendeeWithAttributes) {
     this.#setAttendee(attendee);
   }
 
-  clearAttendee () {
+  clearAttendee() {
     this.#setAttendee(undefined as any);
   }
 }
 
 function useDrawer(): DrawerData {
   const [isOpen, setIsOpen] = useState(false);
-  const [attendee, setAttendee] = useState<AttendeeWithAttributes | undefined>(undefined);
+  const [attendee, setAttendee] = useState<AttendeeWithAttributes | undefined>(
+    undefined
+  );
 
   return new DrawerData({
     isOpen,
@@ -152,97 +162,111 @@ function EditDrawer({
   const router = useRouter();
 
   return (
-
     <Drawer
-    visible={isOpen}
-    onClose={() =>
-      drawer.close()
-    }
-    placement="right"
-    style={{ width: "min(500px, calc(100vw - 64px))" }}
-  >
-    <Drawer.Content>
-      <div style={{
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: '12px',
-        marginBottom: '16px',
-      }}>
-        <Text h3 my={0}>
-          {attendee?.id == "create" ? "New Attendee" : attendee?.name}
-        </Text>
-        <a style={{
-          cursor: 'pointer',
-          color: '#666',
-          display: 'flex',
-        }}>
-          <Edit3 />
-        </a>
-      </div>
+      visible={isOpen}
+      onClose={() => drawer.close()}
+      placement="right"
+      style={{ width: "min(500px, calc(100vw - 64px))" }}
+    >
+      <Drawer.Content>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            gap: "12px",
+            marginBottom: "16px"
+          }}
+        >
+          <Text h3 my={0}>
+            {attendee?.id == "create" ? "New Attendee" : attendee?.name}
+          </Text>
+          <a
+            style={{
+              cursor: "pointer",
+              color: "#666",
+              display: "flex"
+            }}
+          >
+            <Edit3 />
+          </a>
+        </div>
 
+        <Grid.Container gap={2} mb={1} justify="space-between">
+          {builtInAttributes
+            .filter((x) => x.id != "built-in" && x.name !== "Name")
+            .map((attribute) => (
+              <Grid xs={12}>
+                <EditableValue
+                  name={attribute.name}
+                  initialValue={attendee ? (attendee as any)[attribute.id] : ""}
+                  save={async (value) => {}}
+                />
+              </Grid>
+            ))}
+        </Grid.Container>
 
-
-      <Grid.Container gap={2} mb={1} justify="space-between">
-        {builtInAttributes.filter(x => x.id != "built-in" && x.name !== "Name").map(attribute => (
-          <Grid xs={12}>
-            <EditableValue name={attribute.name} initialValue={attendee ? (attendee as any)[attribute.id] : ""} save={async value => {
-            }} />
-          </Grid>
-        ))}
-      </Grid.Container>
-
-      <Grid.Container gap={2} mb={1} justify="space-between">
-        {attendeeAttributes.map(attribute => (
-          <Grid xs={12}>
-            <EditableValue name={attribute.name} initialValue={attendee?.attributeValues.filter(x => x.formFieldId == attribute.id)[0]?.value || ""} save={async value => {
-              const { id } = attribute;
-
-              const response = await fetch(
-              `/api/hackathons/${hackathon.slug}/data/${attendee?.id}/attributes/update`,
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json"
-                  },
-                  body: JSON.stringify({
-                    attributeId: id,
-                    attendeeId: attendee?.id,
-                    value
-                  })
+        <Grid.Container gap={2} mb={1} justify="space-between">
+          {attendeeAttributes.map((attribute) => (
+            <Grid xs={12}>
+              <EditableValue
+                name={attribute.name}
+                initialValue={
+                  attendee?.attributeValues.filter(
+                    (x) => x.formFieldId == attribute.id
+                  )[0]?.value || ""
                 }
-              ).then((r) => r.json());
+                save={async (value) => {
+                  const { id } = attribute;
 
-              const newAttendee = {
-                ...drawer.attendee as any,
-                attributeValues: [
-                  ...drawer.attendee?.attributeValues.filter(x => x.formFieldId != id) || [],
-                  {
-                    attendeeId: attendee?.id,
-                    formFieldId: id,
-                    value
-                  }
-                ]
-              };
+                  const response = await fetch(
+                    `/api/hackathons/${hackathon.slug}/data/${attendee?.id}/attributes/update`,
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json"
+                      },
+                      body: JSON.stringify({
+                        attributeId: id,
+                        attendeeId: attendee?.id,
+                        value
+                      })
+                    }
+                  ).then((r) => r.json());
 
-              drawer.setAttendee(newAttendee);
+                  const newAttendee = {
+                    ...(drawer.attendee as any),
+                    attributeValues: [
+                      ...(drawer.attendee?.attributeValues.filter(
+                        (x) => x.formFieldId != id
+                      ) || []),
+                      {
+                        attendeeId: attendee?.id,
+                        formFieldId: id,
+                        value
+                      }
+                    ]
+                  };
 
-              sl("Updated attendee", "#5affcd");
-              console.log({ newAttendee });
+                  drawer.setAttendee(newAttendee);
 
-              setAttendees([
-                ...attendees.filter(x => x.id != attendee?.id),
-                newAttendee
-              ]);
-              
-              // router.reload(); // Temporary
-              // TODO: Remove this and store updates in state
-            }} />
-          </Grid>
-        ))}
-      </Grid.Container>
+                  sl("Updated attendee", "#5affcd");
+                  console.log({ newAttendee });
 
-      {/* <Form
+                  setAttendees([
+                    ...attendees.filter((x) => x.id != attendee?.id),
+                    newAttendee
+                  ]);
+
+                  // router.reload(); // Temporary
+                  // TODO: Remove this and store updates in state
+                }}
+              />
+            </Grid>
+          ))}
+        </Grid.Container>
+
+        {/* <Form
         schema={{
           elements: [
             ...(builtInAttributes
@@ -308,11 +332,10 @@ function EditDrawer({
           }
         }}
       /> */}
-    </Drawer.Content>
-  </Drawer>
-  )
+      </Drawer.Content>
+    </Drawer>
+  );
 }
-
 
 function Data({
   hackathon,
@@ -329,62 +352,64 @@ function Data({
 
   const [attendees, setAttendees] = useState(defaultAttendees);
 
-
-  console.log("Data table rendered!", { attendees, attributes })
-
-
+  console.log("Data table rendered!", { attendees, attributes });
 
   const drawer = useDrawer();
 
-  const sortedAttendees = orderedSort(attendees, (a: AttendeeWithAttributes, b: AttendeeWithAttributes) => {
-    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+  const sortedAttendees = orderedSort(
+    attendees,
+    (a: AttendeeWithAttributes, b: AttendeeWithAttributes) => {
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    },
+    (a: AttendeeWithAttributes, b: AttendeeWithAttributes) => {
+      return a.name.localeCompare(b.name);
+    },
+    (a: AttendeeWithAttributes, b: AttendeeWithAttributes) => {
+      return a.email.localeCompare(b.email);
+    },
+    (a: AttendeeWithAttributes, b: AttendeeWithAttributes) => {
+      const md5A = md5(JSON.stringify(a));
+      const md5B = md5(JSON.stringify(b));
 
-  }, (a: AttendeeWithAttributes, b: AttendeeWithAttributes) => {
-    return a.name.localeCompare(b.name); 
-
-  }, (a: AttendeeWithAttributes, b: AttendeeWithAttributes) => {
-    return a.email.localeCompare(b.email);
-
-  }, (a: AttendeeWithAttributes, b: AttendeeWithAttributes) => {
-    const md5A = md5(JSON.stringify(a));
-    const md5B = md5(JSON.stringify(b));
-
-    return md5A.localeCompare(md5B);
-  });
+      return md5A.localeCompare(md5B);
+    }
+  );
 
   sl("Attendees vs. sortedAttendees", "#bada55");
 
-  console.log(sortedAttendees.map((a: any) => {
-    return (a.createdAt as Date).getUTCMilliseconds()
-  }))
+  console.log(
+    sortedAttendees.map((a: any) => {
+      return (a.createdAt as Date).getUTCMilliseconds();
+    })
+  );
 
+  const tableData = sortedAttendees.map(
+    (attendee: AttendeeWithAttributes, i: number) => {
+      const output: any = {
+        $i: i,
+        $attendee: attendee
+      };
 
+      for (const { name, fromAttendee } of builtInAttributes) {
+        output[name] = fromAttendee(attendee);
+      }
 
-  const tableData = sortedAttendees.map((attendee: AttendeeWithAttributes, i: number) => {
-    const output: any = {
-      $i: i,
-      $attendee: attendee
-    };
+      for (const attribute of attributes) {
+        const attributeId = attributes.find(
+          (attribute_: AttendeeAttribute) => attribute_.name == attribute.name
+        )?.id;
 
-    for (const { name, fromAttendee } of builtInAttributes) {
-      output[name] = fromAttendee(attendee);
+        const attendeeAttribute = attendee.attributeValues.find(
+          (attributeValue: AttendeeAttributeValue) =>
+            attributeValue.formFieldId == attributeId
+        );
+
+        output[attribute.name] = attendeeAttribute?.value || "";
+      }
+
+      return output;
     }
-
-    for (const attribute of attributes) {
-      const attributeId = attributes.find(
-        (attribute_: AttendeeAttribute) => attribute_.name == attribute.name
-      )?.id;
-
-      const attendeeAttribute = attendee.attributeValues.find(
-        (attributeValue: AttendeeAttributeValue) =>
-          attributeValue.formFieldId == attributeId
-      );
-
-      output[attribute.name] = attendeeAttribute?.value || "";
-    }
-
-    return output;
-  });
+  );
 
   let createNew = (() => {
     const output: any = {};
@@ -465,11 +490,16 @@ function Data({
   return (
     width && (
       <>
-        <EditDrawer drawer={drawer} attendeeAttributes={attributes} hackathon={hackathon} {...{
-          setStatefulData: () => null as any,
-          setAttendees,
-          attendees
-        }} />
+        <EditDrawer
+          drawer={drawer}
+          attendeeAttributes={attributes}
+          hackathon={hackathon}
+          {...{
+            setStatefulData: () => null as any,
+            setAttendees,
+            attendees
+          }}
+        />
         {css`
           .attendees-data-table {
             --table-font-size: calc(1 * 11pt) !important;
@@ -513,8 +543,8 @@ function Data({
               render={
                 column.customRender
                   ? (((value: string, _: unknown, index: number) => {
-                    return column.customRender?.(value, attendees[index]);
-                  }) as any)
+                      return column.customRender?.(value, attendees[index]);
+                    }) as any)
                   : undefined
               }
             />
@@ -541,6 +571,20 @@ function Data({
   );
 }
 
+function DeleteButton({setValue}: {setValue}) {
+  return (
+    <Button
+      iconRight={<Delete />}
+      auto
+      scale={2 / 3}
+      onClick={() => {
+        setSchemaFormElements(
+          schemaFormElements.filter((x) => !x.name.includes(attribute.id))
+        );
+      }}
+    />
+  );
+}
 
 export default function Hackathon({
   hackathon
@@ -555,15 +599,15 @@ export default function Hackathon({
     );
   }
   const [drawerOpen, setDrawerOpen] = useState(false);
-  
+
   const properties = (attribute: AttendeeAttribute) => {
     return [
       {
         type: "text",
         miniLabel: "Property Name:",
-        label: attribute.name == "" ? attribute.id : attribute.name, // @ts-ignore
-        name: `${attribute.id}_name`,
-        mt: hackathon.attendeeAttributes[0].id == attribute.id? 0.5 :  1.5,
+        label: attribute.name, // @ts-ignore
+        name: `custom-${attribute.id}-name`,
+        mt: 2,
         mb: 0.5,
         defaultValue: attribute["name"]
       },
@@ -571,7 +615,7 @@ export default function Hackathon({
         type: "select",
         options: ["text", "select"],
         miniLabel: "Property Type:",
-        name: `${attribute.id}_type`,
+        name: `custom-${attribute.id}-type`,
         mb: 0.3, // @ts-ignore
         defaultValue: attribute["type"]
       },
@@ -580,52 +624,41 @@ export default function Hackathon({
         multipleSelect: true,
         options: [],
         miniLabel: "Available Options:",
-        name: `${attribute.id}_options`,
+        name: `custom-${attribute.id}-options`,
         disabled: true,
         useValuesAsOptions: true,
         mt: 0.5,
         mb: 0.1, // @ts-ignore
         defaultValue: [...attribute["options"]],
         visible: (data: { [key: string]: { value: string } }) => {
-          return data[`${attribute.id}_type`]?.value === "select"
+          return data[`custom-${attribute.id}-type`].value === "select";
         }
       },
       {
         type: "text",
-        name: `${attribute.id}_add-option`,
+        name: `custom-${attribute.id}-add-option`,
         mb: 0.5, // @ts-ignore
         visible: (data: { [key: string]: { value: string } }) => {
-          return data[`${attribute.id}_type`]?.value === "select"
+          return data[`custom-${attribute.id}-type`].value === "select";
         },
         placeholder: "Add an option...",
         onKeyup: (event: any, updateValue: any, getValue: any) => {
           if (event.key === "Enter") {
             event.preventDefault();
-            let toAdd = getValue(`${attribute.id}_add-option`)
-            console.log(getValue(`${attribute.id}_options`))
-            let previousValues = Array.isArray(getValue(`${attribute.id}_options`)) ?  getValue(`${attribute.id}_options`) : []
-            console.log("THE LENGTH:")
-            console.log(previousValues.length)
-            updateValue(
-              `${attribute.id}_options`, 
-              [...previousValues.filter((x: any) => x != toAdd), toAdd]
-            )
-            updateValue(
-              `${attribute.id}_add-option`, 
-              ``
-            )
+            let toAdd = getValue(`custom-${attribute.id}-add-option`);
+            updateValue(`custom-${attribute.id}-options`, [
+              ...getValue(`custom-${attribute.id}-options`).filter(
+                (x: any) => x != toAdd
+              ),
+              toAdd
+            ]);
+            updateValue(`custom-${attribute.id}-add-option`, ``);
           }
         }
       }
-    ]
-  }
-  
-  const router = useRouter();
-  
-  const [schemaFormElements, setSchemaFormElements] = useState([
-      ...(hackathon.attendeeAttributes.map((attribute) => properties(attribute)).flat())
-    ])
-  
+    ];
+  };
+
   return (
     <>
       <Page>
@@ -656,44 +689,18 @@ export default function Hackathon({
             <Text h3>Edit Schema</Text>
             <Form
               schema={{
-                elements: schemaFormElements as any,
+                elements: [
+                  ...hackathon.attendeeAttributes
+                    .map((attribute) => properties(attribute))
+                    .flat()
+                ] as any,
                 submitText: `Edit Schema`
               }}
               gap={1}
-              buttonMt={16}
-              additionalButtons={
-                <Button onClick={() => {
-                  setSchemaFormElements([
-                    ...schemaFormElements,
-                    ...properties({
-                      id: uuidv4(),
-                      name: "",
-                      type: "text",
-                      options: [],
-                      order: 1,
-                      hackathonId: ""
-                    })
-                  ])
-                }}>
-                  Add A Field
-                </Button>
-              }
               submission={{
                 type: "controlled",
                 onSubmit: async (data) => {
-                  let res = await fetch(
-                    `/api/hackathons/${hackathon.slug}/data/schema`,
-                    {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json"
-                      },
-                      body: JSON.stringify({
-                        ...data
-                      })
-                    }
-                  ).then((r) => r.json());
-                  router.reload()
+                  return null;
                 }
               }}
               // appendToLabel={}
@@ -702,24 +709,20 @@ export default function Hackathon({
         </Drawer>
       </Page>
       {css`
-          .select.multiple .icon{
-            display: none;
-          }
-          .select.multiple.active {
-            border: 1px solid #eaeaea!important;
-          }
-          .select.multiple {
-            cursor: default!important;
-          }
-          .select-dropdown {
-            border: 1px solid black!important;
-            padding: 0!important;
-          }
-          .select.multiple .option {
-            cursor: default!important;
-            color: black!important;
-          }
-        `}
+        .select.multiple .icon {
+          display: none;
+        }
+        .select.multiple.active {
+          border: 1px solid #eaeaea !important;
+        }
+        .select.multiple {
+          cursor: default !important;
+        }
+        .select.multiple .option {
+          cursor: default !important;
+          color: black !important;
+        }
+      `}
     </>
   );
 }

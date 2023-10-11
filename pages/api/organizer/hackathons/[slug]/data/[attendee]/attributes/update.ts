@@ -13,7 +13,7 @@ export default async function handler(
 
     const id = `${attributeId}-${req.query.attendee as string}`;
 
-    console.log('updating', id, value)
+    console.log("updating", id, value);
 
     await prisma.attendeeAttributeValue.update({
         data: {
