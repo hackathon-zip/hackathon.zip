@@ -1,12 +1,12 @@
 import { css } from "@/components/CSS";
 import type { GetServerSideProps } from "next";
 
-import Debug from "@/components/Debug";
 import EditableValue from "@/components/EditableValue";
 import { Form } from "@/components/Form";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import useViewport from "@/hooks/useViewport";
 import prisma from "@/lib/prisma";
+import { orderedSort, sl } from "@/lib/utils";
 import { getAuth } from "@clerk/nextjs/server";
 import { Button, Card, Drawer, Grid, Page, Table, Text, useToasts } from "@geist-ui/core";
 import { Edit3, Plus } from "@geist-ui/react-icons";
@@ -16,6 +16,7 @@ import type {
   AttendeeAttributeValue,
   Hackathon
 } from "@prisma/client";
+import md5 from "md5";
 import { useRouter } from "next/router";
 import type { ReactElement } from "react";
 import { useState } from "react";
@@ -136,15 +137,13 @@ function EditDrawer({
   drawer,
   attendeeAttributes,
   hackathon,
-  setStatefulData,
-  generateData,
+  setAttendees,
   attendees
 }: {
   drawer: DrawerData;
   attendeeAttributes: AttendeeAttribute[];
   hackathon: Hackathon | HackathonWithAttendees;
-  setStatefulData: (data: any) => void;
-  generateData: (attendees: AttendeeWithAttributes[]) => any;
+  setAttendees: (attendees: AttendeeWithAttributes[]) => void;
   attendees: AttendeeWithAttributes[];
 }) {
   const { attendee, isOpen } = drawer;
@@ -160,7 +159,7 @@ function EditDrawer({
       drawer.close()
     }
     placement="right"
-    style={{ maxWidth: "500px" }}
+    style={{ width: "min(500px, calc(100vw - 64px))" }}
   >
     <Drawer.Content>
       <div style={{
@@ -227,15 +226,23 @@ function EditDrawer({
               };
 
               drawer.setAttendee(newAttendee);
+
+              sl("Updated attendee", "#5affcd");
+              console.log({ newAttendee });
+
+              setAttendees([
+                ...attendees.filter(x => x.id != attendee?.id),
+                newAttendee
+              ]);
               
-              router.reload(); // Temporary
+              // router.reload(); // Temporary
               // TODO: Remove this and store updates in state
             }} />
           </Grid>
         ))}
       </Grid.Container>
 
-      <Form
+      {/* <Form
         schema={{
           elements: [
             ...(builtInAttributes
@@ -300,8 +307,7 @@ function EditDrawer({
             }
           }
         }}
-      />
-      <Debug data={{ attendee }} />
+      /> */}
     </Drawer.Content>
   </Drawer>
   )
@@ -310,7 +316,7 @@ function EditDrawer({
 
 function Data({
   hackathon,
-  attendees,
+  attendees: defaultAttendees,
   attributes
 }: {
   hackathon: HackathonWithAttendees;
@@ -321,41 +327,65 @@ function Data({
   const sliceNum = Math.ceil((Math.max(width || 100_000, 1000) - 1000) / 350);
   const { setToast } = useToasts();
 
+  const [attendees, setAttendees] = useState(defaultAttendees);
+
+
+  console.log("Data table rendered!", { attendees, attributes })
+
+
+
   const drawer = useDrawer();
 
-  const generateData = (attendees: AttendeeWithAttributes[]) =>
-    attendees
-      .sort(
-        (a: AttendeeWithAttributes, b: AttendeeWithAttributes) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      )
-      .map((attendee: AttendeeWithAttributes, i: number) => {
-        const output: any = {
-          $i: i,
-          $attendee: attendee
-        };
+  const sortedAttendees = orderedSort(attendees, (a: AttendeeWithAttributes, b: AttendeeWithAttributes) => {
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
 
-        for (const { name, fromAttendee } of builtInAttributes) {
-          output[name] = fromAttendee(attendee);
-        }
+  }, (a: AttendeeWithAttributes, b: AttendeeWithAttributes) => {
+    return a.name.localeCompare(b.name); 
 
-        for (const attribute of attributes) {
-          const attributeId = attributes.find(
-            (attribute_: AttendeeAttribute) => attribute_.name == attribute.name
-          )?.id;
+  }, (a: AttendeeWithAttributes, b: AttendeeWithAttributes) => {
+    return a.email.localeCompare(b.email);
 
-          const attendeeAttribute = attendee.attributeValues.find(
-            (attributeValue: AttendeeAttributeValue) =>
-              attributeValue.formFieldId == attributeId
-          );
+  }, (a: AttendeeWithAttributes, b: AttendeeWithAttributes) => {
+    const md5A = md5(JSON.stringify(a));
+    const md5B = md5(JSON.stringify(b));
 
-          output[attribute.name] = attendeeAttribute?.value || "";
-        }
+    return md5A.localeCompare(md5B);
+  });
 
-        return output;
-      });
+  sl("Attendees vs. sortedAttendees", "#bada55");
 
-  const data = generateData(attendees);
+  console.log(sortedAttendees.map((a: any) => {
+    return (a.createdAt as Date).getUTCMilliseconds()
+  }))
+
+
+
+  const tableData = sortedAttendees.map((attendee: AttendeeWithAttributes, i: number) => {
+    const output: any = {
+      $i: i,
+      $attendee: attendee
+    };
+
+    for (const { name, fromAttendee } of builtInAttributes) {
+      output[name] = fromAttendee(attendee);
+    }
+
+    for (const attribute of attributes) {
+      const attributeId = attributes.find(
+        (attribute_: AttendeeAttribute) => attribute_.name == attribute.name
+      )?.id;
+
+      const attendeeAttribute = attendee.attributeValues.find(
+        (attributeValue: AttendeeAttributeValue) =>
+          attributeValue.formFieldId == attributeId
+      );
+
+      output[attribute.name] = attendeeAttribute?.value || "";
+    }
+
+    return output;
+  });
+
   let createNew = (() => {
     const output: any = {};
 
@@ -386,24 +416,11 @@ function Data({
     return output;
   })();
 
-  type DrawerAttendeeTuple = [boolean, AttendeeWithAttributes | null];
-
-
-
-  const [statefulData_, setStatefulData] = useState(data);
-  console.log({ statefulData_ });
-  const statefulData = statefulData_.sort(
-    (a: any, b: any) =>
-      new Date(a.$attendee.createdAt).getTime() -
-      new Date(b.$attendee.createdAt).getTime()
-  );
-  // const statefulData = statefulData_.sort((a: any, b: any)x => a.$attendee.createdAt - b.$attendee.createdAt);
-
   const renderActions = (value: any, rowData: any, rowIndex: any) => {
     const [loading, setLoading] = useState(false);
     return (
       <>
-        {rowIndex != statefulData.length && (
+        {rowIndex != tableData.length && (
           <Button
             type="error"
             loading={loading}
@@ -430,11 +447,11 @@ function Data({
                   text: `Succesfully deleted ${rowData.Name}'s record.`,
                   delay: 2000
                 });
-                setStatefulData(
-                  generateData([
-                    ...attendees.filter((a) => a.email != rowData.Email)
-                  ])
-                );
+                // setStatefulData(
+                //   generateData([
+                //     ...attendees.filter((a) => a.email != rowData.Email)
+                //   ])
+                // );
               }
             }}
           >
@@ -449,8 +466,8 @@ function Data({
     width && (
       <>
         <EditDrawer drawer={drawer} attendeeAttributes={attributes} hackathon={hackathon} {...{
-          generateData,
-          setStatefulData,
+          setStatefulData: () => null as any,
+          setAttendees,
           attendees
         }} />
         {css`
@@ -466,7 +483,7 @@ function Data({
         `}
         <Table
           className="attendees-data-table"
-          data={[...statefulData, createNew]}
+          data={[...tableData, createNew]}
           rowClassName={() => "attendees-data-table-row"}
           onRow={(e) => {
             console.log(e, "@");
@@ -523,6 +540,7 @@ function Data({
     )
   );
 }
+
 
 export default function Hackathon({
   hackathon
@@ -678,6 +696,7 @@ export default function Hackathon({
                   router.reload()
                 }
               }}
+              // appendToLabel={}
             />
           </Drawer.Content>
         </Drawer>

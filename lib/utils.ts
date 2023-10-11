@@ -96,3 +96,64 @@ export function formatPhoneNumber(phoneNumberString: string) {
     }
     return null;
 }
+
+function ui$getContrastingColor(hex: string): string {
+    // Function to convert hex to RGB
+    function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+        let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    }
+
+    // Calculate luminance value
+    function calculateLuminance(rgb: { r: number; g: number; b: number }): number {
+        return 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
+    }
+
+    // Get RGB values from the background color
+    let rgb = hexToRgb(hex);
+
+    // Calculate luminance
+    let luminance = calculateLuminance(rgb!);
+
+    // Choose foreground color based on the luminance value
+    return luminance < 140 ? "#f8f8fa" : "#10151b";
+}
+
+export function styledLog(message: string, style: string) {
+    console.log("%c" + message, style);
+}
+
+export function sl(message: string, color?: string, invert: boolean = false) {
+    if (!color) return console.log(message);
+
+    const contrastingColor = ui$getContrastingColor(color);
+    const otherStyles = `
+        padding: 3px;
+        border-radius: 3px;
+        font-size: 14px;
+    `;
+
+    if (invert) return styledLog(message, `color: ${color}; background-color: ${contrastingColor}; ${otherStyles}`);
+
+    styledLog(message, `color: ${color}; background-color: ${contrastingColor}; ${otherStyles}`);
+}
+
+type SortFunction<ArrayItem> = (a: ArrayItem, b: ArrayItem) => number;
+
+export type MinimumSize1Array<T> = [T, ...T[]];
+
+export function orderedSort<ArrayItem>(array: ArrayItem[], ...sortFunctions: MinimumSize1Array<SortFunction<ArrayItem>>) {
+    return array.sort((a, b) => {
+        for (const sortFunction of sortFunctions) {
+            if (sortFunction) {
+                const result = sortFunction(a, b);
+                if (result !== 0) return result;
+            }
+        }
+        return 0;
+    });
+}
