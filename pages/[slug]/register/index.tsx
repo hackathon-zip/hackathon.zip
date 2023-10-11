@@ -1,36 +1,25 @@
-import {
-  Button,
-  Card,
-  Drawer,
-  Fieldset,
-  Grid,
-  Input,
-  Page,
-  Text,
-  Textarea
-} from "@geist-ui/core";
-import { getAuth } from "@clerk/nextjs/server";
-import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import prisma from "@/lib/prisma";
-import { NextApiRequest } from "next";
-import { NextServerOptions } from "next/dist/server/next";
+import { getAuth } from "@clerk/nextjs/server";
+import {
+    Page
+} from "@geist-ui/core";
+import type { GetServerSideProps } from "next";
 
-import type { Hackathon } from "@prisma/client";
-import { PlusCircle } from "@geist-ui/react-icons";
-import React, { useState } from "react";
-import type { ReactElement } from "react";
-import { Form } from "@/components/Form";
-import { delay } from "@/lib/utils";
 import Debug from "@/components/Debug";
-import Link from "next/link";
-import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import type { FormSchema } from "@/components/Form";
+import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
+import type { AttendeeAttribute, Hackathon } from "@prisma/client";
+import type { ReactElement } from "react";
+import { useState } from "react";
+
+type HackathonWithAttributes = Hackathon & {
+  attendeeAttributes: AttendeeAttribute[];
+};
 
 export default function Hackathon({
   hackathon
 }: {
-  hackathon: Hackathon | null;
+  hackathon: HackathonWithAttributes | null;
 }): any {
   const defaultValue: FormSchema = {
     elements: [
@@ -50,6 +39,76 @@ export default function Hackathon({
         <Page>404: Not Found!</Page>
       </>
     );
+  }
+
+  const properties = (attribute: AttendeeAttribute) => {
+    return [
+      {
+        type: "text",
+        miniLabel: "Property Name:",
+        label: attribute.name == "" ? attribute.id : attribute.name, // @ts-ignore
+        name: `${attribute.id}_name`,
+        mt: hackathon.attendeeAttributes[0].id == attribute.id ? 0.5 :  1.5,
+        mb: 0.5,
+        defaultValue: attribute["name"],
+        visible: (data: { [key: string]: { value: string } }) => {
+          return  data[`${attribute.id}_name`]?.value != "deleted"
+        },
+        required: true
+      },
+      {
+        type: "select",
+        options: ["text", "select"],
+        miniLabel: "Property Type:",
+        name: `${attribute.id}_type`,
+        mb: 0.3, // @ts-ignore
+        defaultValue: attribute["type"],
+        visible: (data: { [key: string]: { value: string } }) => {
+          return  data[`${attribute.id}_name`]?.value != "deleted"
+        },
+        required: true
+      },
+      {
+        type: "select",
+        multipleSelect: true,
+        options: [],
+        miniLabel: "Available Options:",
+        name: `${attribute.id}_options`,
+        disabled: true,
+        useValuesAsOptions: true,
+        mt: 0.5,
+        mb: 0.1, // @ts-ignore
+        defaultValue: [...attribute["options"]],
+        visible: (data: { [key: string]: { value: string } }) => {
+          return data[`${attribute.id}_type`]?.value === "select" && data[`${attribute.id}_name`]?.value != "deleted"
+        },
+        required: true
+      },
+      {
+        type: "text",
+        name: `${attribute.id}_add-option`,
+        mb: 0.5, // @ts-ignore
+        visible: (data: { [key: string]: { value: string } }) => {
+          return data[`${attribute.id}_type`]?.value === "select" && data[`${attribute.id}_name`]?.value != "deleted"
+        },
+        placeholder: "Add an option...",
+        onKeyup: (event: any, updateValue: any, getValue: any) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            let toAdd = getValue(`${attribute.id}_add-option`)
+            let previousValues = Array.isArray(getValue(`${attribute.id}_options`)) ?  getValue(`${attribute.id}_options`) : []
+            updateValue(
+              `${attribute.id}_options`, 
+              [...previousValues.filter((x: any) => x != toAdd), toAdd]
+            )
+            updateValue(
+              `${attribute.id}_add-option`, 
+              ``
+            )
+          }
+        }
+      }
+    ]
   }
 
   return (
@@ -113,6 +172,9 @@ export const getServerSideProps = (async (context) => {
             }
           }
         ]
+      },
+      include: {
+        attendeeAttributes: true
       }
     });
     return {

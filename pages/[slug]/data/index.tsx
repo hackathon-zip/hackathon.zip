@@ -29,6 +29,7 @@ import md5 from "md5";
 import { useRouter } from "next/router";
 import type { ReactElement } from "react";
 import { useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 type AttendeeWithAttributes = Attendee & {
   attributeValues: AttendeeAttributeValue[];
@@ -379,7 +380,7 @@ function Data({
 
   console.log(
     sortedAttendees.map((a: any) => {
-      return (a.createdAt as Date).getUTCMilliseconds();
+      return (new Date(a.createdAt) as Date).getUTCMilliseconds();
     })
   );
 
@@ -487,6 +488,8 @@ function Data({
     );
   };
 
+  const [drawerOpen, setDrawerOpen] = useState(false)
+
   return (
     width && (
       <>
@@ -500,6 +503,69 @@ function Data({
             attendees
           }}
         />
+        <Drawer
+          visible={drawerOpen}
+          onClose={() =>
+            setDrawerOpen(false)
+          }
+          placement="right"
+          style={{ maxWidth: "500px" }}
+        >
+          <Drawer.Content>
+            <Text h3>New Attendee</Text>
+            <Form
+              schema={{
+                elements: [
+                  ...(builtInAttributes
+                    .filter((x) => x.id != "built-in")
+                    .map((attribute) => ({
+                      type: "text",
+                      label: attribute.name,
+                      name: attribute.id,
+                      defaultValue: ""
+                    })) as any),
+                  ...(attributes.map((attribute) => ({
+                    type: "text",
+                    label: attribute.name,
+                    name: `custom-${attribute.id}`,
+                    defaultValue: ""
+                  })) as any)
+                ],
+                submitText: `Create New Attendee`
+              }}
+              submission={{
+                type: "controlled",
+                onSubmit: async (data) => {
+                  let res = await fetch(
+                    `/api/hackathons/${hackathon.slug}/data/create`,
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json"
+                      },
+                      body: JSON.stringify({
+                        ...data
+                      })
+                    }
+                  ).then((r) => r.json());
+                  if (res.error) {
+                    setToast({ text: res.error, delay: 2000 });
+                  } else {
+                    setToast({
+                      text: `Succesfully created ${res.attendee.name}'s record.`,
+                      delay: 2000
+                    });
+                    setAttendees([
+                      ...attendees,
+                      res.attendee
+                    ]);
+                    setDrawerOpen(false)
+                  }
+                }
+              }}
+            />
+          </Drawer.Content>
+        </Drawer>
         {css`
           .attendees-data-table {
             --table-font-size: calc(1 * 11pt) !important;
@@ -518,17 +584,7 @@ function Data({
           onRow={(e) => {
             console.log(e, "@");
             if (e.$i === undefined) {
-              drawer.open();
-              drawer.setAttendee({
-                id: "create",
-                name: "",
-                email: "",
-                hackathonId: "",
-                checkedIn: false,
-                createdAt: new Date(),
-                checkInKey: "",
-                attributeValues: []
-              });
+              return setDrawerOpen(true)
             }
             const attendee = attendees[e.$i];
 
@@ -571,16 +627,14 @@ function Data({
   );
 }
 
-function DeleteButton({setValue}: {setValue}) {
+function DeleteButton({setValue, attributeName}: {setValue: any, attributeName: string}) {
   return (
     <Button
       iconRight={<Delete />}
       auto
       scale={2 / 3}
       onClick={() => {
-        setSchemaFormElements(
-          schemaFormElements.filter((x) => !x.name.includes(attribute.id))
-        );
+        setValue(attributeName, 'deleted')
       }}
     />
   );
@@ -605,59 +659,76 @@ export default function Hackathon({
       {
         type: "text",
         miniLabel: "Property Name:",
-        label: attribute.name, // @ts-ignore
-        name: `custom-${attribute.id}-name`,
-        mt: 2,
+        label: attribute.name == "" ? attribute.id : attribute.name, // @ts-ignore
+        name: `${attribute.id}_name`,
+        mt: hackathon.attendeeAttributes[0].id == attribute.id? 0.5 :  1.5,
         mb: 0.5,
-        defaultValue: attribute["name"]
+        defaultValue: attribute["name"],
+        visible: (data: { [key: string]: { value: string } }) => {
+          return  data[`${attribute.id}_name`]?.value != "deleted"
+        },
+        required: true
       },
       {
         type: "select",
         options: ["text", "select"],
         miniLabel: "Property Type:",
-        name: `custom-${attribute.id}-type`,
+        name: `${attribute.id}_type`,
         mb: 0.3, // @ts-ignore
-        defaultValue: attribute["type"]
+        defaultValue: attribute["type"],
+        visible: (data: { [key: string]: { value: string } }) => {
+          return  data[`${attribute.id}_name`]?.value != "deleted"
+        },
+        required: true
       },
       {
         type: "select",
         multipleSelect: true,
         options: [],
         miniLabel: "Available Options:",
-        name: `custom-${attribute.id}-options`,
+        name: `${attribute.id}_options`,
         disabled: true,
         useValuesAsOptions: true,
         mt: 0.5,
         mb: 0.1, // @ts-ignore
         defaultValue: [...attribute["options"]],
         visible: (data: { [key: string]: { value: string } }) => {
-          return data[`custom-${attribute.id}-type`].value === "select";
-        }
+          return data[`${attribute.id}_type`]?.value === "select" && data[`${attribute.id}_name`]?.value != "deleted"
+        },
+        required: true
       },
       {
         type: "text",
-        name: `custom-${attribute.id}-add-option`,
+        name: `${attribute.id}_add-option`,
         mb: 0.5, // @ts-ignore
         visible: (data: { [key: string]: { value: string } }) => {
-          return data[`custom-${attribute.id}-type`].value === "select";
+          return data[`${attribute.id}_type`]?.value === "select" && data[`${attribute.id}_name`]?.value != "deleted"
         },
         placeholder: "Add an option...",
         onKeyup: (event: any, updateValue: any, getValue: any) => {
           if (event.key === "Enter") {
             event.preventDefault();
-            let toAdd = getValue(`custom-${attribute.id}-add-option`);
-            updateValue(`custom-${attribute.id}-options`, [
-              ...getValue(`custom-${attribute.id}-options`).filter(
-                (x: any) => x != toAdd
-              ),
-              toAdd
-            ]);
-            updateValue(`custom-${attribute.id}-add-option`, ``);
+            let toAdd = getValue(`${attribute.id}_add-option`)
+            let previousValues = Array.isArray(getValue(`${attribute.id}_options`)) ?  getValue(`${attribute.id}_options`) : []
+            updateValue(
+              `${attribute.id}_options`, 
+              [...previousValues.filter((x: any) => x != toAdd), toAdd]
+            )
+            updateValue(
+              `${attribute.id}_add-option`, 
+              ``
+            )
           }
         }
       }
-    ];
-  };
+    ]
+  }
+
+  const router = useRouter();
+
+  const [schemaFormElements, setSchemaFormElements] = useState([
+    ...(hackathon.attendeeAttributes.map((attribute) => properties(attribute)).flat())
+  ])
 
   return (
     <>
@@ -689,21 +760,47 @@ export default function Hackathon({
             <Text h3>Edit Schema</Text>
             <Form
               schema={{
-                elements: [
-                  ...hackathon.attendeeAttributes
-                    .map((attribute) => properties(attribute))
-                    .flat()
-                ] as any,
+                elements: schemaFormElements as any,
                 submitText: `Edit Schema`
               }}
               gap={1}
+              buttonMt={16}
+              additionalButtons={
+                <Button onClick={() => {
+                  setSchemaFormElements([
+                    ...schemaFormElements,
+                    ...properties({
+                      id: uuidv4(),
+                      name: "",
+                      type: "text",
+                      options: [],
+                      order: 1,
+                      hackathonId: ""
+                    })
+                  ])
+                }}>
+                  Add A Field
+                </Button>
+              }
               submission={{
                 type: "controlled",
                 onSubmit: async (data) => {
-                  return null;
+                  let res = await fetch(
+                    `/api/hackathons/${hackathon.slug}/data/schema`,
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json"
+                      },
+                      body: JSON.stringify({
+                        ...data
+                      })
+                    }
+                  ).then((r) => r.json());
+                  router.reload()
                 }
               }}
-              // appendToLabel={}
+              AppendToLabel={DeleteButton}
             />
           </Drawer.Content>
         </Drawer>
@@ -721,6 +818,10 @@ export default function Hackathon({
         .select.multiple .option {
           cursor: default !important;
           color: black !important;
+        }
+        .select-dropdown {
+          border: 1px solid black!important;
+          padding: 0!important;
         }
       `}
     </>
