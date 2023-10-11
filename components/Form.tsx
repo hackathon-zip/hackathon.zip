@@ -1,4 +1,12 @@
-import { AutoComplete, Button, Input, Select, Text, Checkbox, Textarea } from "@geist-ui/core";
+import {
+  AutoComplete,
+  Button,
+  Input,
+  Select,
+  Text,
+  Checkbox,
+  Textarea
+} from "@geist-ui/core";
 import { ButtonTypes } from "@geist-ui/core/esm/button";
 import React, { CSSProperties, useState } from "react";
 
@@ -100,11 +108,11 @@ interface BaseFormElement {
   label?: string;
   miniLabel?: string;
   labelPosition?: string;
-  mt?: number
-  mb?: number
-  disabled?: true
-  visible?: (data: {[key: string]: string}) => boolean
-  onKeyup?: (event: any, updateValue: any, getValue: any) => null
+  mt?: number;
+  mb?: number;
+  disabled?: true;
+  visible?: (data: { [key: string]: string }) => boolean;
+  onKeyup?: (event: any, updateValue: any, getValue: any) => null;
 }
 
 interface FormInput extends BaseFormElement {
@@ -121,7 +129,14 @@ interface FormTextInputTuple extends BaseFormElement {
 }
 
 interface FormTextInput extends FormInput {
-  type: "date" | "datetime-local" | "text" | "email" | "password" | "number" | "textarea";
+  type:
+    | "date"
+    | "datetime-local"
+    | "text"
+    | "email"
+    | "password"
+    | "number"
+    | "textarea";
   placeholder?: string;
   inlineLabel?: string;
   defaultValue?: string;
@@ -250,13 +265,16 @@ export const Form = React.forwardRef(
     function updateValue(name: string, value: string) {
       const element = inputFields[name] as FormTextInput;
       setValues((old: any) => {
-        if(!old[name]){
+        if (!old[name]) {
           old[name] = {
             value: ""
-          }
+          };
         }
-        old[name].value = Array.isArray(old[name]?.value) && !Array.isArray(value) ! ? value.split(",") : value;
-        console.log(value)
+        old[name].value =
+          Array.isArray(old[name]?.value) && !Array.isArray(value)!
+            ? value.split(",")
+            : value;
+        console.log(value);
         if (element.required) {
           if (value) {
             if (element.validate) {
@@ -347,8 +365,11 @@ export const Form = React.forwardRef(
               })}
         >
           {schema.elements.map((formElement: FormElement) => {
-            if( typeof formElement.visible != "undefined" && !formElement.visible(values)){
-              return <></>
+            if (
+              typeof formElement.visible != "undefined" &&
+              !formElement.visible(values)
+            ) {
+              return <></>;
             }
             if (
               "date text email password number"
@@ -370,59 +391,6 @@ export const Form = React.forwardRef(
                   mb={typeof element.mb == "undefined" ? 1 : element.mb}
                   placeholder={element.placeholder}
                   htmlType={(element as FormTextInput).type}
-                  onKeyPress={(event) => event.key === "Enter" && event.preventDefault()}
-                  onKeyDown={(event) => event.key === "Enter" && event.preventDefault()}
-                  onKeyUp={(event) => element.onKeyup?.(event, updateValue, getValue)}
-                >
-                  {element.label && (
-                    <Text h5 style={{display: "flex"}}>
-                      <span style={{flexGrow: 1}}>
-                          {element.label}
-                          {element.required && !AppendToLabel && <Required />}
-                      </span>
-                      {AppendToLabel && <AppendToLabel setValue={updateValue} attributeName={element.name}  />}
-                    </Text>
-                  )}
-                  {element.miniLabel && (
-                    <Text small  mb={0.5} style={{display: 'block', fontSize: '13px'}}>
-                      {element.miniLabel}
-                      {element.required && <Required />}
-                    </Text>
-                  )}
-                </Input>
-              );
-            } else if (
-              formElement.type == "textarea"
-            ) {
-              const element = formElement as FormTextInput;
-              return (
-                <>
-                {element.label && (
-                  <Text h5>
-                    {element.label}
-                    {element.required && <Required />}
-                  </Text>
-                )}
-                {element.miniLabel && (
-                  <Text
-                    small
-                    mt={element.mt || 0}
-                    mb={0.5}
-                    style={{ display: "block", fontSize: "13px" }}
-                  >
-                    {element.miniLabel}
-                    {element.required && <Required />}
-                  </Text>
-                )}
-                <Textarea
-                  aria-disabled={loading}
-                  type={getWarningStatus(element.name) ? "error" : "default"}
-                  value={getValue(element.name)}
-                  onChange={(e) => updateValue(element.name, e.target.value)}
-                  name={element.name}
-                  width="100%"
-                  mb={typeof element.mb == "undefined" ? 1 : element.mb}
-                  placeholder={element.placeholder}
                   onKeyPress={(event) =>
                     event.key === "Enter" && event.preventDefault()
                   }
@@ -433,10 +401,75 @@ export const Form = React.forwardRef(
                     element.onKeyup?.(event, updateValue, getValue)
                   }
                 >
-                  
-                </Textarea>
-        </>
-              )} else if (formElement.type == "tuple") {
+                  {element.label && (
+                    <Text h5 style={{ display: "flex" }}>
+                      <span style={{ flexGrow: 1 }}>
+                        {element.label}
+                        {element.required && !AppendToLabel && <Required />}
+                      </span>
+                      {AppendToLabel && (
+                        <AppendToLabel
+                          setValue={updateValue}
+                          attributeName={element.name}
+                        />
+                      )}
+                    </Text>
+                  )}
+                  {element.miniLabel && (
+                    <Text
+                      small
+                      mb={0.5}
+                      style={{ display: "block", fontSize: "13px" }}
+                    >
+                      {element.miniLabel}
+                      {element.required && <Required />}
+                    </Text>
+                  )}
+                </Input>
+              );
+            } else if (formElement.type == "textarea") {
+              const element = formElement as FormTextInput;
+              return (
+                <>
+                  {element.label && (
+                    <Text h5>
+                      {element.label}
+                      {element.required && <Required />}
+                    </Text>
+                  )}
+                  {element.miniLabel && (
+                    <Text
+                      small
+                      mt={element.mt || 0}
+                      mb={0.5}
+                      style={{ display: "block", fontSize: "13px" }}
+                    >
+                      {element.miniLabel}
+                      {element.required && <Required />}
+                    </Text>
+                  )}
+                  <Textarea
+                    aria-disabled={loading}
+                    type={getWarningStatus(element.name) ? "error" : "default"}
+                    value={getValue(element.name)}
+                    onChange={(e) => updateValue(element.name, e.target.value)}
+                    name={element.name}
+                    width="100%"
+                    mb={typeof element.mb == "undefined" ? 1 : element.mb}
+                    placeholder={element.placeholder}
+                    onKeyPress={(event) =>
+                      event.key === "Enter" && event.preventDefault()
+                    }
+                    onKeyDown={(event) =>
+                      event.key === "Enter" && event.preventDefault()
+                    }
+                    onKeyUp={(event) =>
+                      element.onKeyup?.(event, updateValue, getValue)
+                    }
+                  ></Textarea>
+                </>
+              );
+            } else if (formElement.type == "tuple") {
               const element = formElement as FormTextInputTuple;
               return (
                 <InputTuple
@@ -465,8 +498,12 @@ export const Form = React.forwardRef(
                       {element.required && <Required />}
                     </Text>
                   )}
-                  <Checkbox.Group onChange={(e) => updateValue(element.name, e)}>
-                    {element.options.map(option => <Checkbox value={option}>{option}</Checkbox>)}
+                  <Checkbox.Group
+                    onChange={(e) => updateValue(element.name, e)}
+                  >
+                    {element.options.map((option) => (
+                      <Checkbox value={option}>{option}</Checkbox>
+                    ))}
                   </Checkbox.Group>
                 </>
               );
@@ -482,7 +519,16 @@ export const Form = React.forwardRef(
                     </Text>
                   )}
                   {element.miniLabel && (
-                    <Text small mt={element.mt || 0} mb={0.5} style={{display: 'block', fontSize: '13px', color: '#333'}}>
+                    <Text
+                      small
+                      mt={element.mt || 0}
+                      mb={0.5}
+                      style={{
+                        display: "block",
+                        fontSize: "13px",
+                        color: "#333"
+                      }}
+                    >
                       {element.miniLabel}
                       {element.required && <Required />}
                     </Text>
@@ -495,7 +541,11 @@ export const Form = React.forwardRef(
                     multiple={element.multipleSelect || false}
                     value={getValue(element.name)}
                     initialValue={getValue(element.name)}
-                    mt={element.mt && !element.label && !element.miniLabel ? element.mt : 0}
+                    mt={
+                      element.mt && !element.label && !element.miniLabel
+                        ? element.mt
+                        : 0
+                    }
                     mb={typeof element.mb == "undefined" ? 1 : element.mb}
                     onChange={(v) =>
                       updateValue(
@@ -504,7 +554,10 @@ export const Form = React.forwardRef(
                       )
                     }
                   >
-                    {(element.useValuesAsOptions ? getValue(element.name) || [] : element.options).map((option: string) => (
+                    {(element.useValuesAsOptions
+                      ? getValue(element.name) || []
+                      : element.options
+                    ).map((option: string) => (
                       <Select.Option key={option} value={option}>
                         {option}
                       </Select.Option>

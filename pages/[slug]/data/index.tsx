@@ -488,7 +488,7 @@ function Data({
     );
   };
 
-  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
     width && (
@@ -505,9 +505,7 @@ function Data({
         />
         <Drawer
           visible={drawerOpen}
-          onClose={() =>
-            setDrawerOpen(false)
-          }
+          onClose={() => setDrawerOpen(false)}
           placement="right"
           style={{ maxWidth: "500px" }}
         >
@@ -555,11 +553,8 @@ function Data({
                       text: `Succesfully created ${res.attendee.name}'s record.`,
                       delay: 2000
                     });
-                    setAttendees([
-                      ...attendees,
-                      res.attendee
-                    ]);
-                    setDrawerOpen(false)
+                    setAttendees([...attendees, res.attendee]);
+                    setDrawerOpen(false);
                   }
                 }
               }}
@@ -584,7 +579,7 @@ function Data({
           onRow={(e) => {
             console.log(e, "@");
             if (e.$i === undefined) {
-              return setDrawerOpen(true)
+              return setDrawerOpen(true);
             }
             const attendee = attendees[e.$i];
 
@@ -627,14 +622,20 @@ function Data({
   );
 }
 
-function DeleteButton({setValue, attributeName}: {setValue: any, attributeName: string}) {
+function DeleteButton({
+  setValue,
+  attributeName
+}: {
+  setValue: any;
+  attributeName: string;
+}) {
   return (
     <Button
       iconRight={<Delete />}
       auto
       scale={2 / 3}
       onClick={() => {
-        setValue(attributeName, 'deleted')
+        setValue(attributeName, "deleted");
       }}
     />
   );
@@ -661,11 +662,11 @@ export default function Hackathon({
         miniLabel: "Property Name:",
         label: attribute.name == "" ? attribute.id : attribute.name, // @ts-ignore
         name: `${attribute.id}_name`,
-        mt: hackathon.attendeeAttributes[0].id == attribute.id? 0.5 :  1.5,
+        mt: hackathon.attendeeAttributes[0].id == attribute.id ? 0.5 : 1.5,
         mb: 0.5,
         defaultValue: attribute["name"],
         visible: (data: { [key: string]: { value: string } }) => {
-          return  data[`${attribute.id}_name`]?.value != "deleted"
+          return data[`${attribute.id}_name`]?.value != "deleted";
         },
         required: true
       },
@@ -677,7 +678,7 @@ export default function Hackathon({
         mb: 0.3, // @ts-ignore
         defaultValue: attribute["type"],
         visible: (data: { [key: string]: { value: string } }) => {
-          return  data[`${attribute.id}_name`]?.value != "deleted"
+          return data[`${attribute.id}_name`]?.value != "deleted";
         },
         required: true
       },
@@ -693,7 +694,10 @@ export default function Hackathon({
         mb: 0.1, // @ts-ignore
         defaultValue: [...attribute["options"]],
         visible: (data: { [key: string]: { value: string } }) => {
-          return data[`${attribute.id}_type`]?.value === "select" && data[`${attribute.id}_name`]?.value != "deleted"
+          return (
+            data[`${attribute.id}_type`]?.value === "select" &&
+            data[`${attribute.id}_name`]?.value != "deleted"
+          );
         },
         required: true
       },
@@ -702,33 +706,39 @@ export default function Hackathon({
         name: `${attribute.id}_add-option`,
         mb: 0.5, // @ts-ignore
         visible: (data: { [key: string]: { value: string } }) => {
-          return data[`${attribute.id}_type`]?.value === "select" && data[`${attribute.id}_name`]?.value != "deleted"
+          return (
+            data[`${attribute.id}_type`]?.value === "select" &&
+            data[`${attribute.id}_name`]?.value != "deleted"
+          );
         },
         placeholder: "Add an option...",
         onKeyup: (event: any, updateValue: any, getValue: any) => {
           if (event.key === "Enter") {
             event.preventDefault();
-            let toAdd = getValue(`${attribute.id}_add-option`)
-            let previousValues = Array.isArray(getValue(`${attribute.id}_options`)) ?  getValue(`${attribute.id}_options`) : []
-            updateValue(
-              `${attribute.id}_options`, 
-              [...previousValues.filter((x: any) => x != toAdd), toAdd]
+            let toAdd = getValue(`${attribute.id}_add-option`);
+            let previousValues = Array.isArray(
+              getValue(`${attribute.id}_options`)
             )
-            updateValue(
-              `${attribute.id}_add-option`, 
-              ``
-            )
+              ? getValue(`${attribute.id}_options`)
+              : [];
+            updateValue(`${attribute.id}_options`, [
+              ...previousValues.filter((x: any) => x != toAdd),
+              toAdd
+            ]);
+            updateValue(`${attribute.id}_add-option`, ``);
           }
         }
       }
-    ]
-  }
+    ];
+  };
 
   const router = useRouter();
 
   const [schemaFormElements, setSchemaFormElements] = useState([
-    ...(hackathon.attendeeAttributes.map((attribute) => properties(attribute)).flat())
-  ])
+    ...hackathon.attendeeAttributes
+      .map((attribute) => properties(attribute))
+      .flat()
+  ]);
 
   return (
     <>
@@ -766,19 +776,21 @@ export default function Hackathon({
               gap={1}
               buttonMt={16}
               additionalButtons={
-                <Button onClick={() => {
-                  setSchemaFormElements([
-                    ...schemaFormElements,
-                    ...properties({
-                      id: uuidv4(),
-                      name: "",
-                      type: "text",
-                      options: [],
-                      order: 1,
-                      hackathonId: ""
-                    })
-                  ])
-                }}>
+                <Button
+                  onClick={() => {
+                    setSchemaFormElements([
+                      ...schemaFormElements,
+                      ...properties({
+                        id: uuidv4(),
+                        name: "",
+                        type: "text",
+                        options: [],
+                        order: 1,
+                        hackathonId: ""
+                      })
+                    ]);
+                  }}
+                >
                   Add A Field
                 </Button>
               }
@@ -797,7 +809,7 @@ export default function Hackathon({
                       })
                     }
                   ).then((r) => r.json());
-                  router.reload()
+                  router.reload();
                 }
               }}
               AppendToLabel={DeleteButton}
@@ -820,8 +832,8 @@ export default function Hackathon({
           color: black !important;
         }
         .select-dropdown {
-          border: 1px solid black!important;
-          padding: 0!important;
+          border: 1px solid black !important;
+          padding: 0 !important;
         }
       `}
     </>

@@ -55,14 +55,14 @@ export default function Hackathon({
       </>
     );
   }
-  
+
   const properties = (attribute: AttendeeAttribute, i: number) => {
     return [
       {
         type: "checkbox",
         options: ["Display on form?"],
         label: attribute.name,
-        name: `${attribute.id}_enabled_on_form`,
+        name: `${attribute.id}_enabled_on_form`
       },
       {
         type: "text",
@@ -72,7 +72,9 @@ export default function Hackathon({
         mb: 0.5,
         defaultValue: attribute["name"],
         visible: (data: { [key: string]: { value: string[] } }) => {
-          return data[`${attribute.id}_enabled_on_form`].value.includes("Display on form?");
+          return data[`${attribute.id}_enabled_on_form`].value.includes(
+            "Display on form?"
+          );
         },
         required: true
       },
@@ -84,7 +86,9 @@ export default function Hackathon({
         mb: 0.5,
         defaultValue: attribute["name"],
         visible: (data: { [key: string]: { value: string[] } }) => {
-          return data[`${attribute.id}_enabled_on_form`].value.includes("Display on form?");
+          return data[`${attribute.id}_enabled_on_form`].value.includes(
+            "Display on form?"
+          );
         }
       },
       {
@@ -95,11 +99,13 @@ export default function Hackathon({
         mb: 0.5,
         defaultValue: attribute["name"],
         visible: (data: { [key: string]: { value: string[] } }) => {
-          return data[`${attribute.id}_enabled_on_form`].value.includes("Display on form?");
+          return data[`${attribute.id}_enabled_on_form`].value.includes(
+            "Display on form?"
+          );
         }
       }
-    ]
-  }
+    ];
+  };
 
   return (
     <>
@@ -107,31 +113,44 @@ export default function Hackathon({
         <h2>Configure Your Registration Form</h2>
         <Grid.Container gap={2} justify="center">
           <Grid xs={12}>
-        <Form submission={{
-          onSubmit: () => null,
-          type: "controlled"
-        }} buttonMt={16} schema={{
-          elements: hackathon.attendeeAttributes.map((attribute, i) => properties(attribute, i)).flat() as any
-        }} /></Grid>
-<Grid xs={12}>
-        <iframe
-          src={`/${hackathon?.slug}/register/form-preview/${encodeURIComponent(
-            JSON.stringify({
-              elements: [
-                {
-                  type: "text",
-                  required: false,
-                  name: "name",
-                  label: "Hello"
-                }
-              ]
-            })
-          )}`}
-          width="100%"
-          height="1000px"
-          
-          style={{border:"1px solid #333", borderRadius: "8px", padding: '16px', background: "#fff", marginTop: "24px"}}
-        /></Grid>
+            <Form
+              submission={{
+                onSubmit: () => null,
+                type: "controlled"
+              }}
+              buttonMt={16}
+              schema={{
+                elements: hackathon.attendeeAttributes
+                  .map((attribute, i) => properties(attribute, i))
+                  .flat() as any
+              }}
+            />
+          </Grid>
+          <Grid xs={12}>
+            <iframe
+              src={`/${hackathon?.slug}/register/form-preview/${encodeURIComponent(
+                JSON.stringify({
+                  elements: [
+                    {
+                      type: "text",
+                      required: false,
+                      name: "name",
+                      label: "Hello"
+                    }
+                  ]
+                })
+              )}`}
+              width="100%"
+              height="1000px"
+              style={{
+                border: "1px solid #333",
+                borderRadius: "8px",
+                padding: "16px",
+                background: "#fff",
+                marginTop: "24px"
+              }}
+            />
+          </Grid>
         </Grid.Container>
         <Debug data={{ formJSON }} />
       </Page>
