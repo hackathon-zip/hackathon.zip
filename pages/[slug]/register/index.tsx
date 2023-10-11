@@ -16,7 +16,7 @@ import prisma from "@/lib/prisma";
 import { NextApiRequest } from "next";
 import { NextServerOptions } from "next/dist/server/next";
 
-import type { Hackathon } from "@prisma/client";
+import type { Hackathon, AttendeeAttribute } from "@prisma/client";
 import { PlusCircle } from "@geist-ui/react-icons";
 import React, { useState } from "react";
 import type { ReactElement } from "react";
@@ -27,10 +27,14 @@ import Link from "next/link";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import type { FormSchema } from "@/components/Form";
 
+type HackathonWithAttributes = Hackathon & {
+  attendeeAttributes: AttendeeAttribute[];
+};
+
 export default function Hackathon({
   hackathon
 }: {
-  hackathon: Hackathon | null;
+  hackathon: HackathonWithAttributes | null;
 }): any {
   const defaultValue: FormSchema = {
     elements: [
@@ -51,22 +55,65 @@ export default function Hackathon({
       </>
     );
   }
+  
+  const properties = (attribute: AttendeeAttribute, i: number) => {
+    return [
+      {
+        type: "checkbox",
+        options: ["Display on form?"],
+        label: attribute.name,
+        name: `${attribute.id}_enabled_on_form`,
+      },
+      {
+        type: "text",
+        miniLabel: "Label:",
+        name: `${attribute.id}_label`,
+        mt: 1,
+        mb: 0.5,
+        defaultValue: attribute["name"],
+        visible: (data: { [key: string]: { value: string[] } }) => {
+          return data[`${attribute.id}_enabled_on_form`].value.includes("Display on form?");
+        },
+        required: true
+      },
+      {
+        type: "textarea",
+        miniLabel: "Description:",
+        name: `${attribute.id}_description`,
+        mt: 1,
+        mb: 0.5,
+        defaultValue: attribute["name"],
+        visible: (data: { [key: string]: { value: string[] } }) => {
+          return data[`${attribute.id}_enabled_on_form`].value.includes("Display on form?");
+        }
+      },
+      {
+        type: "text",
+        miniLabel: "Placeholder:",
+        name: `${attribute.id}_placeholder`,
+        mt: 1,
+        mb: 0.5,
+        defaultValue: attribute["name"],
+        visible: (data: { [key: string]: { value: string[] } }) => {
+          return data[`${attribute.id}_enabled_on_form`].value.includes("Display on form?");
+        }
+      }
+    ]
+  }
 
   return (
     <>
       <Page>
-        <h1>Register</h1>
-        <h3>
-          {hackathon.startDate &&
-            new Date(hackathon.startDate).toLocaleString()}
-          {" to "}
-          {hackathon.endDate &&
-            new Date(hackathon.endDate).toLocaleString()} at{" "}
-          {hackathon?.location}
-        </h3>
-
-        <code>/{hackathon?.slug}</code>
-
+        <h2>Configure Your Registration Form</h2>
+        <Grid.Container gap={2} justify="center">
+          <Grid xs={12}>
+        <Form submission={{
+          onSubmit: () => null,
+          type: "controlled"
+        }} buttonMt={16} schema={{
+          elements: hackathon.attendeeAttributes.map((attribute, i) => properties(attribute, i)).flat() as any
+        }} /></Grid>
+<Grid xs={12}>
         <iframe
           src={`/${hackathon?.slug}/register/form-preview/${encodeURIComponent(
             JSON.stringify({
@@ -82,8 +129,10 @@ export default function Hackathon({
           )}`}
           width="100%"
           height="1000px"
-        />
-
+          
+          style={{border:"1px solid #333", borderRadius: "8px", padding: '16px', background: "#fff", marginTop: "24px"}}
+        /></Grid>
+        </Grid.Container>
         <Debug data={{ formJSON }} />
       </Page>
     </>
@@ -113,6 +162,9 @@ export const getServerSideProps = (async (context) => {
             }
           }
         ]
+      },
+      include: {
+        attendeeAttributes: true
       }
     });
     return {

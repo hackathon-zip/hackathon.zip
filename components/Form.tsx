@@ -1,4 +1,4 @@
-import { AutoComplete, Button, Input, Select, Text } from "@geist-ui/core";
+import { AutoComplete, Button, Input, Select, Text, Checkbox, Textarea } from "@geist-ui/core";
 import { ButtonTypes } from "@geist-ui/core/esm/button";
 import React, { CSSProperties, useState } from "react";
 
@@ -121,7 +121,7 @@ interface FormTextInputTuple extends BaseFormElement {
 }
 
 interface FormTextInput extends FormInput {
-  type: "date" | "datetime-local" | "text" | "email" | "password" | "number";
+  type: "date" | "datetime-local" | "text" | "email" | "password" | "number" | "textarea";
   placeholder?: string;
   inlineLabel?: string;
   defaultValue?: string;
@@ -402,7 +402,52 @@ export const Form = React.forwardRef(
                   )}
                 </Input>
               );
-            } else if (formElement.type == "tuple") {
+            } else if (
+              formElement.type == "textarea"
+            ) {
+              const element = formElement as FormTextInput;
+              return (
+                <>
+                {element.label && (
+                  <Text h5>
+                    {element.label}
+                    {element.required && <Required />}
+                  </Text>
+                )}
+                {element.miniLabel && (
+                  <Text
+                    small
+                    mt={element.mt || 0}
+                    mb={0.5}
+                    style={{ display: "block", fontSize: "13px" }}
+                  >
+                    {element.miniLabel}
+                    {element.required && <Required />}
+                  </Text>
+                )}
+                <Textarea
+                  aria-disabled={loading}
+                  type={getWarningStatus(element.name) ? "error" : "default"}
+                  value={getValue(element.name)}
+                  onChange={(e) => updateValue(element.name, e.target.value)}
+                  name={element.name}
+                  width="100%"
+                  mb={typeof element.mb == "undefined" ? 1 : element.mb}
+                  placeholder={element.placeholder}
+                  onKeyPress={(event) =>
+                    event.key === "Enter" && event.preventDefault()
+                  }
+                  onKeyDown={(event) =>
+                    event.key === "Enter" && event.preventDefault()
+                  }
+                  onKeyUp={(event) =>
+                    element.onKeyup?.(event, updateValue, getValue)
+                  }
+                >
+                  
+                </Textarea>
+        </>
+              )} else if (formElement.type == "tuple") {
               const element = formElement as FormTextInputTuple;
               return (
                 <InputTuple
@@ -420,6 +465,21 @@ export const Form = React.forwardRef(
                     };
                   })}
                 />
+              );
+            } else if (formElement.type == "checkbox") {
+              const element = formElement as FormCheckbox;
+              return (
+                <>
+                  {element.label && (
+                    <Text h5 mt={1.5} mb={0.5}>
+                      {element.label}
+                      {element.required && <Required />}
+                    </Text>
+                  )}
+                  <Checkbox.Group onChange={(e) => updateValue(element.name, e)}>
+                    {element.options.map(option => <Checkbox value={option}>{option}</Checkbox>)}
+                  </Checkbox.Group>
+                </>
               );
             } else if (formElement.type == "select") {
               const element = formElement as FormSelect;
