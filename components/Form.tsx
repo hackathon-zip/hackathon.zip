@@ -212,7 +212,8 @@ export const Form = React.forwardRef(
       submitButtonType = "success",
       gap = 1,
       buttonMt = 0,
-      AppendToLabel
+      AppendToLabel,
+      setData = (data: any) => null
     }: {
       schema: FormSchema;
       submission: FormSubmission<any>;
@@ -225,6 +226,7 @@ export const Form = React.forwardRef(
       gap?: number;
       buttonMt?: number;
       AppendToLabel?: any;
+      setData?: null;
     },
     ref
   ) => {
@@ -242,8 +244,8 @@ export const Form = React.forwardRef(
         .map((input) => [input?.name, input]) as [string, FormTextInput][]
     );
 
-    const [values, setValues] = useState<any>(
-      Object.fromEntries(
+    const [values, setValues] = useState<any>(() => {
+      let data = Object.fromEntries(
         Object.entries(inputFields).map<[string, FormValue]>(
           ([name, input]) => [
             name,
@@ -257,14 +259,16 @@ export const Form = React.forwardRef(
             }
           ]
         )
-      )
-    );
+      );
+      setData(data);
+      return data;
+    });
 
     const [loading, setLoading] = useState(false);
 
     function updateValue(name: string, value: string) {
       const element = inputFields[name] as FormTextInput;
-      setValues((old: any) => {
+      let generateValues = (old: any) => {
         if (!old[name]) {
           old[name] = {
             value: ""
@@ -294,7 +298,9 @@ export const Form = React.forwardRef(
         }
         if (old[name].isValid) old[name].showWarning = false;
         return { ...old };
-      });
+      };
+      setValues(generateValues);
+      setData(generateValues);
     }
 
     function getValue(name: string) {

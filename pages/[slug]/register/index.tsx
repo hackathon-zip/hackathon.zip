@@ -70,7 +70,7 @@ export default function Hackathon({
         name: `${attribute.id}_label`,
         mt: 1,
         mb: 0.5,
-        defaultValue: attribute["name"],
+        defaultValue: "",
         visible: (data: { [key: string]: { value: string[] } }) => {
           return data[`${attribute.id}_enabled_on_form`].value.includes(
             "Display on form?"
@@ -84,7 +84,7 @@ export default function Hackathon({
         name: `${attribute.id}_description`,
         mt: 1,
         mb: 0.5,
-        defaultValue: attribute["name"],
+        defaultValue: "",
         visible: (data: { [key: string]: { value: string[] } }) => {
           return data[`${attribute.id}_enabled_on_form`].value.includes(
             "Display on form?"
@@ -94,10 +94,10 @@ export default function Hackathon({
       {
         type: "text",
         miniLabel: "Placeholder:",
-        name: `${attribute.id}_placeholder`,
+        name: `${attribute.id}_plaecholder`,
         mt: 1,
         mb: 0.5,
-        defaultValue: attribute["name"],
+        defaultValue: "",
         visible: (data: { [key: string]: { value: string[] } }) => {
           return data[`${attribute.id}_enabled_on_form`].value.includes(
             "Display on form?"
@@ -106,6 +106,40 @@ export default function Hackathon({
       }
     ];
   };
+
+  const [formData, setFormData] = useState({});
+  
+  const generatePreviewFields = (data) => {
+    let object = (() => {
+      let newData = {}
+      Object.keys(formData).map(x => {
+        let id = x.split("_")[0]
+        let property = x.split("_")[1]
+        if(!newData[id]){
+          newData[id] = {
+            attribute: hackathon.attendeeAttributes.filter(x=> x.id == id)[0]
+          }
+        }
+        newData[id][property] = formData[x].value
+      })
+      return newData
+    })()
+    return Object.keys(object).map(
+       (x) =>
+         ({
+           ...object[x].attribute,
+           ...object[x],
+           label: object[x].label || object[x].attribute.name,
+           placeholder: object[x].plaecholder,
+           miniLabel: object[x].description,
+           name: object[x].attribute.id,
+           type: object[x].attribute.type,
+           enabled: object[x].enabled.includes(
+             "Display on form?"
+           )
+         })
+     ).filter(x => x.enabled)
+  }
 
   return (
     <>
@@ -124,20 +158,31 @@ export default function Hackathon({
                   .map((attribute, i) => properties(attribute, i))
                   .flat() as any
               }}
+              setData={setFormData}
             />
           </Grid>
           <Grid xs={12}>
             <iframe
               src={`/${hackathon?.slug}/register/form-preview/${encodeURIComponent(
                 JSON.stringify({
-                  elements: [
-                    {
-                      type: "text",
-                      required: false,
-                      name: "name",
-                      label: "Hello"
-                    }
-                  ]
+      
+                 elements: [
+                   {
+                     type: "text",
+                     label: "Name",
+                     name: "name",
+                     placeholder: "Fiona Hackworth",
+                     required: true
+                   },
+                   {
+                     type: "email",
+                     label: "Email",
+                     name: "email",
+                     placeholder: "fiona@hackathon.zip",
+                     required: true
+                   },
+                   ...generatePreviewFields(formData)
+                 ]
                 })
               )}`}
               width="100%"
@@ -152,7 +197,7 @@ export default function Hackathon({
             />
           </Grid>
         </Grid.Container>
-        <Debug data={{ formJSON }} />
+        <Debug data={{ formData: generatePreviewFields(formData) }} />
       </Page>
     </>
   );
