@@ -62,6 +62,7 @@ export default function middleware(
 
         case undefined: // you are on hackathon.zip
             console.log("[domain routing]: undefined");
+
             return withoutAuthentication(pathname, () =>
                 rewrite(
                     isApi
