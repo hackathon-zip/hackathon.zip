@@ -44,3 +44,7 @@ body:has(.thisPageIsClerkSignInOrSignUp):has(
     background: url("https://cloud-8lj4t1m8o-hack-club-bot.vercel.app/0image__45_-min__1_.png");
     background-size: cover;
 }
+
+section {
+  min-height: 0px!important;
+}

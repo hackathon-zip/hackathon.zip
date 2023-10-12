@@ -33,17 +33,17 @@ export default function Hackathon({
     (new Date(hackathon.endDate as any).getTime() - new Date().getTime()) /
       (1000 * 60 * 60 * 24)
   );
-  
+
   const badges: any = {
     data: hackathon.attendees.length
-  }
+  };
 
   return (
     <>
       <div
         style={{
           minHeight: "220px",
-          height: 'fit-content',
+          height: "fit-content",
           width: "100%",
           backgroundImage:
             "linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.6)), url(https://pbs.twimg.com/media/FZmKOGwUcAApTR7.jpg)",
@@ -54,7 +54,7 @@ export default function Hackathon({
           paddingBottom: "16px"
         }}
       >
-        <Page className="header" style={{minHeight: '220px'}}>
+        <Page className="header" style={{ minHeight: "220px" }}>
           <h1 style={{ marginBottom: "0px" }}>{hackathon?.name}</h1>
           <h3>
             {hackathon.startDate &&
@@ -112,24 +112,32 @@ export default function Hackathon({
           </div>
         </Page>
       </div>
-      <Page>
+      <Page style={{ minHeight: "220px" }}>
         <Grid.Container gap={1}>
-          {NavbarTabs.filter(x => x.value != "dashboard").map((tab) => (
+          {NavbarTabs.filter((x) => x.value != "dashboard").map((tab) => (
             <Grid xs={24} sm={12} md={8} lg={6} xl={4}>
-              <Link style={{ width: "100%" }} href={`/${hackathon.slug}/${tab.value}`}>
+              <Link
+                style={{ width: "100%" }}
+                href={`/${hackathon.slug}/${tab.value}`}
+              >
                 <Card
                   hoverable
                   style={{
                     width: "100%",
-                    border: "1px solid #d1d1d1!important",
-                    
+                    border: "1px solid #d1d1d1!important"
                   }}
                   className="project-card"
                 >
-                <div style={{display: 'flex!important',
-                  alignItems: 'center'}}>
-                  <div style={{ flexGrow: 1, fontWeight: 600}}>{tab.label}</div>
-                  {badges[tab.value] && <Badge type="success">{badges[tab.value]}</Badge>}</div>
+                  <div
+                    style={{ display: "flex", alignItems: "center" }}
+                  >
+                    <div style={{ flexGrow: 1, fontWeight: 600 }}>
+                      {tab.label}
+                    </div>
+                    {badges[tab.value] && (
+                      <Badge type="success">{badges[tab.value]}</Badge>
+                    )}
+                  </div>
                 </Card>
               </Link>
             </Grid>
