@@ -1,7 +1,7 @@
 import { css } from "@/components/CSS";
 import type { GetServerSideProps } from "next";
 
-import EditableValue from "@/components/EditableValue";
+import EditableValue, { EditableHeader } from "@/components/EditableValue";
 import { Form } from "@/components/Form";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import useViewport from "@/hooks/useViewport";
@@ -18,7 +18,7 @@ import {
   Text,
   useToasts
 } from "@geist-ui/core";
-import { Delete, Edit3, Plus } from "@geist-ui/react-icons";
+import { Delete, Plus } from "@geist-ui/react-icons";
 import type {
   Attendee,
   AttendeeAttribute,
@@ -179,18 +179,11 @@ function EditDrawer({
             marginBottom: "16px"
           }}
         >
-          <Text h3 my={0}>
-            {attendee?.id == "create" ? "New Attendee" : attendee?.name}
-          </Text>
-          <a
-            style={{
-              cursor: "pointer",
-              color: "#666",
-              display: "flex"
-            }}
-          >
-            <Edit3 />
-          </a>
+          <EditableHeader
+            name="Name"
+            initialValue={attendee?.name || ""}
+            save={async (value) => {}}
+          />
         </div>
 
         <Grid.Container gap={2} mb={1} justify="space-between">

@@ -1,10 +1,10 @@
 import {
   AutoComplete,
   Button,
+  Checkbox,
   Input,
   Select,
   Text,
-  Checkbox,
   Textarea
 } from "@geist-ui/core";
 import { ButtonTypes } from "@geist-ui/core/esm/button";
@@ -508,7 +508,12 @@ export const Form = React.forwardRef(
                     onChange={(e) => updateValue(element.name, e)}
                   >
                     {element.options.map((option) => (
-                      <Checkbox value={option}>{option}</Checkbox>
+                      <Checkbox
+                        value={option}
+                        checked={element.defaultValue.includes(option)}
+                      >
+                        {option}
+                      </Checkbox>
                     ))}
                   </Checkbox.Group>
                 </>

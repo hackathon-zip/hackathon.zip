@@ -2,13 +2,44 @@ import { useScrollPosition } from "@/hooks/useScrollPosition";
 import { useTheme } from "@/hooks/useTheme";
 import useUrlState from "@/hooks/useUrlState";
 import { ClerkLoaded, UserButton } from "@clerk/nextjs";
-import { Breadcrumbs, Select, Tabs } from "@geist-ui/core";
-import { Moon, Sun } from "@geist-ui/react-icons";
+import { Breadcrumbs, Input, Select, Tabs } from "@geist-ui/core";
+import { Moon, Search, Sun } from "@geist-ui/react-icons";
 import HomeIcon from "@geist-ui/react-icons/home";
 import { useRouter } from "next/router";
-import { ReactNode } from "react";
+import { ReactNode, useRef, useState } from "react";
 
 type TypescriptIsWrong = any;
+
+function SearchBar() {
+  const inputRef = useRef<any>(null);
+  const [query, setQuery] = useState<string>("");
+
+  return (
+    <div
+      style={{
+        width: "100%",
+        maxWidth: "500px",
+        cursor: "text"
+      }}
+      onClick={() => {
+        inputRef.current.focus();
+      }}
+    >
+      <Input
+        ref={inputRef}
+        crossOrigin
+        name="input"
+        icon={<Search />}
+        placeholder="Search..."
+        width="100%"
+        value={query}
+        onChange={(e) => {
+          setQuery(e.target.value);
+        }}
+      />
+    </div>
+  );
+}
 
 export const NavbarTabs = [
   {
@@ -91,7 +122,8 @@ export default function Navbar({
       <nav
         style={{
           width: "100%",
-          display: "flex",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr 1fr",
           height: "54px",
           alignItems: "center",
           justifyContent: "space-between",
@@ -123,7 +155,19 @@ export default function Navbar({
           style={{
             display: "flex",
             gap: "16px",
-            alignItems: "center"
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%"
+          }}
+        >
+          <SearchBar />
+        </div>
+        <div
+          style={{
+            display: "flex",
+            gap: "16px",
+            alignItems: "center",
+            justifyContent: "flex-end"
           }}
         >
           <Select

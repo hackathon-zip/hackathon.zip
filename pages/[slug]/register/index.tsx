@@ -16,7 +16,11 @@ import prisma from "@/lib/prisma";
 import { NextApiRequest } from "next";
 import { NextServerOptions } from "next/dist/server/next";
 
-import type { Hackathon, AttendeeAttribute, SignupFormField } from "@prisma/client";
+import type {
+  Hackathon,
+  AttendeeAttribute,
+  SignupFormField
+} from "@prisma/client";
 import { PlusCircle } from "@geist-ui/react-icons";
 import React, { useState } from "react";
 import type { ReactElement } from "react";
@@ -29,7 +33,7 @@ import type { FormSchema } from "@/components/Form";
 
 type AttendeeAttributeWithField = AttendeeAttribute & {
   signupFormField: SignupFormField | null;
-}
+};
 
 type HackathonWithAttributes = Hackathon & {
   attendeeAttributes: AttendeeAttributeWithField[];
@@ -67,7 +71,8 @@ export default function Hackathon({
         options: ["Display on form?"],
         label: attribute.name,
         name: `${attribute.id}_enabled_on_form`,
-        defaultValue: attribute.signupFormField != null ? ["Display on form?"] : []
+        defaultValue:
+          attribute.signupFormField != null ? ["Display on form?"] : []
       },
       {
         type: "text",
@@ -75,7 +80,10 @@ export default function Hackathon({
         name: `${attribute.id}_label`,
         mt: 1,
         mb: 0.5,
-        defaultValue: attribute.signupFormField != null ? attribute.signupFormField.label : "",
+        defaultValue:
+          attribute.signupFormField != null
+            ? attribute.signupFormField.label
+            : "",
         visible: (data: { [key: string]: { value: string[] } }) => {
           return data[`${attribute.id}_enabled_on_form`].value.includes(
             "Display on form?"
@@ -89,7 +97,10 @@ export default function Hackathon({
         name: `${attribute.id}_description`,
         mt: 1,
         mb: 0.5,
-        defaultValue: attribute.signupFormField != null ? attribute.signupFormField.description : "",
+        defaultValue:
+          attribute.signupFormField != null
+            ? attribute.signupFormField.description
+            : "",
         visible: (data: { [key: string]: { value: string[] } }) => {
           return data[`${attribute.id}_enabled_on_form`].value.includes(
             "Display on form?"
@@ -102,7 +113,10 @@ export default function Hackathon({
         name: `${attribute.id}_plaecholder`,
         mt: 1,
         mb: 0.5,
-        defaultValue: attribute.signupFormField != null ? attribute.signupFormField.plaecholder : "",
+        defaultValue:
+          attribute.signupFormField != null
+            ? attribute.signupFormField.plaecholder
+            : "",
         visible: (data: { [key: string]: { value: string[] } }) => {
           return data[`${attribute.id}_enabled_on_form`].value.includes(
             "Display on form?"
@@ -113,38 +127,35 @@ export default function Hackathon({
   };
 
   const [formData, setFormData] = useState({});
-  
+
   const generatePreviewFields = (data: any) => {
     let object = (() => {
-      let newData: any = {}
-      Object.keys(formData).map(x => {
-        let id = x.split("_")[0]
-        let property = x.split("_")[1]
-        if(!newData[id]){
+      let newData: any = {};
+      Object.keys(formData).map((x) => {
+        let id = x.split("_")[0];
+        let property = x.split("_")[1];
+        if (!newData[id]) {
           newData[id] = {
-            attribute: hackathon.attendeeAttributes.filter(x=> x.id == id)[0]
-          }
+            attribute: hackathon.attendeeAttributes.filter((x) => x.id == id)[0]
+          };
         }
-        newData[id][property] = (formData as any)[x].value
-      })
-      return newData
-    })()
-    return Object.keys(object).map(
-       (x) =>
-         ({
-           ...object[x].attribute,
-           ...object[x],
-           label: object[x].label || object[x].attribute.name,
-           placeholder: object[x].plaecholder,
-           miniLabel: object[x].description,
-           name: object[x].attribute.id,
-           type: object[x].attribute.type,
-           enabled: object[x].enabled.includes(
-             "Display on form?"
-           )
-         })
-     ).filter(x => x.enabled)
-  }
+        newData[id][property] = (formData as any)[x].value;
+      });
+      return newData;
+    })();
+    return Object.keys(object)
+      .map((x) => ({
+        ...object[x].attribute,
+        ...object[x],
+        label: object[x].label || object[x].attribute.name,
+        placeholder: object[x].plaecholder,
+        miniLabel: object[x].description,
+        name: object[x].attribute.id,
+        type: object[x].attribute.type,
+        enabled: object[x].enabled.includes("Display on form?")
+      }))
+      .filter((x) => x.enabled);
+  };
 
   return (
     <>
@@ -167,7 +178,7 @@ export default function Hackathon({
                       })
                     }
                   ).then((r) => r.json());
-                  console.log(res)
+                  console.log(res);
                 },
                 type: "controlled"
               }}
@@ -184,24 +195,23 @@ export default function Hackathon({
             <iframe
               src={`/${hackathon?.slug}/register/form-preview/${encodeURIComponent(
                 JSON.stringify({
-      
-                 elements: [
-                   {
-                     type: "text",
-                     label: "Name",
-                     name: "name",
-                     placeholder: "Fiona Hackworth",
-                     required: true
-                   },
-                   {
-                     type: "email",
-                     label: "Email",
-                     name: "email",
-                     placeholder: "fiona@hackathon.zip",
-                     required: true
-                   },
-                   ...generatePreviewFields(formData)
-                 ]
+                  elements: [
+                    {
+                      type: "text",
+                      label: "Name",
+                      name: "name",
+                      placeholder: "Fiona Hackworth",
+                      required: true
+                    },
+                    {
+                      type: "email",
+                      label: "Email",
+                      name: "email",
+                      placeholder: "fiona@hackathon.zip",
+                      required: true
+                    },
+                    ...generatePreviewFields(formData)
+                  ]
                 })
               )}`}
               width="100%"
