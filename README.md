@@ -2,6 +2,8 @@
 
 We're building hackathon infrastructure that just works.
 
+<img src="https://cloud-p1yhi2i8t-hack-club-bot.vercel.app/0screenshot_2023-10-11_at_11.46.25___pm.png" width="600px" />
+
 ## Routing System
 
 ```
