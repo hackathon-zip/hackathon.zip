@@ -150,6 +150,7 @@ interface FormRadio extends FormInput {
 interface FormCheckbox extends FormInput {
   type: "checkbox";
   options: string[];
+  defaultValue: string[];
 }
 
 interface FormSelect extends FormInput {
@@ -266,7 +267,7 @@ export const Form = React.forwardRef(
 
     const [loading, setLoading] = useState(false);
 
-    function updateValue(name: string, value: string) {
+    function updateValue(name: string, value: string | string[]) {
       const element = inputFields[name] as FormTextInput;
       let generateValues = (old: any) => {
         if (!old[name]) {
@@ -282,7 +283,7 @@ export const Form = React.forwardRef(
         if (element.required) {
           if (value) {
             if (element.validate) {
-              old[name].isValid = element.validate(value);
+              old[name].isValid = element.validate(value as string);
             } else {
               old[name].isValid = true;
             }
@@ -291,7 +292,7 @@ export const Form = React.forwardRef(
           }
         } else {
           if (element.validate && value) {
-            old[name].isValid = element.validate(value);
+            old[name].isValid = element.validate(value as string);
           } else {
             old[name].isValid = true;
           }
@@ -505,6 +506,7 @@ export const Form = React.forwardRef(
                     </Text>
                   )}
                   <Checkbox.Group
+                    value={element.defaultValue}
                     onChange={(e) => updateValue(element.name, e)}
                   >
                     {element.options.map((option) => (

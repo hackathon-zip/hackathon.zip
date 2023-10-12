@@ -18,7 +18,7 @@ import {
   Text,
   useToasts
 } from "@geist-ui/core";
-import { Delete, Plus } from "@geist-ui/react-icons";
+import { Plus, Trash2 } from "@geist-ui/react-icons";
 import type {
   Attendee,
   AttendeeAttribute,
@@ -182,7 +182,32 @@ function EditDrawer({
           <EditableHeader
             name="Name"
             initialValue={attendee?.name || ""}
-            save={async (value) => {}}
+            save={async (value) => {
+              await fetch(
+                `/api/hackathons/${hackathon.slug}/data/${attendee?.id}/update`,
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify({
+                    name: value
+                  })
+                }
+              );
+
+              const newAttendee = {
+                ...(drawer.attendee as any),
+                name: value
+              };
+
+              drawer.setAttendee(newAttendee);
+
+              setAttendees([
+                ...attendees.filter((x) => x.id != attendee?.id),
+                newAttendee
+              ]);
+            }}
           />
         </div>
 
@@ -194,7 +219,32 @@ function EditDrawer({
                 <EditableValue
                   name={attribute.name}
                   initialValue={attendee ? (attendee as any)[attribute.id] : ""}
-                  save={async (value) => {}}
+                  save={async (value) => {
+                    await fetch(
+                      `/api/hackathons/${hackathon.slug}/data/${attendee?.id}/update`,
+                      {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                          email: value
+                        })
+                      }
+                    );
+
+                    const newAttendee = {
+                      ...(drawer.attendee as any),
+                      email: value
+                    };
+
+                    drawer.setAttendee(newAttendee);
+
+                    setAttendees([
+                      ...attendees.filter((x) => x.id != attendee?.id),
+                      newAttendee
+                    ]);
+                  }}
                 />
               </Grid>
             ))}
@@ -435,46 +485,115 @@ function Data({
     return output;
   })();
 
+  const [stagedForDeletion, setStagedForDeletion] = useState<[string][]>([]);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
   const renderActions = (value: any, rowData: any, rowIndex: any) => {
     const [loading, setLoading] = useState(false);
     return (
       <>
-        {rowIndex != tableData.length && (
+        {rowIndex == tableData.length ? (
+          stagedForDeletion.length > 0 && (
+            <Button
+              type="error"
+              auto
+              scale={1 / 3}
+              font="12px"
+              onClick={async (event) => {
+                event.stopPropagation();
+
+                setDeleteLoading(true);
+                let res = await fetch(
+                  `/api/hackathons/${hackathon.slug}/data/delete`,
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                      ids: stagedForDeletion
+                    })
+                  }
+                ).then((r) => r.json());
+                setDeleteLoading(false);
+                if (res.error) {
+                  setToast({ text: res.error, delay: 2000 });
+                } else {
+                  setToast({
+                    text: `Succesfully deleted ${
+                      stagedForDeletion.length
+                    } record${stagedForDeletion.length == 1 ? "" : "s"}.`,
+                    delay: 2000
+                  });
+                  // setStatefulData(
+                  //   generateData([
+                  //     ...attendees.filter((a) => a.email != rowData.Email)
+                  //   ])
+                  // );
+                  setStagedForDeletion([]);
+                  setAttendees((a) =>
+                    a.filter((x) => !stagedForDeletion.includes((x as any).id))
+                  );
+                }
+              }}
+            >
+              Confirm
+            </Button>
+          )
+        ) : (
           <Button
             type="error"
-            loading={loading}
+            loading={
+              stagedForDeletion.includes(rowData.$attendee.id) && loading
+            }
             auto
             scale={1 / 3}
             font="12px"
+            className={
+              stagedForDeletion.includes(rowData.$attendee.id)
+                ? "staged-button"
+                : ""
+            }
             onClick={async (event) => {
               event.stopPropagation();
-              setLoading(true);
-              let res = await fetch(
-                `/api/hackathons/${hackathon.slug}/data/${rowData.Email}/delete`,
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json"
-                  }
+
+              setStagedForDeletion((old) => {
+                if (old.includes(rowData.$attendee.id)) {
+                  return old.filter((x) => x != rowData.$attendee.id);
+                } else {
+                  return [rowData.$attendee.id, ...stagedForDeletion];
                 }
-              ).then((r) => r.json());
-              setLoading(false);
-              if (res.error) {
-                setToast({ text: res.error, delay: 2000 });
-              } else {
-                setToast({
-                  text: `Succesfully deleted ${rowData.Name}'s record.`,
-                  delay: 2000
-                });
-                // setStatefulData(
-                //   generateData([
-                //     ...attendees.filter((a) => a.email != rowData.Email)
-                //   ])
-                // );
-              }
+              });
+              //   event.stopPropagation();
+              //   setLoading(true);
+              //   let res = await fetch(
+              //     `/api/hackathons/${hackathon.slug}/data/${rowData.Email}/delete`,
+              //     {
+              //       method: "POST",
+              //       headers: {
+              //         "Content-Type": "application/json"
+              //       }
+              //     }
+              //   ).then((r) => r.json());
+              //   setLoading(false);
+              //   if (res.error) {
+              //     setToast({ text: res.error, delay: 2000 });
+              //   } else {
+              //     setToast({
+              //       text: `Succesfully deleted ${rowData.Name}'s record.`,
+              //       delay: 2000
+              //     });
+              //     // setStatefulData(
+              //     //   generateData([
+              //     //     ...attendees.filter((a) => a.email != rowData.Email)
+              //     //   ])
+              //     // );
+              //   }
             }}
           >
-            Delete
+            {stagedForDeletion.includes(rowData.$attendee.id)
+              ? "Staged"
+              : "Delete"}
           </Button>
         )}
       </>
@@ -561,6 +680,12 @@ function Data({
           .attendees-data-table-row {
             cursor: pointer;
           }
+          .attendees-data-table-row:has(.staged-button) {
+            background-color: #ec899355;
+          }
+          .attendees-data-table-row:hover:has(.staged-button) {
+            background-color: #ec899369 !important;
+          }
           .attendees-data-table-row > td > div.cell {
             min-height: calc(2.525 * var(--table-font-size));
           }
@@ -624,7 +749,7 @@ function DeleteButton({
 }) {
   return (
     <Button
-      iconRight={<Delete />}
+      iconRight={<Trash2 />}
       auto
       scale={2 / 3}
       onClick={() => {
