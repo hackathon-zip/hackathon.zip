@@ -16,7 +16,7 @@ import prisma from "@/lib/prisma";
 import { NextApiRequest } from "next";
 import { NextServerOptions } from "next/dist/server/next";
 
-import type { Hackathon, AttendeeAttribute } from "@prisma/client";
+import type { Hackathon, AttendeeAttribute, SignupFormField } from "@prisma/client";
 import { PlusCircle } from "@geist-ui/react-icons";
 import React, { useState } from "react";
 import type { ReactElement } from "react";
@@ -27,8 +27,12 @@ import Link from "next/link";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import type { FormSchema } from "@/components/Form";
 
+type AttendeeAttributeWithField = AttendeeAttribute & {
+  signupFormField: SignupFormField | null;
+}
+
 type HackathonWithAttributes = Hackathon & {
-  attendeeAttributes: AttendeeAttribute[];
+  attendeeAttributes: AttendeeAttributeWithField[];
 };
 
 export default function Hackathon({
@@ -56,13 +60,14 @@ export default function Hackathon({
     );
   }
 
-  const properties = (attribute: AttendeeAttribute, i: number) => {
+  const properties = (attribute: AttendeeAttributeWithField, i: number) => {
     return [
       {
         type: "checkbox",
         options: ["Display on form?"],
         label: attribute.name,
-        name: `${attribute.id}_enabled_on_form`
+        name: `${attribute.id}_enabled_on_form`,
+        defaultValue: attribute.signupFormField != null ? ["Display on form?"] : []
       },
       {
         type: "text",
@@ -70,7 +75,7 @@ export default function Hackathon({
         name: `${attribute.id}_label`,
         mt: 1,
         mb: 0.5,
-        defaultValue: "",
+        defaultValue: attribute.signupFormField != null ? attribute.signupFormField.label : "",
         visible: (data: { [key: string]: { value: string[] } }) => {
           return data[`${attribute.id}_enabled_on_form`].value.includes(
             "Display on form?"
@@ -84,7 +89,7 @@ export default function Hackathon({
         name: `${attribute.id}_description`,
         mt: 1,
         mb: 0.5,
-        defaultValue: "",
+        defaultValue: attribute.signupFormField != null ? attribute.signupFormField.description : "",
         visible: (data: { [key: string]: { value: string[] } }) => {
           return data[`${attribute.id}_enabled_on_form`].value.includes(
             "Display on form?"
@@ -97,7 +102,7 @@ export default function Hackathon({
         name: `${attribute.id}_plaecholder`,
         mt: 1,
         mb: 0.5,
-        defaultValue: "",
+        defaultValue: attribute.signupFormField != null ? attribute.signupFormField.plaecholder : "",
         visible: (data: { [key: string]: { value: string[] } }) => {
           return data[`${attribute.id}_enabled_on_form`].value.includes(
             "Display on form?"
@@ -109,9 +114,9 @@ export default function Hackathon({
 
   const [formData, setFormData] = useState({});
   
-  const generatePreviewFields = (data) => {
+  const generatePreviewFields = (data: any) => {
     let object = (() => {
-      let newData = {}
+      let newData: any = {}
       Object.keys(formData).map(x => {
         let id = x.split("_")[0]
         let property = x.split("_")[1]
@@ -120,7 +125,7 @@ export default function Hackathon({
             attribute: hackathon.attendeeAttributes.filter(x=> x.id == id)[0]
           }
         }
-        newData[id][property] = formData[x].value
+        newData[id][property] = (formData as any)[x].value
       })
       return newData
     })()
@@ -149,7 +154,21 @@ export default function Hackathon({
           <Grid xs={12}>
             <Form
               submission={{
-                onSubmit: () => null,
+                onSubmit: async (data) => {
+                  let res = await fetch(
+                    `/api/hackathons/${hackathon.slug}/data/form`,
+                    {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json"
+                      },
+                      body: JSON.stringify({
+                        ...data
+                      })
+                    }
+                  ).then((r) => r.json());
+                  console.log(res)
+                },
                 type: "controlled"
               }}
               buttonMt={16}
@@ -228,7 +247,11 @@ export const getServerSideProps = (async (context) => {
         ]
       },
       include: {
-        attendeeAttributes: true
+        attendeeAttributes: {
+          include: {
+            signupFormField: true
+          }
+        }
       }
     });
     return {

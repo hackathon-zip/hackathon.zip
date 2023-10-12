@@ -226,7 +226,7 @@ export const Form = React.forwardRef(
       gap?: number;
       buttonMt?: number;
       AppendToLabel?: any;
-      setData?: null;
+      setData?: any;
     },
     ref
   ) => {

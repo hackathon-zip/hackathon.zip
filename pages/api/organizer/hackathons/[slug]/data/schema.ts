@@ -64,5 +64,5 @@ export default async function handler(
             }
         }
     });
-    res.json({ attributes: updatedAttributes });
+    res.json({ body: req.body });
 }
