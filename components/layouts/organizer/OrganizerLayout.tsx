@@ -7,6 +7,7 @@ import { Hackathon } from "@prisma/client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Navbar, { NavbarTabs } from "./Navbar";
+import Head from "next/head"
 
 export default function HackathonLayout({
   children
@@ -57,6 +58,9 @@ export default function HackathonLayout({
         flexDirection: "column"
       }}
     >
+      <Head>
+        <title>{activeHackathon?.name} - Hackathon.zip</title>
+      </Head>
       <Navbar
         breadcrumbs={[
           {
