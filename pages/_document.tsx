@@ -31,7 +31,7 @@ export default class MyDocument extends Document {
 
           <link rel="shortcut-icon" href="/favicon.png" />
 
-          <meta name="theme-color" content="#4E597C" />
+          <meta name="theme-color" content="#FFFFFF" />
 
           <meta name="apple-mobile-web-app-capable" content="yes" />
         </Head>

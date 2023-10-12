@@ -32,7 +32,8 @@ export default function middleware(
     };
 
     const { pathname } = request.nextUrl;
-    const hostname = request.headers.get("host"); // Get the hostname from the request headers, because Next.js doesn't like localhost subdomains (vercel/next.js#56320)
+    let hostname = request.headers.get("host") as string; // Get the hostname from the request headers, because Next.js doesn't like localhost subdomains (vercel/next.js#56320)
+    hostname = hostname.replace('192.168.0.235', 'client.hackathon.zip');
     const isApi = pathname.startsWith("/api");
     const isAttendeeApi = pathname.startsWith("/api/attendee/");
     let pathnameWithoutAPI = pathname.replace("/api", "");
@@ -59,6 +60,14 @@ export default function middleware(
             return withoutAuthentication(pathname, () =>
                 rewrite("/api/integration" + pathname)
             );
+        case "client":
+        return withoutAuthentication(pathname, () =>
+            rewrite(
+                isApi
+                    ? `/api/client${pathnameWithoutAPI}`
+                    : `/client${pathname}`
+            )
+        );
 
         case undefined: // you are on hackathon.zip
             console.log("[domain routing]: undefined");

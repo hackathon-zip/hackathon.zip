@@ -173,3 +173,8 @@ export function orderedSort<ArrayItem>(
         return 0;
     });
 }
+
+export type StateTuple<StatefulType> = [
+    StatefulType,
+    React.Dispatch<React.SetStateAction<StatefulType>>
+];

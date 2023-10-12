@@ -22,6 +22,7 @@
         "@types/react-dom": "18.2.7",
         "active-table": "^1.0.3",
         "active-table-react": "^1.0.3",
+        "cookie-cutter": "^0.2.0",
         "markdown-it": "^13.0.2",
         "md5": "^2.3.0",
         "next": "13.5.2",
