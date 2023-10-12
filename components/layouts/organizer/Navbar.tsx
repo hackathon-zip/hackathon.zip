@@ -93,8 +93,10 @@ export const NavbarTabs = [
 ];
 
 export default function Navbar({
-  breadcrumbs
+  breadcrumbs,
+  showTabs = true
 }: {
+  showTabs?: boolean;
   breadcrumbs?: { value: ReactNode; href?: string }[];
 }) {
   const router = useRouter();
@@ -116,7 +118,8 @@ export default function Navbar({
         position: "sticky",
         top: 0,
         left: 0,
-        zIndex: 999
+        zIndex: 999,
+        borderBottom: !showTabs ? "1px solid #eaeaea" : undefined
       }}
     >
       <nav
@@ -203,29 +206,30 @@ export default function Navbar({
         </div>
       </nav>
 
-      <div
-        style={{
-          width: "100%"
-        }}
-      >
-        <Tabs
-          onChange={(value) => {
-            router.push(
-              `/${activeHackathonSlug}/${value == "dashboard" ? "" : value}`
-            );
-          }}
+      {showTabs && (
+        <div
           style={{
-            background: theme === "dark" ? "#131313" : "#ffffff"
+            width: "100%"
           }}
-          value={feature ?? "dashboard"}
         >
-          {NavbarTabs.map((tab) => (
-            <Tabs.Item label={tab.label} value={tab.value} />
-          ))}
-        </Tabs>
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
+          <Tabs
+            onChange={(value) => {
+              router.push(
+                `/${activeHackathonSlug}/${value == "dashboard" ? "" : value}`
+              );
+            }}
+            style={{
+              background: theme === "dark" ? "#131313" : "#ffffff"
+            }}
+            value={feature ?? "dashboard"}
+          >
+            {NavbarTabs.map((tab) => (
+              <Tabs.Item label={tab.label} value={tab.value} />
+            ))}
+          </Tabs>
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
               .tab-styles-locator {
                 display: none;
               }
@@ -247,9 +251,10 @@ export default function Navbar({
                 gap: 4px;
               }
             `
-          }}
-        />
-      </div>
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

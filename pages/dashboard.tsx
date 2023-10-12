@@ -3,17 +3,22 @@ import { getAuth } from "@clerk/nextjs/server";
 import { Card, Drawer, Fieldset, Grid, Page, Text } from "@geist-ui/core";
 import type { GetServerSideProps } from "next";
 
-import Debug from "@/components/Debug";
 import { Form } from "@/components/Form";
+import DashboardLayout from "@/components/layouts/organizer/DashboardLayout";
 import { PlusCircle } from "@geist-ui/react-icons";
-import type { Hackathon } from "@prisma/client";
+import type { Attendee, Hackathon } from "@prisma/client";
+import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
+
+type HackathonWithAttendees = Hackathon & {
+  attendees: Attendee[];
+};
 
 export default function Index({
   hackathons
 }: {
-  hackathons: Hackathon[];
+  hackathons: HackathonWithAttendees[];
 }): any {
   const [drawerState, setDrawerState] = useState(false);
   const [data, setData] = useState({});
@@ -22,7 +27,35 @@ export default function Index({
     <>
       <Page>
         <Page.Header>
-          <h2>Hackathon Thing</h2>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "32px"
+            }}
+          >
+            <Image
+              src="/wordmark-light.svg"
+              alt="Hackathon.zip"
+              height={40}
+              width={350}
+              style={{
+                margin: "0px"
+              }}
+            />
+            <div style={{ flexGrow: 1 }} />
+            <h5
+              style={{
+                background: "#eee",
+                borderRadius: "99px",
+                width: "fit-content",
+                padding: "8px 16px",
+                marginBottom: "0px"
+              }}
+            >
+              All your hackathon needs, zipped.
+            </h5>
+          </div>
         </Page.Header>
 
         <style>{`
@@ -51,7 +84,7 @@ export default function Index({
         >
           <h2 style={{ marginBottom: "0px" }}>Create a Hackathon</h2>
           <p style={{ marginTop: "16px" }}>
-            Let's get you set up on Hackathon Thing.
+            Let's get you set up on Hackathon.zip.
           </p>
           <Drawer.Content>
             <Form
@@ -109,24 +142,77 @@ export default function Index({
         </Drawer>
 
         <Grid.Container gap={3} className="hackathons">
-          {hackathons.map((hackathon) => (
-            <Grid xs={24} sm={12} md={8} lg={6} xl={4}>
-              <Link style={{ width: "100%" }} href={`/${hackathon.slug}`}>
-                <Card
-                  hoverable
-                  style={{ width: "100%", border: "1px solid #343434" }}
-                  className="project-card"
-                >
-                  <Fieldset.Title>{hackathon.name}</Fieldset.Title>
-                  <Fieldset.Subtitle>{hackathon.slug}</Fieldset.Subtitle>
-                </Card>
-              </Link>
-            </Grid>
-          ))}
+          {hackathons.map((hackathon) => {
+            const daysToGo = Math.floor(
+              (new Date(hackathon.endDate as any).getTime() -
+                new Date().getTime()) /
+                (1000 * 60 * 60 * 24)
+            );
+            return (
+              <Grid xs={24} sm={12} md={8} lg={6} xl={4}>
+                <Link style={{ width: "100%" }} href={`/${hackathon.slug}`}>
+                  <Card
+                    hoverable
+                    style={{
+                      width: "100%",
+                      border: "1px solid #d1d1d1!important"
+                    }}
+                    className="project-card"
+                  >
+                    <Fieldset.Title>{hackathon.name}</Fieldset.Title>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr"
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column"
+                        }}
+                      >
+                        <Text h3 mb={0}>
+                          {hackathon.attendees.length}
+                        </Text>
+                        <Text small>
+                          Attendee{hackathon.attendees.length == 1 ? "" : "s"}
+                        </Text>
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column"
+                        }}
+                      >
+                        {daysToGo != 0 ? (
+                          <>
+                            <Text h3 mb={0}>
+                              {Math.abs(daysToGo)}
+                            </Text>
+                            <Text small>
+                              Days {daysToGo > 0 ? "To Go" : "Ago"}
+                            </Text>
+                          </>
+                        ) : (
+                          <>
+                            <Text h3 mb={0}>
+                              Today
+                            </Text>
+                            <Text small>Good luck!</Text>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                </Link>
+              </Grid>
+            );
+          })}
           <Grid xs={24} sm={12} md={8} lg={6} xl={4}>
             <Card
               hoverable
-              style={{ width: "100%", border: "1px solid #343434" }}
+              style={{ width: "100%", border: "1px solid #d1d1d1!important" }}
               className="project-card"
               onClick={() => setDrawerState(true)}
             >
@@ -147,11 +233,14 @@ export default function Index({
             </Card>
           </Grid>
         </Grid.Container>
-        <Debug data={{ data }} />
       </Page>
     </>
   );
 }
+
+Index.getLayout = function getLayout(page: ReactElement) {
+  return <DashboardLayout>{page}</DashboardLayout>;
+};
 
 export const getServerSideProps = (async (context) => {
   const { userId } = getAuth(context.req);
@@ -159,6 +248,9 @@ export const getServerSideProps = (async (context) => {
   const hackathons = await prisma.hackathon.findMany({
     where: {
       ownerId: userId ?? undefined
+    },
+    include: {
+      attendees: true
     }
   });
 
@@ -168,5 +260,5 @@ export const getServerSideProps = (async (context) => {
     }
   };
 }) satisfies GetServerSideProps<{
-  hackathons: Hackathon[];
+  hackathons: HackathonWithAttendees[];
 }>;
