@@ -24,7 +24,11 @@ export default class MyDocument extends Document {
         <Head>
           <link rel="icon" href="/favicon.png" />
           <link rel="favicon" href="/favicon.png" />
-          <link rel="apple-touch-icon" href="/favicon.png" />
+
+          <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+          <link rel="apple-touch-startup-image" href="/apple-touch-icon.png" />
+          <meta name="apple-mobile-web-app-title" content="Hackathons" />
+
           <link rel="shortcut-icon" href="/favicon.png" />
 
           <meta name="theme-color" content="#4E597C" />
