@@ -1,6 +1,6 @@
-import { Fragment } from "react";
-import Document, { Html, Head, Main, NextScript } from "next/document";
 import { CssBaseline } from "@geist-ui/core";
+import Document, { Head, Html, Main, NextScript } from "next/document";
+import { Fragment } from "react";
 
 export default class MyDocument extends Document {
   static async getInitialProps(ctx: any) {
@@ -21,7 +21,16 @@ export default class MyDocument extends Document {
   render() {
     return (
       <Html lang="en">
-        <Head />
+        <Head>
+          <link rel="icon" href="/favicon.png" />
+          <link rel="favicon" href="/favicon.png" />
+          <link rel="apple-touch-icon" href="/favicon.png" />
+          <link rel="shortcut-icon" href="/favicon.png" />
+
+          <meta name="theme-color" content="#4E597C" />
+
+          <meta name="apple-mobile-web-app-capable" content="yes" />
+        </Head>
         <body>
           <Main />
           <NextScript />
