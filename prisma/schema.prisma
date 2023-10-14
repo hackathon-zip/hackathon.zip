@@ -19,15 +19,15 @@ model Hackathon {
   attendeeAttributes AttendeeAttribute[]
 
   // event info
-  location  String
-  startDate DateTime?
-  endDate   DateTime?
-  timezone String?
-  schedule  Schedule?
-  signupForm  SignupForm?
-  dashboard AttendeeDashboard?
-  sponsors  Sponsor[]
-  leads     Lead[]
+  location   String
+  startDate  DateTime?
+  endDate    DateTime?
+  timezone   String?
+  schedule   Schedule?
+  signupForm SignupForm?
+  dashboard  AttendeeDashboard?
+  sponsors   Sponsor[]
+  leads      Lead[]
 
   // branding
   website   String?
@@ -42,7 +42,7 @@ model Hackathon {
   shipEnabled      Boolean @default(false)
   integrateEnabled Boolean @default(false)
   financeEnabled   Boolean @default(false)
-  sponsorsEnabled Boolean @default(false)
+  sponsorsEnabled  Boolean @default(false)
   leadsEnabled     Boolean @default(false)
 
   hcbId String?
@@ -52,7 +52,9 @@ model Hackathon {
   ownerId         String
   collaboratorIds String[]
 
-  devices Device[]
+  devices          Device[]
+  projects         Project[]
+  ProjectAttribute ProjectAttribute[]
 }
 
 model AttendeeDashboard {
@@ -91,11 +93,11 @@ model Schedule {
 }
 
 model Sponsor {
-  id         String    @id @default(uuid())
-  hackathonId String    
-  name       String
-  logoUrl    String?
-  website    String?
+  id          String  @id @default(uuid())
+  hackathonId String
+  name        String
+  logoUrl     String?
+  website     String?
 
   showOnWebsite Boolean @default(false)
 
@@ -107,21 +109,21 @@ model Sponsor {
   amountCash  Float?
   amountOther String?
 
-  hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
+  hackathon Hackathon @relation(fields: [hackathonId], references: [id])
 }
 
 model Lead {
-  id        String    @id @default(uuid())
-  hackathonId String   
-  name      String
-  email     String
-  phone     String?
-  company   String?
-  jobTitle  String?
+  id          String  @id @default(uuid())
+  hackathonId String
+  name        String
+  email       String
+  phone       String?
+  company     String?
+  jobTitle    String?
 
-  type     LeadType
+  type LeadType
 
-  hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
+  hackathon Hackathon @relation(fields: [hackathonId], references: [id])
 }
 
 enum LeadType {
@@ -131,22 +133,22 @@ enum LeadType {
 }
 
 model SignupForm {
-  id          String    @id @default(uuid())
-  fields SignupFormField[]
-  hackathonId String    @unique
-  hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
+  id          String            @id @default(uuid())
+  fields      SignupFormField[]
+  hackathonId String            @unique
+  hackathon   Hackathon         @relation(fields: [hackathonId], references: [id])
 }
 
 model SignupFormField {
-  id           String    @id @default(uuid())
-  attributeId  String @unique
-  attribute    AttendeeAttribute @relation(fields: [attributeId], references: [id])
-  
+  id          String            @id @default(uuid())
+  attributeId String            @unique
+  attribute   AttendeeAttribute @relation(fields: [attributeId], references: [id])
+
   required    Boolean
   label       String
   description String?
   plaecholder String?
-  order Int
+  order       Int
 
   signupFormId String?
   signupForm   SignupForm? @relation(fields: [signupFormId], references: [id])
@@ -170,15 +172,15 @@ model Event {
 }
 
 model AttendeeAttribute {
-  id          String    @id @default(uuid())
-  name        String
-  type        String
-  options     String[]
+  id      String   @id @default(uuid())
+  name    String
+  type    String
+  options String[]
 
-  order       Int
+  order Int
 
   signupFormField SignupFormField?
-  
+
   hackathonId String
   hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
 
@@ -206,9 +208,43 @@ model Attendee {
 
   hackathonId String
   hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
+  projectId   String?
+  project     Project?  @relation(fields: [projectId], references: [id])
   tokens      Token[]
 
   createdAt DateTime @default(now())
+}
+
+model Project {
+  id              String                  @id @default(uuid())
+  name            String
+  hackathonId     String
+  hackathon       Hackathon               @relation(fields: [hackathonId], references: [id])
+  attributeValues ProjectAttributeValue[]
+  collaborators   Attendee[]
+}
+
+model ProjectAttribute {
+  id      String   @id @default(uuid())
+  name    String
+  type    String
+  options String[]
+
+  order Int
+
+  hackathonId String
+  hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
+
+  values ProjectAttributeValue[]
+}
+
+model ProjectAttributeValue {
+  id          String           @id @default(uuid())
+  value       String
+  projectId   String
+  project     Project          @relation(fields: [projectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  attributeId String
+  attribute   ProjectAttribute @relation(fields: [attributeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Token {
@@ -220,10 +256,10 @@ model Token {
 }
 
 model Device {
-  id        String   @id @default(uuid())
-  name      String
-  authKey   String   @unique @default(cuid())
-  createdAt DateTime @default(now())
+  id          String    @id @default(uuid())
+  name        String
+  authKey     String    @unique @default(cuid())
+  createdAt   DateTime  @default(now())
   hackathonId String
   hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
 }
