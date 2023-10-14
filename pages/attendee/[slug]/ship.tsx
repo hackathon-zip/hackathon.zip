@@ -42,7 +42,7 @@ export default function Attendee({
     );
   }
 
-  const [newProjectName, setNewProjectName] = React.useState();
+  const [newProjectName, setNewProjectName] = React.useState("");
   const [newProjectLoading, setNewProjectLoading] = React.useState(false);
 
   const newProjectHandler = (e: any) => {
@@ -50,7 +50,7 @@ export default function Attendee({
     console.log(e.target.value);
   };
 
-  const [projectId, setProjectId] = React.useState();
+  const [projectId, setProjectId] = React.useState("");
   const [projectIdLoading, setProjectIdLoading] = React.useState(false);
 
   const [project, setProject] = React.useState(attendee?.project);
