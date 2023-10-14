@@ -5,89 +5,127 @@ import useDeviceId from "./useDeviceId";
 type View = JSX.Element | React.ReactNode | string | any;
 
 type NavigationStore = {
-    viewStack: View[];
+  viewStack: View[];
 };
 
 type NavigationConfiguration = {
-    defaultView: View;
-    layout: JSX.Element | any;
-}
+  defaultView: View;
+  layout: JSX.Element | any;
+};
 
-const NavigationContext = createContext<StateTuple<NavigationStore>>([{
+const NavigationContext = createContext<StateTuple<NavigationStore>>([
+  {
     viewStack: []
-}, () => null]);
+  },
+  () => null
+]);
 
-function LoadingView ({ layout: Layout }: { layout: JSX.Element | any }) {
-    return (
-        <Layout>
-            <div style={{ width: '100%', height: '100%', gap: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-                <img src="/wordmark-light.svg" alt="Hackathon.zip" width="350" height="40" />
-            </div>
-        </Layout>
-    )
+function LoadingView({ layout: Layout }: { layout: JSX.Element | any }) {
+  return (
+    <Layout>
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          gap: "32px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column"
+        }}
+      >
+        <img
+          src="/wordmark-light.svg"
+          alt="Hackathon.zip"
+          width="350"
+          height="40"
+        />
+      </div>
+    </Layout>
+  );
 }
 
-export function NavigationProvider({ defaultView, layout: Layout }: NavigationConfiguration) {
-    const [loading, setLoading] = useState(true);
+export function NavigationProvider({
+  defaultView,
+  layout: Layout
+}: NavigationConfiguration) {
+  const [loading, setLoading] = useState(true);
 
-    const [state, setState] = useState<NavigationStore>({
-        viewStack: [defaultView]
-    });
+  const [state, setState] = useState<NavigationStore>({
+    viewStack: [defaultView]
+  });
 
-    const deviceId = useDeviceId();
+  const deviceId = useDeviceId();
 
-    useEffect(() => {
-        if (!deviceId) return;
-        (async () => {
-            await delay(1000);
+  useEffect(() => {
+    if (!deviceId) return;
+    (async () => {
+      await delay(1000);
 
-            setLoading(false);
-        })();
-    }, [deviceId]);
+      setLoading(false);
+    })();
+  }, [deviceId]);
 
-    return (
-        <NavigationContext.Provider value={[state, setState]}>
-            <Layout basic={loading}>
-                {loading && (
-                    <>
-                        <div style={{ width: '100%', height: '100%', gap: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-                            <img src="/wordmark-light.svg" alt="Hackathon.zip" width="350" height="40" />
-                        </div>
-                        <div style={{
-                            display: 'none'
-                        }}>
-                            {state.viewStack[state.viewStack.length - 1]}
-                        </div>
-                    </>
-                )}
+  return (
+    <NavigationContext.Provider value={[state, setState]}>
+      <Layout basic={loading}>
+        {loading && (
+          <>
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                gap: "32px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexDirection: "column"
+              }}
+            >
+              <img
+                src="/wordmark-light.svg"
+                alt="Hackathon.zip"
+                width="350"
+                height="40"
+              />
+            </div>
+            <div
+              style={{
+                display: "none"
+              }}
+            >
+              {state.viewStack[state.viewStack.length - 1]}
+            </div>
+          </>
+        )}
 
-                {!loading && state.viewStack[state.viewStack.length - 1]}
-            </Layout>
-        </NavigationContext.Provider>
-    );
+        {!loading && state.viewStack[state.viewStack.length - 1]}
+      </Layout>
+    </NavigationContext.Provider>
+  );
 }
 
 export default function useNavigation() {
-    const [{ viewStack }, setState] = useContext(NavigationContext);
+  const [{ viewStack }, setState] = useContext(NavigationContext);
 
-    const push = (view: JSX.Element) => {
-        window.blur();
-        setState((old: NavigationStore) => {
-            return {
-                ...old,
-                viewStack: [...old.viewStack, view]
-            }
-        });
-    };
+  const push = (view: JSX.Element) => {
+    window.blur();
+    setState((old: NavigationStore) => {
+      return {
+        ...old,
+        viewStack: [...old.viewStack, view]
+      };
+    });
+  };
 
-    const pop = () => {
-        setState((old: NavigationStore) => {
-            return {
-                ...old,
-                viewStack: old.viewStack.slice(0, old.viewStack.length - 1)
-            }
-        });
-    }
+  const pop = () => {
+    setState((old: NavigationStore) => {
+      return {
+        ...old,
+        viewStack: old.viewStack.slice(0, old.viewStack.length - 1)
+      };
+    });
+  };
 
-    return { currentView: viewStack[viewStack.length - 1], push, pop };
+  return { currentView: viewStack[viewStack.length - 1], push, pop };
 }

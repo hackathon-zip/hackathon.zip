@@ -28,7 +28,8 @@ export default function Home(): any {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            gap: "16px"
+            gap: "16px",
+            marginTop: "16px"
           }}
         >
           <div>
@@ -37,13 +38,6 @@ export default function Home(): any {
               alt="Hackathon.zip"
               height={40}
               width={350}
-              style={
-                {
-                  // margin: "0px",
-                  // height: "40px",
-                  // width: '350px'
-                }
-              }
             />
           </div>
           <Text marginTop={0} mb={0} b>

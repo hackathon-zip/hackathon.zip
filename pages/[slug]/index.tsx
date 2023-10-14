@@ -128,9 +128,7 @@ export default function Hackathon({
                   }}
                   className="project-card"
                 >
-                  <div
-                    style={{ display: "flex", alignItems: "center" }}
-                  >
+                  <div style={{ display: "flex", alignItems: "center" }}>
                     <div style={{ flexGrow: 1, fontWeight: 600 }}>
                       {tab.label}
                     </div>

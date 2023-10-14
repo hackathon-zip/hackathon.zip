@@ -7,7 +7,7 @@ import { Hackathon } from "@prisma/client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Navbar, { NavbarTabs } from "./Navbar";
-import Head from "next/head"
+import Head from "next/head";
 
 export default function HackathonLayout({
   children

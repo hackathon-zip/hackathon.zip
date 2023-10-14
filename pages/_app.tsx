@@ -1,7 +1,7 @@
 import "@/styles/globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { useEffect, useState, type ReactElement, type ReactNode } from "react";
-import Head from "next/head"
+import Head from "next/head";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { CssBaseline, GeistProvider } from "@geist-ui/core";
 import type { NextPage } from "next";
