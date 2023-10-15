@@ -277,6 +277,6 @@ model Device {
   name        String
   authKey     String    @unique @default(cuid())
   createdAt   DateTime  @default(now())
-  hackathonId String
-  hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
+  hackathonId String?
+  hackathon   Hackathon? @relation(fields: [hackathonId], references: [id])
 }
