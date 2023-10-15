@@ -19,7 +19,14 @@ import prisma from "@/lib/prisma";
 import { NextApiRequest } from "next";
 import { NextServerOptions } from "next/dist/server/next";
 
-import type { Hackathon, Attendee, Project } from "@prisma/client";
+import type {
+  Hackathon,
+  Attendee,
+  Project,
+  ProjectAttribute,
+  ProjectSubmissionField
+} from "@prisma/client";
+import { Form } from "@/components/Form";
 import React, { useState } from "react";
 import type { ReactElement } from "react";
 import Link from "next/link";
@@ -31,7 +38,13 @@ export default function Attendee({
   hackathon,
   attendee
 }: {
-  hackathon: Hackathon | null;
+  hackathon:
+    | (Hackathon & {
+        projectSubmissionFields: (ProjectSubmissionField & {
+          attribute: ProjectAttribute;
+        })[];
+      })
+    | null;
   attendee: (Attendee & { project: Project | null }) | null;
 }): any {
   if (!hackathon) {
@@ -75,6 +88,67 @@ export default function Attendee({
         {project && (
           <>
             <p>You're a member of the team working on {project.name}.</p>
+            <h3>Edit Your Submission</h3>
+            <Form
+              schema={{
+                elements: [
+                  {
+                    type: "text",
+                    label: "Project Name",
+                    name: "name",
+                    defaultValue: project.name,
+                    required: true
+                  },
+                  ...(hackathon.projectSubmissionFields?.map(
+                    (x) =>
+                      ({
+                        ...x.attribute,
+                        ...x,
+                        label: x.label,
+                        placeholder: x.placeholder,
+                        description: x.description,
+                        name: x.attribute.id,
+                        type: x.attribute.type
+                      }) as any
+                  ) || [])
+                ],
+                submitText: "Save"
+              }}
+              clearValuesOnSuccesfulSubmit={true}
+              submission={{
+                type: "controlled",
+                onSubmit: async (data) => {
+                  let res = await fetch(transformAPIURL("/project/update"), {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                      id: project.id,
+                      ...data
+                    })
+                  }).then((r) => r.json());
+                  if (res.error) {
+                    setToast({
+                      text: `${res.error.name ?? "Error"}: ${
+                        res.error.meta?.cause ?? "Unknown error."
+                      }`,
+                      delay: 2000,
+                      type: "error"
+                    });
+                    return false;
+                  } else {
+                    setProject(res.project);
+                    setToast({
+                      text: "We've saved your progress, nice work!",
+                      delay: 10000
+                    });
+                    router.reload();
+                    return true;
+                  }
+                }
+              }}
+            />
             <p>
               No longer interested in this project?{" "}
               <Text
@@ -310,6 +384,13 @@ export const getServerSideProps = (async (
             customDomain: context.params?.slug.toString()
           }
         ]
+      },
+      include: {
+        projectSubmissionFields: {
+          include: {
+            attribute: true
+          }
+        }
       }
     });
     if (hackathon) {
