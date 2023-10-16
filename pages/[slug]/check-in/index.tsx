@@ -9,6 +9,7 @@ import {
   Text,
   Table,
   Checkbox,
+  Progress,
   useToasts
 } from "@geist-ui/core";
 import { getAuth } from "@clerk/nextjs/server";
@@ -66,7 +67,7 @@ function Data({
 }) {
   const { width } = useViewport(false);
   const sliceNum = Math.ceil((Math.max(width || 100_000, 1000) - 1000) / 350);
-  const { setToast } = useToasts();
+  const { setToast, removeAll } = useToasts();
 
   const [attendees, setAttendees] = useState(defaultAttendees);
 
@@ -112,6 +113,10 @@ function Data({
         attendee.checkedIn ? "true" : "false",
       customRender: (value: string, attendee?: Attendee) => (
         <Checkbox checked={value == "true"} onClick={async (e) => {
+          setToast({
+            text: "Loading...",
+            delay: 2000
+          });
           let res = await fetch(
             `/api/hackathons/${hackathon.slug}/check-in/${attendee?.id}`,
             {
@@ -121,6 +126,16 @@ function Data({
               }
             }
           ).then((r) => r.json());
+          removeAll()
+          if (res.error) {
+            setToast({ text: res.error, delay: 2000 });
+          } else {
+            setToast({
+              text: e.target.checked == true ? `Checked in!` : `Reversed check-in.`,
+              delay: 2000
+            });
+            setAttendees(res.attendees);
+          }
         }} />
       ),
       readOnly: true
@@ -141,6 +156,13 @@ function Data({
       return output;
     }
   );
+  
+  const [searchValue, setSearchValue] = useState("")
+  
+  const handler = (e: any) => {
+    setSearchValue(e.target.value)
+  }
+  
   return (
     width && (
       <>
@@ -161,9 +183,12 @@ function Data({
             min-height: calc(2.525 * var(--table-font-size));
           }
         `}
+        <Text mt={0}>{attendees.filter(x => x.checkedIn).length} attendees checked-in, {attendees.length - attendees.filter(x => x.checkedIn).length} have not been checked-in.</Text>
+        <Progress mt={1} mb={1} value={attendees.filter(x => x.checkedIn).length} max={attendees.length} />
+        <Input onChange={handler} crossOrigin mb={1} placeholder="Search Attendees" width="100%" />
         <Table
           className="attendees-data-table"
-          data={tableData}
+          data={tableData.filter(x => x.$attendee.name.toLowerCase().includes(searchValue.toLowerCase()) || x.$attendee.email.toLowerCase().includes(searchValue.toLowerCase()))}
           rowClassName={() => "attendees-data-table-row"}
         >
           {builtInAttributes.map((column: BuiltInColumn) => (
