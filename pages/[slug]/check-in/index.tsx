@@ -17,10 +17,7 @@ import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import prisma from "@/lib/prisma";
 import { NextApiRequest } from "next";
 import { NextServerOptions } from "next/dist/server/next";
-
-import type { Attendee,
-  AttendeeAttribute,
-  AttendeeAttributeValue, Hackathon } from "@prisma/client";
+import type { Attendee, Hackathon } from "@prisma/client";
 import { CheckSquare, Key, PlusCircle } from "@geist-ui/react-icons";
 import React, { useState } from "react";
 import type { ReactElement } from "react";
@@ -31,7 +28,6 @@ import Link from "next/link";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import FeatureInfo from "@/components/organizer/FeatureInfo";
 import { css } from "@/components/CSS";
-
 import EditableValue, { EditableHeader } from "@/components/EditableValue";
 import useViewport from "@/hooks/useViewport";
 import { orderedSort, sl } from "@/lib/utils";
@@ -40,13 +36,8 @@ import md5 from "md5";
 import { useRouter } from "next/router";
 import { v4 as uuidv4 } from "uuid";
 
-type AttendeeWithAttributes = Attendee & {
-  attributeValues: AttendeeAttributeValue[];
-};
-
 type HackathonWithAttendees = Hackathon & {
-  attendeeAttributes: AttendeeAttribute[];
-  attendees: AttendeeWithAttributes[];
+  attendees: Attendee[];
 };
 
 export type Column = {
@@ -60,44 +51,18 @@ export type BuiltInColumn = Column & {
   fromAttendee: (attendee: Attendee) => string;
   customRender?: (
     value: string,
-    attendee?: Attendee | AttendeeWithAttributes
+    attendee?: Attendee
   ) => JSX.Element | string;
 };
 
-const builtInAttributes: BuiltInColumn[] = [
-  {
-    type: "text",
-    name: "Name",
-    id: "name",
-    fromAttendee: (attendee: Attendee) => attendee.name,
-    readOnly: false
-  },
-  {
-    type: "text",
-    name: "Email",
-    id: "email",
-    fromAttendee: (attendee: Attendee) => attendee.email,
-    readOnly: false
-  },
-  {
-    type: "checkbox",
-    name: "Checked In",
-    id: "built-in",
-    fromAttendee: (attendee: Attendee) =>
-      attendee.checkedIn ? "true" : "false",
-    customRender: (value: string) => <Checkbox checked={value == "true"} />,
-    readOnly: true
-  }
-]; // these are separated that way we can use them when setting column settings
+ // these are separated that way we can use them when setting column settings
 
 function Data({
   hackathon,
-  attendees: defaultAttendees,
-  attributes
+  attendees: defaultAttendees
 }: {
   hackathon: HackathonWithAttendees;
-  attendees: AttendeeWithAttributes[];
-  attributes: AttendeeAttribute[];
+  attendees: Attendee[];
 }) {
   const { width } = useViewport(false);
   const sliceNum = Math.ceil((Math.max(width || 100_000, 1000) - 1000) / 350);
@@ -107,25 +72,63 @@ function Data({
 
   const sortedAttendees = orderedSort(
     attendees,
-    (a: AttendeeWithAttributes, b: AttendeeWithAttributes) => {
+    (a: Attendee, b: Attendee) => {
       return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
     },
-    (a: AttendeeWithAttributes, b: AttendeeWithAttributes) => {
+    (a: Attendee, b: Attendee) => {
       return a.name.localeCompare(b.name);
     },
-    (a: AttendeeWithAttributes, b: AttendeeWithAttributes) => {
+    (a: Attendee, b: Attendee) => {
       return a.email.localeCompare(b.email);
     },
-    (a: AttendeeWithAttributes, b: AttendeeWithAttributes) => {
+    (a: Attendee, b: Attendee) => {
       const md5A = md5(JSON.stringify(a));
       const md5B = md5(JSON.stringify(b));
 
       return md5A.localeCompare(md5B);
     }
   );
+  
+  const builtInAttributes: BuiltInColumn[] = [
+    {
+      type: "text",
+      name: "Name",
+      id: "name",
+      fromAttendee: (attendee: Attendee) => attendee.name,
+      readOnly: false
+    },
+    {
+      type: "text",
+      name: "Email",
+      id: "email",
+      fromAttendee: (attendee: Attendee) => attendee.email,
+      readOnly: false
+    },
+    {
+      type: "checkbox",
+      name: "Checked In",
+      id: "built-in",
+      fromAttendee: (attendee: Attendee) =>
+        attendee.checkedIn ? "true" : "false",
+      customRender: (value: string, attendee?: Attendee) => (
+        <Checkbox checked={value == "true"} onClick={async (e) => {
+          let res = await fetch(
+            `/api/hackathons/${hackathon.slug}/check-in/${attendee?.id}`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }
+          ).then((r) => r.json());
+        }} />
+      ),
+      readOnly: true
+    }
+  ];
 
   const tableData = sortedAttendees.map(
-    (attendee: AttendeeWithAttributes, i: number) => {
+    (attendee: Attendee, i: number) => {
       const output: any = {
         $i: i,
         $attendee: attendee
@@ -133,19 +136,6 @@ function Data({
 
       for (const { name, fromAttendee } of builtInAttributes) {
         output[name] = fromAttendee(attendee);
-      }
-
-      for (const attribute of attributes) {
-        const attributeId = attributes.find(
-          (attribute_: AttendeeAttribute) => attribute_.name == attribute.name
-        )?.id;
-
-        const attendeeAttribute = attendee.attributeValues.find(
-          (attributeValue: AttendeeAttributeValue) =>
-            attributeValue.formFieldId == attributeId
-        );
-
-        output[attribute.name] = attendeeAttribute?.value || "";
       }
 
       return output;
@@ -239,7 +229,6 @@ export default function Hackathon({
           <Data
             hackathon={hackathon}
             attendees={hackathon.attendees}
-            attributes={hackathon.attendeeAttributes}
           />
         </Card>
       </Page>
@@ -272,8 +261,6 @@ Hackathon.getLayout = function getLayout(page: ReactElement) {
 
 export const getServerSideProps = (async (context) => {
   const { userId } = getAuth(context.req);
-
-  console.log({ userId });
 
   if (context.params?.slug) {
     const hackathon = await prisma.hackathon.findUnique({

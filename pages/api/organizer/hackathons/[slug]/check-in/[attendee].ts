@@ -11,7 +11,7 @@ export default async function handler(
 
 		const { attendee } = req.query;
 		
-		prisma.$queryRaw`update "Attendee" set "checkedIn" = not "checkedIn" where "userId" = ${attendee as string} returning *`
+		await prisma.$queryRaw`update "Attendee" set "checkedIn" = not "checkedIn" where "id" = ${attendee as string} returning *`
 
 		res.json({ complete: true });
 }
