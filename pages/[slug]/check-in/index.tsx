@@ -36,6 +36,7 @@ import { Plus, Trash2 } from "@geist-ui/react-icons";
 import md5 from "md5";
 import { useRouter } from "next/router";
 import { v4 as uuidv4 } from "uuid";
+const converter = require("number-to-words");
 
 type HackathonWithAttendees = Hackathon & {
   attendees: Attendee[];
@@ -50,13 +51,10 @@ export type Column = {
 
 export type BuiltInColumn = Column & {
   fromAttendee: (attendee: Attendee) => string;
-  customRender?: (
-    value: string,
-    attendee?: Attendee
-  ) => JSX.Element | string;
+  customRender?: (value: string, attendee?: Attendee) => JSX.Element | string;
 };
 
- // these are separated that way we can use them when setting column settings
+// these are separated that way we can use them when setting column settings
 
 function Data({
   hackathon,
@@ -89,7 +87,7 @@ function Data({
       return md5A.localeCompare(md5B);
     }
   );
-  
+
   const builtInAttributes: BuiltInColumn[] = [
     {
       type: "text",
@@ -112,57 +110,61 @@ function Data({
       fromAttendee: (attendee: Attendee) =>
         attendee.checkedIn ? "true" : "false",
       customRender: (value: string, attendee?: Attendee) => (
-        <Checkbox checked={value == "true"} onClick={async (e) => {
-          setToast({
-            text: "Loading...",
-            delay: 2000
-          });
-          let res = await fetch(
-            `/api/hackathons/${hackathon.slug}/check-in/${attendee?.id}`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json"
-              }
-            }
-          ).then((r) => r.json());
-          removeAll()
-          if (res.error) {
-            setToast({ text: res.error, delay: 2000 });
-          } else {
+        <Checkbox
+          checked={value == "true"}
+          onClick={async (e) => {
             setToast({
-              text: e.target.checked == true ? `Checked in!` : `Reversed check-in.`,
+              text: "Loading...",
               delay: 2000
             });
-            setAttendees(res.attendees);
-          }
-        }} />
+            let res = await fetch(
+              `/api/hackathons/${hackathon.slug}/check-in/${attendee?.id}`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                }
+              }
+            ).then((r) => r.json());
+            removeAll();
+            if (res.error) {
+              setToast({ text: res.error, delay: 2000 });
+            } else {
+              setToast({
+                text:
+                  e.target.checked == true
+                    ? `Checked in!`
+                    : `Reversed check-in.`,
+                delay: 2000
+              });
+              setAttendees(res.attendees);
+            }
+          }}
+        />
       ),
       readOnly: true
     }
   ];
 
-  const tableData = sortedAttendees.map(
-    (attendee: Attendee, i: number) => {
-      const output: any = {
-        $i: i,
-        $attendee: attendee
-      };
+  const tableData = sortedAttendees.map((attendee: Attendee, i: number) => {
+    const output: any = {
+      $i: i,
+      $attendee: attendee
+    };
 
-      for (const { name, fromAttendee } of builtInAttributes) {
-        output[name] = fromAttendee(attendee);
-      }
-
-      return output;
+    for (const { name, fromAttendee } of builtInAttributes) {
+      output[name] = fromAttendee(attendee);
     }
-  );
-  
-  const [searchValue, setSearchValue] = useState("")
-  
+
+    return output;
+  });
+
+  const [searchValue, setSearchValue] = useState("");
+
   const handler = (e: any) => {
-    setSearchValue(e.target.value)
-  }
-  
+    setSearchValue(e.target.value);
+  };
+
   return (
     width && (
       <>
@@ -183,12 +185,41 @@ function Data({
             min-height: calc(2.525 * var(--table-font-size));
           }
         `}
-        <Text mt={0}>{attendees.filter(x => x.checkedIn).length} attendees checked-in, {attendees.length - attendees.filter(x => x.checkedIn).length} have not been checked-in.</Text>
-        <Progress mt={1} mb={1} value={attendees.filter(x => x.checkedIn).length} max={attendees.length} />
-        <Input onChange={handler} crossOrigin mb={1} placeholder="Search Attendees" width="100%" />
+        <div style={{ display: 'flex', gap: '32px', alignItems: 'center', marginBottom: '12px', marginTop: '8px' }}>
+        <Text my={0} style={{width: 'fit-content', flexShrink: 0, flexGrow: 0}}>
+          <span style={{ textTransform: "capitalize" }}>
+            {converter.toWords(attendees.filter((x) => x.checkedIn).length)}
+          </span>{" "}
+          attendees have been checked-in,{" "}
+          {converter.toWords(
+            attendees.length - attendees.filter((x) => x.checkedIn).length
+          )}{" "}
+          have not been checked-in.
+        </Text>
+        <Progress
+          value={attendees.filter((x) => x.checkedIn).length}
+          max={attendees.length}
+          type="success"
+          style={{ flexGrow: 0}}
+        /></div>
+        <Input
+          onChange={handler}
+          crossOrigin
+          mb={1}
+          placeholder="Search Attendees"
+          width="100%"
+        />
         <Table
           className="attendees-data-table"
-          data={tableData.filter(x => x.$attendee.name.toLowerCase().includes(searchValue.toLowerCase()) || x.$attendee.email.toLowerCase().includes(searchValue.toLowerCase()))}
+          data={tableData.filter(
+            (x) =>
+              x.$attendee.name
+                .toLowerCase()
+                .includes(searchValue.toLowerCase()) ||
+              x.$attendee.email
+                .toLowerCase()
+                .includes(searchValue.toLowerCase())
+          )}
           rowClassName={() => "attendees-data-table-row"}
         >
           {builtInAttributes.map((column: BuiltInColumn) => (
@@ -222,23 +253,23 @@ export default function Hackathon({
       </>
     );
   }
-  
+
   if (!hackathon.checkInEnabled)
-  return (
-    <Page>
-      <FeatureInfo
-        featureKey="checkInEnabled"
-        featureName="Check-In"
-        featureDescription={
-          <>
-            Check-in your hackers and track their attendance with&nbsp;ease.
-          </>
-        }
-        featureIcon={CheckSquare}
-        hackathonSlug={hackathon.slug}
-      />
-    </Page>
-  );
+    return (
+      <Page>
+        <FeatureInfo
+          featureKey="checkInEnabled"
+          featureName="Check-In"
+          featureDescription={
+            <>
+              Check-in your hackers and track their attendance with&nbsp;ease.
+            </>
+          }
+          featureIcon={CheckSquare}
+          hackathonSlug={hackathon.slug}
+        />
+      </Page>
+    );
 
   return (
     <>
@@ -251,10 +282,7 @@ export default function Hackathon({
             margin: "-16px"
           }}
         >
-          <Data
-            hackathon={hackathon}
-            attendees={hackathon.attendees}
-          />
+          <Data hackathon={hackathon} attendees={hackathon.attendees} />
         </Card>
       </Page>
       {css`

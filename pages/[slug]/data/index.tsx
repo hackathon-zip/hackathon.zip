@@ -494,7 +494,6 @@ function Data({
                   return [rowData.$attendee.id, ...stagedForDeletion];
                 }
               });
-              
             }}
           >
             {stagedForDeletion.includes(rowData.$attendee.id)
