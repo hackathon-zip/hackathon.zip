@@ -1,8 +1,9 @@
 import "@/styles/globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
-import { useEffect, useState, type ReactElement, type ReactNode } from "react";
 import Head from "next/head";
-import { ThemeProvider } from "@/hooks/useTheme";
+import { useEffect, useState, type ReactElement, type ReactNode } from "react";
+
+import { Theme, ThemeProvider } from "@/hooks/useTheme";
 import { CssBaseline, GeistProvider } from "@geist-ui/core";
 import type { NextPage } from "next";
 import type { AppProps } from "next/app";
@@ -34,14 +35,18 @@ function localStorageCacheProvider(): Map<string, any> {
 
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
     const localTheme = localStorage.getItem("theme");
     if (localTheme) {
-      setTheme(localTheme as "light" | "dark");
+      setTheme(localTheme as Theme);
     }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("theme", theme);
+  }, [theme]);
 
   return (
     <ThemeProvider theme={theme} setTheme={setTheme}>
