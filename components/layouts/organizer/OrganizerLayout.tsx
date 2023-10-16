@@ -4,10 +4,10 @@ import useUrlState from "@/hooks/useUrlState";
 import { Button, Popover, Spinner } from "@geist-ui/core";
 import { ChevronUpDown } from "@geist-ui/react-icons";
 import { Hackathon } from "@prisma/client";
+import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Navbar, { NavbarTabs } from "./Navbar";
-import Head from "next/head";
 
 export default function HackathonLayout({
   children
@@ -111,7 +111,13 @@ export default function HackathonLayout({
       >
         {children}
       </div>
-      <div style={{ background: "#fff", textAlign: "center", padding: "16px" }}>
+      <div
+        style={{
+          background: theme === "dark" ? "#222" : "#fff",
+          textAlign: "center",
+          padding: "16px"
+        }}
+      >
         <div style={{ maxWidth: "450px", margin: "auto" }}>
           Built by hackathon organizers for hackathon organizers; open sourced
           at{" "}
