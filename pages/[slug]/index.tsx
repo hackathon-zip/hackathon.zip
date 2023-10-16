@@ -1,12 +1,11 @@
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
-import { Page, Text, Card, Grid, Link, Badge } from "@geist-ui/core";
-import type { GetServerSideProps } from "next";
+import { Badge, Card, Grid, Link, Page, Text } from "@geist-ui/core";
 
-import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
-import type { Hackathon, Attendee } from "@prisma/client";
-import type { ReactElement } from "react";
 import { css } from "@/components/CSS";
+import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
+import type { Attendee, Hackathon } from "@prisma/client";
+import { ReactElement, useEffect, useState } from "react";
 
 import { NavbarTabs } from "@/components/layouts/organizer/Navbar";
 
@@ -15,6 +14,26 @@ type DataPoint = {};
 type HackathonWithAttendees = Hackathon & {
   attendees: Attendee[];
 };
+
+function getRelativeTime(date: Date) {
+  // relative time
+  const now = new Date();
+
+  const endDate = new Date(date);
+
+  const diff = endDate.getTime() - now.getTime();
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((diff / 1000 / 60) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+
+  return `${days} days ${hours} hours ${minutes} minutes ${seconds} seconds`
+    .replace("0 days ", "")
+    .replace("0 hours ", "")
+    .replace("0 minutes ", "")
+    .replace("0 seconds ", "");
+}
 
 export default function Hackathon({
   hackathon
@@ -29,11 +48,16 @@ export default function Hackathon({
     );
   }
 
-  const daysToGo = Math.floor(
-    (new Date(hackathon.endDate as any).getTime() - new Date().getTime()) /
-      (1000 * 60 * 60 * 24)
+  const [timeRemaining, setTimeRemaining] = useState<string>(
+    getRelativeTime(hackathon.endDate as Date)
   );
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeRemaining(getRelativeTime(hackathon.endDate as Date));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
   const badges: any = {
     data: hackathon.attendees.length
   };
@@ -67,14 +91,9 @@ export default function Hackathon({
                 timeZone: hackathon.timezone ?? undefined
               })}{" "}
           </h3>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              maxWidth: "200px"
-            }}
-          >
-            <div
+          <Grid.Container gap={2}>
+            <Grid
+              md={4}
               style={{
                 display: "flex",
                 flexDirection: "column"
@@ -86,30 +105,22 @@ export default function Hackathon({
               <Text small>
                 Attendee{hackathon.attendees.length == 1 ? "" : "s"}
               </Text>
-            </div>
-            <div
+            </Grid>
+            <Grid
+              md={10}
               style={{
                 display: "flex",
                 flexDirection: "column"
               }}
             >
-              {daysToGo != 0 ? (
-                <>
-                  <Text h3 mb={0}>
-                    {Math.abs(daysToGo)}
-                  </Text>
-                  <Text small>Days {daysToGo > 0 ? "To Go" : "Ago"}</Text>
-                </>
-              ) : (
-                <>
-                  <Text h3 mb={0}>
-                    Today
-                  </Text>
-                  <Text small>Good luck!</Text>
-                </>
-              )}
-            </div>
-          </div>
+              <Text h3 mb={0}>
+                {timeRemaining}
+              </Text>
+              <Text small>
+                {(hackathon.endDate as Date) > new Date() ? "To Go" : "Ago"}
+              </Text>
+            </Grid>
+          </Grid.Container>
         </Page>
       </div>
       <Page style={{ minHeight: "220px" }}>
