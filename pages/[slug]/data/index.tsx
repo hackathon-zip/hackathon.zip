@@ -301,81 +301,11 @@ function EditDrawer({
                     ...attendees.filter((x) => x.id != attendee?.id),
                     newAttendee
                   ]);
-
-                  // router.reload(); // Temporary
-                  // TODO: Remove this and store updates in state
                 }}
               />
             </Grid>
           ))}
         </Grid.Container>
-
-        {/* <Form
-        schema={{
-          elements: [
-            ...(builtInAttributes
-              .filter((x) => x.id != "built-in")
-              .map((attribute) => ({
-                type: "text",
-                label: attribute.name,
-                name: attribute.id,
-                defaultValue: attendee
-                  ? (attendee as any)[attribute.id]
-                  : ""
-              })) as any),
-            ...(attendeeAttributes.map((attribute) => ({
-              type: "text",
-              label: attribute.name,
-              name: `custom-${attribute.id}`,
-              defaultValue:
-                attendee?.attributeValues.filter(
-                  (x) => x.formFieldId == attribute.id
-                )[0]?.value || ""
-            })) as any)
-          ],
-          submitText:
-            attendee?.id == "create"
-              ? `Create New Attendee`
-              : `Update ${attendee?.name}'s Record`
-        }}
-        submission={{
-          type: "controlled",
-          onSubmit: async (data) => {
-            let res = await fetch(
-              attendee?.id == "create"
-                ? `/api/hackathons/${hackathon.slug}/data/create`
-                : `/api/hackathons/${hackathon.slug}/data/${attendee?.id}/update`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                  ...data
-                })
-              }
-            ).then((r) => r.json());
-            if (res.error) {
-              setToast({ text: res.error, delay: 2000 });
-            } else {
-              setToast({
-                text: `Succesfully ${attendee?.id == "create" ? "created" : "updated"
-                  } ${res.attendee.name}'s record.`,
-                delay: 2000
-              });
-              // setStatefulData(
-              //   generateData([
-              //     ...attendees.map((a) =>
-              //       a.id != res.attendee.id ? a : res.attendee
-              //     )
-              //   ])
-              // );
-              drawer.setAttendee(attendee as any);
-              drawer.close();
-            }
-          }
-        }}
-      /> */}
       </Drawer.Content>
     </Drawer>
   );
@@ -564,31 +494,7 @@ function Data({
                   return [rowData.$attendee.id, ...stagedForDeletion];
                 }
               });
-              //   event.stopPropagation();
-              //   setLoading(true);
-              //   let res = await fetch(
-              //     `/api/hackathons/${hackathon.slug}/data/${rowData.Email}/delete`,
-              //     {
-              //       method: "POST",
-              //       headers: {
-              //         "Content-Type": "application/json"
-              //       }
-              //     }
-              //   ).then((r) => r.json());
-              //   setLoading(false);
-              //   if (res.error) {
-              //     setToast({ text: res.error, delay: 2000 });
-              //   } else {
-              //     setToast({
-              //       text: `Succesfully deleted ${rowData.Name}'s record.`,
-              //       delay: 2000
-              //     });
-              //     // setStatefulData(
-              //     //   generateData([
-              //     //     ...attendees.filter((a) => a.email != rowData.Email)
-              //     //   ])
-              //     // );
-              //   }
+              
             }}
           >
             {stagedForDeletion.includes(rowData.$attendee.id)
