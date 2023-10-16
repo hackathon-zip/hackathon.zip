@@ -276,6 +276,9 @@ export default function Hackathon({
       <Page>
         <Grid.Container justify="space-between" alignItems="center" mb={1}>
           <h1>Check-In</h1>
+          <Button type="success">
+            Pair Check-In Device
+          </Button>
         </Grid.Container>
         <Card
           style={{
