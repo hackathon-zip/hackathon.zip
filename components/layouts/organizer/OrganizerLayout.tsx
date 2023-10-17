@@ -102,23 +102,18 @@ export default function HackathonLayout({
       />
 
       <div
-        style={{
-          background: theme === "light" ? "#fafafa" : "#101010",
-          width: "calc(100vw - (100vw - 100%))",
-          height: "auto",
-          flexGrow: 1
-        }}
+        className={`${
+          theme === "light" ? "bg-slate-50" : "bg-slate-950"
+        } w-[calc(100vw-(100vw-100%))] h-auto flex-grow`}
       >
         {children}
       </div>
       <div
-        style={{
-          background: theme === "dark" ? "#222" : "#fefefe",
-          textAlign: "center",
-          padding: "8px"
-        }}
+        className={`${
+          theme === "light" ? "bg-slate-50" : "bg-slate-950"
+        } text-center p-2`}
       >
-        <Text p small style={{ maxWidth: "750px", margin: "auto" }}>
+        <Text p small className="max-w-[750px] m-auto">
           Built by hackathon organizers for hackathon organizers; open sourced
           at{" "}
           <Link href="https://github.com/hackathon-zip" target="_blank">

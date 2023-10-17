@@ -11,7 +11,6 @@ import {
   useModal,
   useTheme
 } from "@geist-ui/core";
-import type { GetServerSideProps } from "next";
 
 import { Form } from "@/components/Form";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
@@ -159,14 +158,7 @@ export default function Hackathon({
           </Fieldset.Subtitle>
 
           <Grid.Container gap={2} justify="center">
-            <Grid
-              xs={24}
-              md={12}
-              style={{
-                display: "flex",
-                flexWrap: "wrap"
-              }}
-            >
+            <Grid xs={24} md={12} className="flex flex-wrap">
               <Text h5 w="100%" my={0}>
                 Delete Hackathon
               </Text>
@@ -176,14 +168,7 @@ export default function Hackathon({
               </Text>
             </Grid>
 
-            <Grid
-              xs={24}
-              md={12}
-              style={{
-                display: "flex",
-                justifyContent: "end"
-              }}
-            >
+            <Grid xs={24} md={12} className="flex justify-end">
               <DeleteHackathon hackathon={hackathon} />
             </Grid>
           </Grid.Container>

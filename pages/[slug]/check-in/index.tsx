@@ -1,41 +1,27 @@
+import { css } from "@/components/CSS";
+import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
+import FeatureInfo from "@/components/organizer/FeatureInfo";
+import useViewport from "@/hooks/useViewport";
+import prisma from "@/lib/prisma";
+import { orderedSort } from "@/lib/utils";
+import { getAuth } from "@clerk/nextjs/server";
 import {
   Button,
   Card,
-  Drawer,
-  Fieldset,
+  Checkbox,
   Grid,
   Input,
   Page,
-  Text,
-  Table,
-  Checkbox,
   Progress,
+  Table,
+  Text,
   useToasts
 } from "@geist-ui/core";
-import { getAuth } from "@clerk/nextjs/server";
-import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-import prisma from "@/lib/prisma";
-import { NextApiRequest } from "next";
-import { NextServerOptions } from "next/dist/server/next";
+import { CheckSquare } from "@geist-ui/react-icons";
 import type { Attendee, Hackathon } from "@prisma/client";
-import { CheckSquare, Key, PlusCircle } from "@geist-ui/react-icons";
-import React, { useState } from "react";
-import type { ReactElement } from "react";
-import { Form } from "@/components/Form";
-import { delay } from "@/lib/utils";
-import Debug from "@/components/Debug";
-import Link from "next/link";
-import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
-import FeatureInfo from "@/components/organizer/FeatureInfo";
-import { css } from "@/components/CSS";
-import EditableValue, { EditableHeader } from "@/components/EditableValue";
-import useViewport from "@/hooks/useViewport";
-import { orderedSort, sl } from "@/lib/utils";
-import { Plus, Trash2 } from "@geist-ui/react-icons";
 import md5 from "md5";
-import { useRouter } from "next/router";
-import { v4 as uuidv4 } from "uuid";
+import type { ReactElement } from "react";
+import { useState } from "react";
 const converter = require("number-to-words");
 
 type HackathonWithAttendees = Hackathon & {
@@ -185,23 +171,24 @@ function Data({
             min-height: calc(2.525 * var(--table-font-size));
           }
         `}
-        <div style={{ display: 'flex', gap: '32px', alignItems: 'center', marginBottom: '12px', marginTop: '8px' }}>
-        <Text my={0} style={{width: 'fit-content', flexShrink: 0, flexGrow: 0}}>
-          <span style={{ textTransform: "capitalize" }}>
-            {converter.toWords(attendees.filter((x) => x.checkedIn).length)}
-          </span>{" "}
-          attendees have been checked-in,{" "}
-          {converter.toWords(
-            attendees.length - attendees.filter((x) => x.checkedIn).length
-          )}{" "}
-          have not been checked-in.
-        </Text>
-        <Progress
-          value={attendees.filter((x) => x.checkedIn).length}
-          max={attendees.length}
-          type="success"
-          style={{ flexGrow: 0}}
-        /></div>
+        <div className="flex items-center gap-8 mt-2 mb-3">
+          <Text my={0} className="flex-grow-0 flex-shrink-0 w-fit">
+            <span className="capitalize">
+              {converter.toWords(attendees.filter((x) => x.checkedIn).length)}
+            </span>{" "}
+            attendees have been checked-in,{" "}
+            {converter.toWords(
+              attendees.length - attendees.filter((x) => x.checkedIn).length
+            )}{" "}
+            have not been checked-in.
+          </Text>
+          <Progress
+            value={attendees.filter((x) => x.checkedIn).length}
+            max={attendees.length}
+            type="success"
+            style={{ flexGrow: 0 }}
+          />
+        </div>
         <Input
           onChange={handler}
           crossOrigin
@@ -276,9 +263,7 @@ export default function Hackathon({
       <Page>
         <Grid.Container justify="space-between" alignItems="center" mb={1}>
           <h1>Check-In</h1>
-          <Button type="success">
-            Pair Check-In Device
-          </Button>
+          <Button type="success">Pair Check-In Device</Button>
         </Grid.Container>
         <Card
           style={{

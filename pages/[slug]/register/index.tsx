@@ -1,35 +1,18 @@
-import {
-  Button,
-  Card,
-  Drawer,
-  Fieldset,
-  Grid,
-  Input,
-  Page,
-  Text,
-  Textarea
-} from "@geist-ui/core";
-import { getAuth } from "@clerk/nextjs/server";
-import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import prisma from "@/lib/prisma";
-import { NextApiRequest } from "next";
-import { NextServerOptions } from "next/dist/server/next";
+import { getAuth } from "@clerk/nextjs/server";
+import { Grid, Page } from "@geist-ui/core";
 
+import Debug from "@/components/Debug";
+import type { FormSchema } from "@/components/Form";
+import { Form } from "@/components/Form";
+import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import type {
-  Hackathon,
   AttendeeAttribute,
+  Hackathon,
   SignupFormField
 } from "@prisma/client";
-import { PlusCircle } from "@geist-ui/react-icons";
-import React, { useState } from "react";
 import type { ReactElement } from "react";
-import { Form } from "@/components/Form";
-import { delay } from "@/lib/utils";
-import Debug from "@/components/Debug";
-import Link from "next/link";
-import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
-import type { FormSchema } from "@/components/Form";
+import { useState } from "react";
 
 type AttendeeAttributeWithField = AttendeeAttribute & {
   signupFormField: SignupFormField | null;
@@ -216,13 +199,7 @@ export default function Hackathon({
               )}`}
               width="100%"
               height="1000px"
-              style={{
-                border: "1px solid #333",
-                borderRadius: "8px",
-                padding: "16px",
-                background: "#fff",
-                marginTop: "24px"
-              }}
+              className="border border-solid border-[#333] rounded-lg p-4 bg-white mt-6"
             />
           </Grid>
         </Grid.Container>

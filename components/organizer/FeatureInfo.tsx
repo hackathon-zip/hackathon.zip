@@ -97,14 +97,7 @@ export default function FeatureInfo({
           }}
         >
           {children && (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                justifyContent: "center"
-              }}
-            >
+            <div className="flex flex-col items-start justify-center">
               {children}
             </div>
           )}

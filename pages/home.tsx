@@ -14,24 +14,8 @@ import Link from "next/link";
 export default function Home(): any {
   return (
     <>
-      <Page
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center"
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "16px",
-            marginTop: "16px"
-          }}
-        >
+      <Page className="flex flex-col align-center justify-center">
+        <div className="flex flex-col align-center justify-center gap-4 mt-4">
           <div>
             <Image
               src="/wordmark-light.svg"
@@ -53,13 +37,7 @@ export default function Home(): any {
           </Display>
 
           <SignedIn>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                gap: "16px"
-              }}
-            >
+            <div className="flex flex-row gap-4">
               <Link href="/dashboard">
                 <Button type="success">Dashboard</Button>
               </Link>
@@ -73,13 +51,7 @@ export default function Home(): any {
           </SignedIn>
 
           <SignedOut>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                gap: "16px"
-              }}
-            >
+            <div className="flex flex-row gap-4">
               <Link href="/sign-up/">
                 <Button type="success" color="#fff">
                   Get Started

@@ -1,6 +1,6 @@
 import { useTheme } from "@/hooks/useTheme";
-import { useState } from "react";
 import Link from "next/link";
+import { useState } from "react";
 import Navbar from "./Navbar";
 
 export default function DashboardLayout({
@@ -15,28 +15,18 @@ export default function DashboardLayout({
   const { theme } = useTheme();
 
   return (
-    <div
-      style={{
-        width: "calc(100vw - (100vw - 100%))",
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column"
-      }}
-    >
+    <div className="w-[calc(100vw-(100vw-100%))] h-screen flex flex-col">
       <Navbar breadcrumbs={[]} showTabs={false} />
 
       <div
-        style={{
-          background: theme === "light" ? "#fafafa" : "#101010",
-          width: "calc(100vw - (100vw - 100%))",
-          height: "auto",
-          flexGrow: 1
-        }}
+        className={`${
+          theme === "light" ? "bg-slate-50" : "bg-slate-950"
+        } w-[calc(100vw-(100vw-100%))] h-auto flex-grow`}
       >
         {children}
       </div>
-      <div style={{ background: "#fff", textAlign: "center", padding: "16px" }}>
-        <div style={{ maxWidth: "450px", margin: "auto" }}>
+      <div className="p-4 text-center bg-white">
+        <div className="max-w-[450px] m-auto">
           Built by hackathon organizers for hackathon organizers; open sourced
           at{" "}
           <Link href="https://github.com/hackathon-zip" target="_blank">

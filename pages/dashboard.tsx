@@ -1,7 +1,6 @@
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
 import { Card, Drawer, Fieldset, Grid, Page, Text } from "@geist-ui/core";
-import type { GetServerSideProps } from "next";
 
 import { Form } from "@/components/Form";
 import DashboardLayout from "@/components/layouts/organizer/DashboardLayout";
@@ -27,60 +26,26 @@ export default function Index({
     <>
       <Page>
         <Page.Header>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginBottom: "32px"
-            }}
-          >
+          <div className="flex items-center mb-8">
             <Image
               src="/wordmark-light.svg"
               alt="Hackathon.zip"
               height={40}
               width={350}
-              style={{
-                margin: "0px"
-              }}
+              className="m-0"
             />
-            <div style={{ flexGrow: 1 }} />
-            <h5
-              style={{
-                background: "#eee",
-                borderRadius: "99px",
-                width: "fit-content",
-                padding: "8px 16px",
-                marginBottom: "0px"
-              }}
-            >
+            <div className="flex-grow" />
+            <h5 className="bg-[#eee] rounded-full w-fit px-2 py-4 mb-0">
               All your hackathon needs, zipped.
             </h5>
           </div>
         </Page.Header>
 
-        <style>{`
-          body {
-            overflow-y: hidden;
-          }
-
-          .project-card {
-              cursor: pointer;
-          }
-
-          .project-card:hover {
-              border-color: white!important;
-          }
-        `}</style>
-
         <Drawer
           visible={drawerState}
           onClose={() => setDrawerState(false)}
           placement="right"
-          style={{
-            textAlign: "left",
-            maxWidth: "600px",
-            width: "calc(100vw - 64px)"
-          }}
+          className="text-left max-w-[600px] w-[calc(100vw-64px)]"
         >
           <h2 style={{ marginBottom: "0px" }}>Create a Hackathon</h2>
           <p style={{ marginTop: "16px" }}>
@@ -149,42 +114,23 @@ export default function Index({
                 (1000 * 60 * 60 * 24)
             );
             return (
-              <Grid xs={24} sm={12} md={8} lg={6} xl={4}>
-                <Link style={{ width: "100%" }} href={`/${hackathon.slug}`}>
+              <Grid xs={24} sm={12} md={8} lg={6} xl={4} className="w-full">
+                <Link className="w-full" href={`/${hackathon.slug}`}>
                   <Card
                     hoverable
-                    style={{
-                      width: "100%",
-                      border: "1px solid #d1d1d1!important"
-                    }}
-                    className="project-card"
+                    className="cursor-pointer hover:border-white w-full border border-solid border-[#d1d1d1]"
                   >
                     <Fieldset.Title>{hackathon.name}</Fieldset.Title>
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr"
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column"
-                        }}
-                      >
+                    <Grid.Container gap={1}>
+                      <Grid xs={24} className="flex flex-col">
                         <Text h3 mb={0}>
                           {hackathon.attendees.length}
                         </Text>
                         <Text small>
                           Attendee{hackathon.attendees.length == 1 ? "" : "s"}
                         </Text>
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column"
-                        }}
-                      >
+                      </Grid>
+                      <Grid xs={24} className="flex flex-col">
                         {daysToGo != 0 ? (
                           <>
                             <Text h3 mb={0}>
@@ -202,31 +148,20 @@ export default function Index({
                             <Text small>Good luck!</Text>
                           </>
                         )}
-                      </div>
-                    </div>
+                      </Grid>
+                    </Grid.Container>
                   </Card>
                 </Link>
               </Grid>
             );
           })}
-          <Grid xs={24} sm={12} md={8} lg={6} xl={4}>
+          <Grid xs={24} sm={12} md={8} lg={6} xl={4} className="w-full">
             <Card
               hoverable
-              style={{ width: "100%", border: "1px solid #d1d1d1!important" }}
-              className="project-card"
+              className="cursor-pointer hover:border-white !w-full border border-solid border-[#d1d1d1]"
               onClick={() => setDrawerState(true)}
             >
-              <Card.Content
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 10,
-                  margin: "0px",
-                  height: "100%"
-                }}
-              >
+              <Card.Content className="flex flex-col align-center justify-center gap-[10px] m-0 h-full">
                 <PlusCircle size={32} />
                 <Text margin={0}>Create Hackathon</Text>
               </Card.Content>

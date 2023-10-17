@@ -1,36 +1,18 @@
-import {
-  Button,
-  Card,
-  Drawer,
-  Fieldset,
-  Grid,
-  Input,
-  Page,
-  Text,
-  useToasts
-} from "@geist-ui/core";
-import type {
-  InferGetServerSidePropsType,
-  GetServerSideProps,
-  GetServerSidePropsContext,
-  GetServerSidePropsResult
-} from "next";
 import prisma from "@/lib/prisma";
-import { NextApiRequest } from "next";
-import { NextServerOptions } from "next/dist/server/next";
+import { Button, Card, Grid, Input, Text, useToasts } from "@geist-ui/core";
+import type { GetServerSidePropsContext } from "next";
 
+import { Form } from "@/components/Form";
+import AttendeeLayout from "@/components/layouts/attendee/AttendeeLayout";
 import type {
-  Hackathon,
   Attendee,
+  Hackathon,
   Project,
   ProjectAttribute,
   ProjectSubmissionField
 } from "@prisma/client";
-import { Form } from "@/components/Form";
-import React, { useState } from "react";
 import type { ReactElement } from "react";
-import Link from "next/link";
-import AttendeeLayout from "@/components/layouts/attendee/AttendeeLayout";
+import React from "react";
 
 import { useRouter } from "next/router";
 
@@ -154,7 +136,7 @@ export default function Attendee({
               <Text
                 span
                 type="success"
-                style={{ cursor: "pointer" }}
+                className="cursor-pointer"
                 onClick={async (data) => {
                   setToast({
                     text: "Loading...",
@@ -198,7 +180,7 @@ export default function Attendee({
               <Text
                 span
                 type="success"
-                style={{ cursor: "pointer" }}
+                className="cursor-pointer"
                 onClick={async (data) => {
                   setToast({
                     text: "Loading...",
@@ -247,7 +229,7 @@ export default function Attendee({
             You don't seem to have a project at the moment! Let's change that.
             <Grid.Container gap={1} justify="center" marginTop={1}>
               <Grid xs={24} md={12}>
-                <Card style={{ width: "100%" }}>
+                <Card className="w-full">
                   <Text h4>Create a Project</Text>
                   <Input
                     crossOrigin={true}
@@ -301,7 +283,7 @@ export default function Attendee({
                 </Card>
               </Grid>
               <Grid xs={24} md={12}>
-                <Card style={{ width: "100%" }}>
+                <Card className="w-full">
                   <Text h4>Join a Pre-Existing Project</Text>
                   <Input
                     crossOrigin={true}

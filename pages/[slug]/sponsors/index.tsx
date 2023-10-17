@@ -8,7 +8,6 @@ import {
   useModal,
   useToasts
 } from "@geist-ui/core";
-import type { GetServerSideProps } from "next";
 
 import { Form } from "@/components/Form";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
@@ -86,13 +85,7 @@ export default function Hackathon({
   return (
     <>
       <Page>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center"
-          }}
-        >
+        <div className="flex items-center justify-between">
           <h1>Sponsors</h1>
 
           <Button

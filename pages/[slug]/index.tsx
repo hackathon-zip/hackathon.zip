@@ -66,20 +66,13 @@ export default function Hackathon({
     <>
       <div
         style={{
-          minHeight: "220px",
-          height: "fit-content",
-          width: "100%",
           backgroundImage:
-            "linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.6)), url(https://pbs.twimg.com/media/FZmKOGwUcAApTR7.jpg)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          color: "white",
-          padding: "24px 0px",
-          paddingBottom: "16px"
+            "linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.6)), url(https://pbs.twimg.com/media/FZmKOGwUcAApTR7.jpg)"
         }}
+        className="min-h-[220px] h-fit w-full bg-cover bg-center text-white px-6 pb-4"
       >
-        <Page className="header" style={{ minHeight: "220px" }}>
-          <h1 style={{ marginBottom: "0px" }}>{hackathon?.name}</h1>
+        <Page className="header" className="min-h-[220px]">
+          <h1 className="mb-0">{hackathon?.name}</h1>
           <h3>
             {hackathon.startDate &&
               new Date(hackathon.startDate).toLocaleDateString("en-US", {
@@ -92,13 +85,7 @@ export default function Hackathon({
               })}{" "}
           </h3>
           <Grid.Container gap={2}>
-            <Grid
-              md={4}
-              style={{
-                display: "flex",
-                flexDirection: "column"
-              }}
-            >
+            <Grid md={4} className="flex flex-col">
               <Text h3 mb={0}>
                 {hackathon.attendees.length}
               </Text>
@@ -106,13 +93,7 @@ export default function Hackathon({
                 Attendee{hackathon.attendees.length == 1 ? "" : "s"}
               </Text>
             </Grid>
-            <Grid
-              md={10}
-              style={{
-                display: "flex",
-                flexDirection: "column"
-              }}
-            >
+            <Grid md={10} className="flex flex-col">
               <Text h3 mb={0}>
                 {timeRemaining}
               </Text>
@@ -123,26 +104,21 @@ export default function Hackathon({
           </Grid.Container>
         </Page>
       </div>
-      <Page style={{ minHeight: "220px" }}>
+      <Page className="min-h-[220px]">
         <Grid.Container gap={1}>
           {NavbarTabs.filter((x) => x.value != "dashboard").map((tab) => (
             <Grid xs={24} sm={12} md={8} lg={6} xl={4}>
-              <Link
-                style={{ width: "100%" }}
-                href={`/${hackathon.slug}/${tab.value}`}
-              >
+              <Link className="w-full" href={`/${hackathon.slug}/${tab.value}`}>
                 <Card
                   hoverable
                   style={{
                     width: "100%",
                     border: "1px solid #d1d1d1!important"
                   }}
-                  className="project-card"
+                  className="cursor-pointer hover:border-white !w-full border border-solid border-[#d1d1d1]"
                 >
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <div style={{ flexGrow: 1, fontWeight: 600 }}>
-                      {tab.label}
-                    </div>
+                  <div className="flex align-center">
+                    <div className="flex-grow font-semibold">{tab.label}</div>
                     {badges[tab.value] && (
                       <Badge type="success">{badges[tab.value]}</Badge>
                     )}

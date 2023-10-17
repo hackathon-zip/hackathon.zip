@@ -1,4 +1,4 @@
-import { StateTuple, delay } from "@/lib/utils";
+import { delay, StateTuple } from "@/lib/utils";
 import { createContext, useContext, useEffect, useState } from "react";
 import useDeviceId from "./useDeviceId";
 
@@ -23,17 +23,7 @@ const NavigationContext = createContext<StateTuple<NavigationStore>>([
 function LoadingView({ layout: Layout }: { layout: JSX.Element | any }) {
   return (
     <Layout>
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          gap: "32px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexDirection: "column"
-        }}
-      >
+      <div className="flex flex-col items-center justify-center w-full h-full gap-8">
         <img
           src="/wordmark-light.svg"
           alt="Hackathon.zip"
@@ -71,17 +61,7 @@ export function NavigationProvider({
       <Layout basic={loading}>
         {loading && (
           <>
-            <div
-              style={{
-                width: "100%",
-                height: "100%",
-                gap: "32px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexDirection: "column"
-              }}
-            >
+            <div className="flex flex-col items-center justify-center w-full h-full gap-8">
               <img
                 src="/wordmark-light.svg"
                 alt="Hackathon.zip"

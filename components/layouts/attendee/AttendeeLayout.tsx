@@ -95,21 +95,11 @@ export default function AttendeeLayout({
               <div
                 style={{
                   backgroundImage:
-                    "linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.5)), url(https://pbs.twimg.com/media/FZmKOGwUcAApTR7.jpg)",
-                  minHeight: "100px",
-                  padding: "16px",
-                  backgroundSize: "cover",
-                  backgroundPosition: "center"
+                    "linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.5)), url(https://pbs.twimg.com/media/FZmKOGwUcAApTR7.jpg)"
                 }}
+                className="min-h-[100px] p-4 bg-cover bg-center"
               >
-                <Text
-                  h3
-                  b
-                  style={{
-                    color: "white",
-                    fontWeight: "800"
-                  }}
-                >
+                <Text h3 b className="font-extrabold text-white">
                   {hackathon?.name}
                 </Text>
               </div>

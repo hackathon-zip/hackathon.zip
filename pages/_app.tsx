@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+import "@/styles/tailwind.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import Head from "next/head";
 import { useEffect, useState, type ReactElement, type ReactNode } from "react";

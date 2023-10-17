@@ -1,21 +1,9 @@
-import { useHackathon, useMyHackathons } from "@/hooks/data/hackathons";
+import { useMyHackathons } from "@/hooks/data/hackathons";
 import useUrlState from "@/hooks/useUrlState";
-import { fetcher } from "@/lib/fetcher";
 import { ClerkLoaded, UserButton } from "@clerk/nextjs";
-import {
-  Breadcrumbs,
-  Button,
-  Popover,
-  Select,
-  Tabs,
-  Text
-} from "@geist-ui/core";
+import { Breadcrumbs, Popover, Tabs } from "@geist-ui/core";
 import { ChevronUpDown } from "@geist-ui/react-icons";
 import HomeIcon from "@geist-ui/react-icons/home";
-import { Hackathon } from "@prisma/client";
-import { ReactElement, ReactNode } from "react";
-
-import useSWR from "swr";
 
 type TypescriptIsWrong = any;
 
@@ -25,24 +13,12 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
   const { hackathon: activeHackathon } = useUrlState(["hackathon"]);
 
   return (
-    <div
-      style={{
-        width: "100%",
-        height: "200px",
-        display: "flex",
-        flexDirection: "column"
-      }}
-    >
+    <div className="w-full h-[200px] flex flex-col">
       <nav
         style={{
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          boxSizing: "border-box",
-          padding: "0px 32px",
           boxShadow: "inset 0 -1px 0 0 hsla(0,0%,0%,.1)"
         }}
+        className="box-border flex items-center justify-between w-full py-8"
       >
         <Breadcrumbs>
           <Breadcrumbs.Item nextLink href="/dashboard">
@@ -81,7 +57,7 @@ export default function Navbar({ breadcrumbs }: { breadcrumbs: any }) {
                     <ChevronUpDown />
                   </span>
                 }
-                style={{ textTransform: "uppercase" }}
+                className="uppercase"
                 margin={1}
               />
             </Tabs>

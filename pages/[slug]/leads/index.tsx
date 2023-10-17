@@ -15,7 +15,6 @@ import { formatPhoneNumber } from "@/lib/utils";
 import { getAuth } from "@clerk/nextjs/server";
 import { Link, Plus } from "@geist-ui/react-icons";
 import type { Hackathon, Lead } from "@prisma/client";
-import { GetServerSideProps } from "next";
 import { ReactElement, useRef, useState } from "react";
 
 type HackathonWithLeads = Hackathon & {
@@ -83,13 +82,7 @@ export default function Hackathon({
   return (
     <>
       <Page>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center"
-          }}
-        >
+        <div className="flex items-center justify-between">
           <h1>Leads</h1>
 
           <Button

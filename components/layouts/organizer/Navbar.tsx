@@ -111,36 +111,16 @@ export default function Navbar({
 
   return (
     <div
-      style={{
-        width: "100%",
-        display: "flex",
-        flexDirection: "column",
-        position: "sticky",
-        top: 0,
-        left: 0,
-        zIndex: 999,
-        borderBottom: !showTabs ? "1px solid #eaeaea" : undefined
-      }}
+      className={`w-full flex flex-col sticky top-0 left-0 z-50 ${
+        !showTabs && "border-b border-solid border-[#eaeaea]"
+      }`}
     >
       <nav
-        style={{
-          width: "100%",
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          height: "54px",
-          alignItems: "center",
-          justifyContent: "space-between",
-          boxSizing: "border-box",
-          padding: "0px 12px",
-          background: theme === "dark" ? "#131313" : "#ffffff"
-        }}
+        className={`${
+          theme === "dark" ? "bg-slate-950" : "bg-slate-50"
+        } w-full grid grid-cols-3 h-14 items-center justify-between box-border py-3`}
       >
-        <div
-          style={{
-            display: "flex",
-            gap: "32px"
-          }}
-        >
+        <div className="flex gap-8">
           <Breadcrumbs>
             <Breadcrumbs.Item nextLink href="/dashboard">
               <HomeIcon />
@@ -154,25 +134,10 @@ export default function Navbar({
                 <Breadcrumbs.Item>Page</Breadcrumbs.Item> */}
           </Breadcrumbs>
         </div>
-        <div
-          style={{
-            display: "flex",
-            gap: "16px",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%"
-          }}
-        >
+        <div className="flex items-center justify-center w-full gap-4">
           <SearchBar />
         </div>
-        <div
-          style={{
-            display: "flex",
-            gap: "16px",
-            alignItems: "center",
-            justifyContent: "flex-end"
-          }}
-        >
+        <div className="flex items-center justify-end gap-4">
           <Select
             h="28px"
             pure
@@ -181,17 +146,15 @@ export default function Navbar({
             }}
             value={theme}
             title="Switch Theme"
-            style={{
-              minWidth: "85px"
-            }}
+            className="min-w-[85px]"
           >
             <Select.Option value="light">
-              <span className="select-content">
+              <span className="w-auto h-[18px] flex justify-between items-center gap-1">
                 <Sun size={14} /> Light
               </span>
             </Select.Option>
             <Select.Option value="dark">
-              <span className="select-content">
+              <span className="w-auto h-[18px] flex justify-between items-center gap-1">
                 <Moon size={14} /> Dark
               </span>
             </Select.Option>
@@ -218,9 +181,7 @@ export default function Navbar({
                 `/${activeHackathonSlug}/${value == "dashboard" ? "" : value}`
               );
             }}
-            style={{
-              background: theme === "dark" ? "#131313" : "#ffffff"
-            }}
+            className={`${theme === "dark" ? "bg-slate-950" : "bg-slate-50"}`}
             value={feature ?? "dashboard"}
           >
             {NavbarTabs.map((tab) => (
@@ -240,15 +201,6 @@ export default function Navbar({
 
               .tabs > .content {
                 padding-top: 0px !important;
-              }
-  
-              .select-content {
-                width: auto;
-                height: 18px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                gap: 4px;
               }
             `
             }}

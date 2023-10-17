@@ -1,36 +1,18 @@
-import {
-  Button,
-  Card,
-  Drawer,
-  Fieldset,
-  Grid,
-  Input,
-  Page,
-  Text
-} from "@geist-ui/core";
-import type {
-  InferGetServerSidePropsType,
-  GetServerSideProps,
-  GetServerSidePropsContext,
-  GetServerSidePropsResult
-} from "next";
 import prisma from "@/lib/prisma";
-import { NextApiRequest } from "next";
-import { NextServerOptions } from "next/dist/server/next";
+import { Button, Card, Grid, Text } from "@geist-ui/core";
+import type { GetServerSidePropsContext } from "next";
 
+import AttendeeLayout from "@/components/layouts/attendee/AttendeeLayout";
+import Markdown from "@/components/Markdown";
 import type {
-  Hackathon,
   Attendee,
   AttendeeDashboard,
   AttendeeDashboardCard,
-  AttendeeDashboardLink
+  AttendeeDashboardLink,
+  Hackathon
 } from "@prisma/client";
-import React, { useState } from "react";
-import type { ReactElement } from "react";
 import Link from "next/link";
-import Markdown from "@/components/Markdown";
-import AttendeeLayout from "@/components/layouts/attendee/AttendeeLayout";
-import { compile } from "@mdx-js/mdx";
+import type { ReactElement } from "react";
 
 export default function Attendee({
   hackathon,
@@ -60,7 +42,7 @@ export default function Attendee({
 
   return (
     <>
-      <div style={{ width: "100%" }}>
+      <div className="w-full">
         <h1>{hackathon?.name}</h1>
         <Grid.Container gap={2}>
           {hackathon?.dashboard?.links.map((link) => (

@@ -1,5 +1,4 @@
 import { css } from "@/components/CSS";
-import type { GetServerSideProps } from "next";
 
 import EditableValue, { EditableHeader } from "@/components/EditableValue";
 import { Form } from "@/components/Form";
@@ -170,15 +169,7 @@ function EditDrawer({
       style={{ width: "min(500px, calc(100vw - 64px))" }}
     >
       <Drawer.Content>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            gap: "12px",
-            marginBottom: "16px"
-          }}
-        >
+        <div className="flex flex-row items-center gap-3 mb-4">
           <EditableHeader
             name="Name"
             initialValue={attendee?.name || ""}
