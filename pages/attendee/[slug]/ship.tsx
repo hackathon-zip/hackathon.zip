@@ -24,6 +24,7 @@ import type {
   Attendee,
   Project,
   ProjectAttribute,
+  CustomPage,
   ProjectSubmissionField
 } from "@prisma/client";
 import { Form } from "@/components/Form";
@@ -361,7 +362,10 @@ export default function Attendee({
 
 Attendee.getLayout = function getLayout(
   page: ReactElement,
-  props: { hackathon: Hackathon | null; attendee: Attendee | null }
+  props: {
+    hackathon: Hackathon & { pages: CustomPage[] };
+    attendee: Attendee | null;
+  }
 ) {
   return (
     <AttendeeLayout hackathon={props.hackathon} attendee={props.attendee}>
@@ -390,7 +394,8 @@ export const getServerSideProps = (async (
           include: {
             attribute: true
           }
-        }
+        },
+        pages: true
       }
     });
     if (hackathon) {

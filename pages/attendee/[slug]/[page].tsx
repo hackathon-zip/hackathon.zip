@@ -44,7 +44,7 @@ export default function Attendee({
           })[];
           links: CustomPageLink[];
         })[];
-        page:
+        dashboard:
           | (CustomPage & {
               cards: (CustomPageCard & {
                 links: CustomPageLink[];
@@ -69,7 +69,7 @@ export default function Attendee({
       <div style={{ width: "100%" }}>
         <h1>{hackathon?.name}</h1>
         <Grid.Container gap={2}>
-          {hackathon?.page?.links.map((link) => (
+          {hackathon?.dashboard?.links.map((link) => (
             <Grid>
               <Link href={link.url}>
                 <Button type="success">{link.text}</Button>
@@ -78,7 +78,7 @@ export default function Attendee({
           ))}
         </Grid.Container>
         <Grid.Container gap={1.5} my={1}>
-          {hackathon?.page?.cards.map((card) => (
+          {hackathon?.dashboard?.cards.map((card) => (
             <Grid xs={12}>
               <Card width="100%">
                 <Text h4 my={0}>
@@ -94,7 +94,7 @@ export default function Attendee({
             </Grid>
           ))}
         </Grid.Container>
-        {hackathon?.page && <Markdown code={hackathon?.page?.body} />}
+        {hackathon?.dashboard && <Markdown code={hackathon?.dashboard?.body} />}
       </div>
     </>
   );
@@ -149,7 +149,7 @@ export const getServerSideProps = (async (
             })[];
             links: CustomPageLink[];
           })[];
-          page:
+          dashboard:
             | (CustomPage & {
                 cards: (CustomPageCard & {
                   links: CustomPageLink[];
@@ -159,10 +159,8 @@ export const getServerSideProps = (async (
             | null;
         })
       | null;
-    hackathon?.page ==
-      hackathon?.pages.filter(
-        (x) => x.slug == (context.params?.page as string)
-      )[0];
+    hackathon?.dashboard ==
+      hackathon?.pages.filter((x) => x.slug == "dashboard")[0];
     if (hackathon) {
       const token = context.req.cookies[hackathon?.slug as string];
       let attendee = null;

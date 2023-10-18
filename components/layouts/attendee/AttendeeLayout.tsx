@@ -10,7 +10,13 @@ import {
   useModal,
   useToasts
 } from "@geist-ui/core";
-import type { Attendee, Hackathon } from "@prisma/client";
+import type {
+  Attendee,
+  Hackathon,
+  CustomPage,
+  CustomPageLink,
+  CustomPageCard
+} from "@prisma/client";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useRef } from "react";
@@ -21,7 +27,7 @@ export default function AttendeeLayout({
   attendee
 }: {
   children: React.ReactNode;
-  hackathon: Hackathon | null;
+  hackathon: (Hackathon & { pages: CustomPage[] }) | null;
   attendee: Attendee | null;
 }) {
   const { setToast } = useToasts();
@@ -123,22 +129,6 @@ export default function AttendeeLayout({
                     </Text>
                   </Card.Content>
                   <Divider h="1px" my={0} />
-                </>
-              )}
-              {!attendee && (
-                <>
-                  <Card.Content>
-                    <Text b my={0}>
-                      <Link color underline href={transformURL("/register")}>
-                        Register
-                      </Link>
-                    </Text>
-                  </Card.Content>
-                  <Divider h="1px" my={0} />
-                </>
-              )}
-              {attendee && (
-                <>
                   <Card.Content>
                     <Text b my={0}>
                       <Link color underline href={transformURL("/ship")}>
@@ -147,14 +137,38 @@ export default function AttendeeLayout({
                     </Text>
                   </Card.Content>
                   <Divider h="1px" my={0} />
-                </>
-              )}
-              {attendee && (
-                <>
+                  {hackathon?.pages.map((page) => (
+                    <>
+                      <Card.Content>
+                        <Text b my={0}>
+                          <Link
+                            color
+                            underline
+                            href={transformURL(`/${page.slug}`)}
+                          >
+                            {page.title}
+                          </Link>
+                        </Text>
+                      </Card.Content>
+                      <Divider h="1px" my={0} />
+                    </>
+                  ))}
                   <Card.Content>
                     <Text b my={0}>
                       <Link color underline href={transformAPIURL("/sign-out")}>
                         Sign Out
+                      </Link>
+                    </Text>
+                  </Card.Content>
+                  <Divider h="1px" my={0} />
+                </>
+              )}
+              {!attendee && (
+                <>
+                  <Card.Content>
+                    <Text b my={0}>
+                      <Link color underline href={transformURL("/register")}>
+                        Register
                       </Link>
                     </Text>
                   </Card.Content>

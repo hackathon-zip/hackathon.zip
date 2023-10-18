@@ -112,7 +112,7 @@ function Data({
       customRender: (value: string, attendee?: Attendee) => (
         <Checkbox
           checked={value == "true"}
-          onClick={async (e: any)  => {
+          onClick={async (e: any) => {
             setToast({
               text: "Loading...",
               delay: 2000
@@ -185,23 +185,35 @@ function Data({
             min-height: calc(2.525 * var(--table-font-size));
           }
         `}
-        <div style={{ display: 'flex', gap: '32px', alignItems: 'center', marginBottom: '12px', marginTop: '8px' }}>
-        <Text my={0} style={{width: 'fit-content', flexShrink: 0, flexGrow: 0}}>
-          <span style={{ textTransform: "capitalize" }}>
-            {converter.toWords(attendees.filter((x) => x.checkedIn).length)}
-          </span>{" "}
-          attendees have been checked-in,{" "}
-          {converter.toWords(
-            attendees.length - attendees.filter((x) => x.checkedIn).length
-          )}{" "}
-          have not been checked-in.
-        </Text>
-        <Progress
-          value={attendees.filter((x) => x.checkedIn).length}
-          max={attendees.length}
-          type="success"
-          style={{ flexGrow: 0}}
-        /></div>
+        <div
+          style={{
+            display: "flex",
+            gap: "32px",
+            alignItems: "center",
+            marginBottom: "12px",
+            marginTop: "8px"
+          }}
+        >
+          <Text
+            my={0}
+            style={{ width: "fit-content", flexShrink: 0, flexGrow: 0 }}
+          >
+            <span style={{ textTransform: "capitalize" }}>
+              {converter.toWords(attendees.filter((x) => x.checkedIn).length)}
+            </span>{" "}
+            attendees have been checked-in,{" "}
+            {converter.toWords(
+              attendees.length - attendees.filter((x) => x.checkedIn).length
+            )}{" "}
+            have not been checked-in.
+          </Text>
+          <Progress
+            value={attendees.filter((x) => x.checkedIn).length}
+            max={attendees.length}
+            type="success"
+            style={{ flexGrow: 0 }}
+          />
+        </div>
         <Input
           onChange={handler}
           crossOrigin
@@ -276,9 +288,7 @@ export default function Hackathon({
       <Page>
         <Grid.Container justify="space-between" alignItems="center" mb={1}>
           <h1>Check-In</h1>
-          <Button type="success">
-            Pair Check-In Device
-          </Button>
+          <Button type="success">Pair Check-In Device</Button>
         </Grid.Container>
         <Card
           style={{

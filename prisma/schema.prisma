@@ -62,6 +62,7 @@ model CustomPage {
   id          String           @id @default(uuid())
   body        String
   slug        String
+  title       String
   cards       CustomPageCard[]
   links       CustomPageLink[]
   hackathonId String           @unique
