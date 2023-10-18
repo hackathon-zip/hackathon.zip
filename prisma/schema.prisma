@@ -25,7 +25,7 @@ model Hackathon {
   timezone   String?
   schedule   Schedule?
   signupForm SignupForm?
-  dashboard  AttendeeDashboard?
+  pages      CustomPage[]
   sponsors   Sponsor[]
   leads      Lead[]
 
@@ -58,32 +58,33 @@ model Hackathon {
   projectSubmissionFields ProjectSubmissionField[]
 }
 
-model AttendeeDashboard {
-  id          String                  @id @default(uuid())
+model CustomPage {
+  id          String           @id @default(uuid())
   body        String
-  cards       AttendeeDashboardCard[]
-  links       AttendeeDashboardLink[]
-  hackathonId String                  @unique
-  hackathon   Hackathon               @relation(fields: [hackathonId], references: [id])
+  slug        String
+  cards       CustomPageCard[]
+  links       CustomPageLink[]
+  hackathonId String           @unique
+  hackathon   Hackathon        @relation(fields: [hackathonId], references: [id])
 }
 
-model AttendeeDashboardCard {
-  id                  String                  @id @default(uuid())
-  text                String
-  links               AttendeeDashboardLink[]
-  header              String
-  AttendeeDashboard   AttendeeDashboard?      @relation(fields: [attendeeDashboardId], references: [id])
-  attendeeDashboardId String?
+model CustomPageCard {
+  id           String           @id @default(uuid())
+  text         String
+  links        CustomPageLink[]
+  header       String
+  customPage   CustomPage?      @relation(fields: [customPageId], references: [id])
+  customPageId String?
 }
 
-model AttendeeDashboardLink {
-  id          String                 @id @default(uuid())
-  text        String
-  url         String
-  cardId      String?
-  card        AttendeeDashboardCard? @relation(fields: [cardId], references: [id])
-  dashboardId String?
-  dashboard   AttendeeDashboard?     @relation(fields: [dashboardId], references: [id])
+model CustomPageLink {
+  id           String          @id @default(uuid())
+  text         String
+  url          String
+  cardId       String?
+  card         CustomPageCard? @relation(fields: [cardId], references: [id])
+  customPageId String?
+  customPage   CustomPage?     @relation(fields: [customPageId], references: [id])
 }
 
 model Schedule {
@@ -273,10 +274,10 @@ model Token {
 }
 
 model Device {
-  id          String    @id @default(uuid())
+  id          String     @id @default(uuid())
   name        String
-  authKey     String    @unique @default(cuid())
-  createdAt   DateTime  @default(now())
+  authKey     String     @unique @default(cuid())
+  createdAt   DateTime   @default(now())
   hackathonId String?
   hackathon   Hackathon? @relation(fields: [hackathonId], references: [id])
 }

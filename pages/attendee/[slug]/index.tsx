@@ -21,9 +21,9 @@ import { NextServerOptions } from "next/dist/server/next";
 import type {
   Hackathon,
   Attendee,
-  AttendeeDashboard,
-  AttendeeDashboardCard,
-  AttendeeDashboardLink
+  CustomPage,
+  CustomPageCard,
+  CustomPageLink
 } from "@prisma/client";
 import React, { useState } from "react";
 import type { ReactElement } from "react";
@@ -38,14 +38,18 @@ export default function Attendee({
 }: {
   hackathon:
     | (Hackathon & {
-        dashboard:
-          | (AttendeeDashboard & {
-              cards: (AttendeeDashboardCard & {
-                links: AttendeeDashboardLink[];
+        pages: (CustomPage & {
+              cards: (CustomPageCard & {
+                links: CustomPageLink[];
               })[];
-              links: AttendeeDashboardLink[];
-            })
-          | null;
+              links: CustomPageLink[];
+            })[];
+        dashboard: (CustomPage & {
+          cards: (CustomPageCard & {
+            links: CustomPageLink[];
+          })[];
+          links: CustomPageLink[];
+        }) | null;
       })
     | null;
   attendee: Attendee | null;
@@ -109,7 +113,7 @@ export const getServerSideProps = (async (
   context: GetServerSidePropsContext
 ) => {
   if (context.params?.slug) {
-    const hackathon = await prisma.hackathon.findFirst({
+    let hackathon = (await prisma.hackathon.findFirst({
       where: {
         OR: [
           {
@@ -121,7 +125,7 @@ export const getServerSideProps = (async (
         ]
       },
       include: {
-        dashboard: {
+        pages: {
           include: {
             links: true,
             cards: {
@@ -132,7 +136,22 @@ export const getServerSideProps = (async (
           }
         }
       }
-    });
+    })) as ((Hackathon & {
+          pages: (CustomPage & {
+                cards: (CustomPageCard & {
+                  links: CustomPageLink[];
+                })[];
+                links: CustomPageLink[];
+              })[];
+          dashboard: (CustomPage & {
+            cards: (CustomPageCard & {
+              links: CustomPageLink[];
+            })[];
+            links: CustomPageLink[];
+          }) | null;
+        })
+      | null);
+    hackathon?.dashboard == hackathon?.pages.filter(x => x.slug == "dashboard")[0]
     if (hackathon) {
       const token = context.req.cookies[hackathon?.slug as string];
       let attendee = null;
