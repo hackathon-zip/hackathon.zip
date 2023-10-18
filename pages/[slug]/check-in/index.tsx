@@ -112,7 +112,7 @@ function Data({
       customRender: (value: string, attendee?: Attendee) => (
         <Checkbox
           checked={value == "true"}
-          onClick={async (e) => {
+          onClick={async (e: any)  => {
             setToast({
               text: "Loading...",
               delay: 2000

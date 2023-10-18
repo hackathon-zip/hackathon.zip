@@ -7,6 +7,13 @@ import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import type { Attendee, Hackathon } from "@prisma/client";
 import { ReactElement, useEffect, useState } from "react";
 
+import type {
+  InferGetServerSidePropsType,
+  GetServerSideProps,
+  GetServerSidePropsContext,
+  GetServerSidePropsResult
+} from "next";
+
 import { NavbarTabs } from "@/components/layouts/organizer/Navbar";
 
 type DataPoint = {};
