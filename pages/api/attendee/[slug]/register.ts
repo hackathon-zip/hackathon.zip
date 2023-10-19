@@ -1,6 +1,5 @@
 import prisma from "@/lib/prisma";
 import { getHackathonSlug } from "@/lib/utils";
-import { getAuth } from "@clerk/nextjs/server";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
@@ -37,7 +36,7 @@ export default async function handler(
             }))
         });
 
-        res.redirect(`/api/attendee/${req.query.slug}/sign-in`);
+        res.redirect(`/api/sign-in`);
     } catch (error) {
         console.error(error);
         return res.status(400).json({ error });
