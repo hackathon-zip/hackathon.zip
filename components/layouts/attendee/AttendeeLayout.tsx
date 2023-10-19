@@ -137,7 +137,7 @@ export default function AttendeeLayout({
                     </Text>
                   </Card.Content>
                   <Divider h="1px" my={0} />
-                  {hackathon?.pages.map((page) => (
+                  {hackathon?.pages.filter(x=> x.slug != "dashboard").map((page) => (
                     <>
                       <Card.Content>
                         <Text b my={0}>

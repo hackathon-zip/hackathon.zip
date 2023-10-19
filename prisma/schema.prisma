@@ -65,7 +65,7 @@ model CustomPage {
   title       String
   cards       CustomPageCard[]
   links       CustomPageLink[]
-  hackathonId String           @unique
+  hackathonId String           
   hackathon   Hackathon        @relation(fields: [hackathonId], references: [id])
 }
 
