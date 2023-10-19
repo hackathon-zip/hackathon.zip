@@ -1,7 +1,6 @@
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
 import { Page, Text, Card, Grid, Link, Badge } from "@geist-ui/core";
-import type { GetServerSideProps } from "next";
 
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import type { Hackathon, Attendee } from "@prisma/client";
