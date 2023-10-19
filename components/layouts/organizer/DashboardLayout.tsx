@@ -45,7 +45,7 @@ export default function DashboardLayout({
           .
         </div>
       </div>
-      
+
       <style
         dangerouslySetInnerHTML={{
           __html: `

@@ -66,6 +66,7 @@ export default function Attendee({
       <div>
         <h1>Register</h1>
         <Form
+          style={{ maxWidth: "400px", width: "70vw" }}
           schema={{
             elements: [
               {

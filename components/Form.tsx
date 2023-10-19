@@ -4,9 +4,14 @@ import {
   Checkbox,
   Input,
   Select,
+  Tabs,
+  Divider,
+  Card,
   Text,
   Textarea
 } from "@geist-ui/core";
+import { Edit, Eye } from "@geist-ui/icons";
+import Markdown from "@/components/Markdown";
 import { ButtonTypes } from "@geist-ui/core/esm/button";
 import React, { CSSProperties, useState } from "react";
 
@@ -136,7 +141,8 @@ interface FormTextInput extends FormInput {
     | "email"
     | "password"
     | "number"
-    | "textarea";
+    | "textarea"
+    | "markdown";
   placeholder?: string;
   inlineLabel?: string;
   defaultValue?: string;
@@ -434,6 +440,85 @@ export const Form = React.forwardRef(
                   )}
                 </Input>
               );
+            } else if (formElement.type == "markdown") {
+              const element = formElement as FormTextInput;
+              return (
+                <>
+                  {element.label && (
+                    <Text h5>
+                      {element.label}
+                      {element.required && <Required />}
+                    </Text>
+                  )}
+                  {element.miniLabel && (
+                    <Text
+                      small
+                      mt={element.mt || 0}
+                      mb={0.5}
+                      style={{ display: "block", fontSize: "13px" }}
+                    >
+                      {element.miniLabel}
+                      {element.required && <Required />}
+                    </Text>
+                  )}
+                  <Tabs initialValue="1" leftSpace={0} hoverWidthRatio={1}>
+                    <Tabs.Item
+                      label={
+                        <>
+                          <Edit /> Edit
+                        </>
+                      }
+                      value="1"
+                    >
+                      <Textarea
+                        aria-disabled={loading}
+                        type={
+                          getWarningStatus(element.name) ? "error" : "default"
+                        }
+                        value={getValue(element.name)}
+                        onChange={(e) =>
+                          updateValue(element.name, e.target.value)
+                        }
+                        name={element.name}
+                        width="100%"
+                        height="400px"
+                        mb={typeof element.mb == "undefined" ? 1 : element.mb}
+                        placeholder={element.placeholder}
+                        onKeyPress={(event) => {
+                          if (element.onKeyup) {
+                            event.key === "Enter" && event.preventDefault();
+                          }
+                        }}
+                        onKeyDown={(event) => {
+                          if (element.onKeyup) {
+                            event.key === "Enter" && event.preventDefault();
+                          }
+                        }}
+                        onKeyUp={(event) =>
+                          element.onKeyup?.(event, updateValue, getValue)
+                        }
+                      ></Textarea>
+                    </Tabs.Item>
+                    <Tabs.Item
+                      label={
+                        <>
+                          <Eye /> Preview{" "}
+                        </>
+                      }
+                      value="2"
+                    >
+                      <Card
+                        style={{ maxHeight: "400px", overflow: "scroll" }}
+                        mb={typeof element.mb == "undefined" ? 1 : element.mb}
+                      >
+                        <Markdown
+                          code={getValue(element.name) || "Nothing to preview."}
+                        />
+                      </Card>
+                    </Tabs.Item>
+                  </Tabs>
+                </>
+              );
             } else if (formElement.type == "textarea") {
               const element = formElement as FormTextInput;
               return (
@@ -462,14 +547,19 @@ export const Form = React.forwardRef(
                     onChange={(e) => updateValue(element.name, e.target.value)}
                     name={element.name}
                     width="100%"
+                    height="400px"
                     mb={typeof element.mb == "undefined" ? 1 : element.mb}
                     placeholder={element.placeholder}
-                    onKeyPress={(event) =>
-                      event.key === "Enter" && event.preventDefault()
-                    }
-                    onKeyDown={(event) =>
-                      event.key === "Enter" && event.preventDefault()
-                    }
+                    onKeyPress={(event) => {
+                      if (element.onKeyup) {
+                        event.key === "Enter" && event.preventDefault();
+                      }
+                    }}
+                    onKeyDown={(event) => {
+                      if (element.onKeyup) {
+                        event.key === "Enter" && event.preventDefault();
+                      }
+                    }}
                     onKeyUp={(event) =>
                       element.onKeyup?.(event, updateValue, getValue)
                     }
