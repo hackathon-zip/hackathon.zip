@@ -45,6 +45,22 @@ export default function DashboardLayout({
           .
         </div>
       </div>
+      
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+      
+          .select-content {
+            width: auto;
+            height: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 4px;
+          }
+        `
+        }}
+      />
     </div>
   );
 }

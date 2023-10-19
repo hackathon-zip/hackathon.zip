@@ -159,10 +159,9 @@ export const getServerSideProps = (async (
             | null;
         })
       | null;
-    
+
     if (hackathon) {
-      hackathon.dashboard =
-      hackathon?.pages.filter(
+      hackathon.dashboard = hackathon?.pages.filter(
         (x) => x.slug == "dashboard"
       )[0];
       const token = context.req.cookies[hackathon?.slug as string];

@@ -67,7 +67,9 @@ export default function Attendee({
   return (
     <>
       <div style={{ width: "100%" }}>
-        <h2>{hackathon?.page?.title} ~ {hackathon?.name}</h2>
+        <h2>
+          {hackathon?.page?.title} ~ {hackathon?.name}
+        </h2>
         <Grid.Container gap={2}>
           {hackathon?.page?.links.map((link) => (
             <Grid>
@@ -159,9 +161,11 @@ export const getServerSideProps = (async (
             | null;
         })
       | null;
-    
+
     if (hackathon) {
-      hackathon.page = hackathon?.pages.filter((x) => x.slug == context.params?.page as string)[0];
+      hackathon.page = hackathon?.pages.filter(
+        (x) => x.slug == (context.params?.page as string)
+      )[0];
       const token = context.req.cookies[hackathon?.slug as string];
       let attendee = null;
       if (token) {
