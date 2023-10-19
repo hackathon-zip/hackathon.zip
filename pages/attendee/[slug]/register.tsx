@@ -101,12 +101,14 @@ export default function Attendee({
           submission={{
             type: "controlled",
             onSubmit: async (data) => {
-              let res = await fetch(transformAPIURL("/project/create"), {
+              let res = await fetch(transformAPIURL("/register"), {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json"
                 },
-                body: JSON.stringify({})
+                body: JSON.stringify({
+                  ...data
+                })
               }).then((r) => r.json());
               if (res.error) {
                 setToast({
