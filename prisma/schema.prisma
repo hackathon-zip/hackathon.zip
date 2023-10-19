@@ -28,6 +28,7 @@ model Hackathon {
   pages      CustomPage[]
   sponsors   Sponsor[]
   leads      Lead[]
+  brandingItems BrandingItem[]
 
   // branding
   website   String?
@@ -44,6 +45,7 @@ model Hackathon {
   financeEnabled   Boolean @default(false)
   sponsorsEnabled  Boolean @default(false)
   leadsEnabled     Boolean @default(false)
+  brandingEnabled  Boolean @default(false)
 
   hcbId String?
 
@@ -133,6 +135,25 @@ enum LeadType {
   Venue
   Sponsor
   Other
+}
+
+model BrandingItem {
+  id String @id @default(uuid())
+  hackathonId String
+
+  fileName String
+  url String
+
+  type BrandingItemType
+
+  hackathon Hackathon @relation(fields: [hackathonId], references: [id])
+}
+
+enum BrandingItemType {
+  Logo
+  Banner
+  StickerDesign
+  TShirtDesign
 }
 
 model SignupForm {
