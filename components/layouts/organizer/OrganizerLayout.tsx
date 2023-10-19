@@ -1,7 +1,7 @@
 import { useMyHackathons } from "@/hooks/data/hackathons";
 import { useTheme } from "@/hooks/useTheme";
 import useUrlState from "@/hooks/useUrlState";
-import { Button, Popover, Spinner, Text } from "@geist-ui/core";
+import { Button, Popover, Spinner } from "@geist-ui/core";
 import { ChevronUpDown } from "@geist-ui/react-icons";
 import { Hackathon } from "@prisma/client";
 import Head from "next/head";
@@ -113,19 +113,19 @@ export default function HackathonLayout({
       </div>
       <div
         style={{
-          background: theme === "dark" ? "#222" : "#fefefe",
+          background: theme === "dark" ? "#222" : "#fff",
           textAlign: "center",
-          padding: "8px"
+          padding: "16px"
         }}
       >
-        <Text p small style={{ maxWidth: "750px", margin: "auto" }}>
+        <div style={{ maxWidth: "450px", margin: "auto" }}>
           Built by hackathon organizers for hackathon organizers; open sourced
           at{" "}
           <Link href="https://github.com/hackathon-zip" target="_blank">
             github.com/hackathon-zip
           </Link>
           .
-        </Text>
+        </div>
       </div>
     </div>
   );
