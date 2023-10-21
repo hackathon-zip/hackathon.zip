@@ -11,7 +11,16 @@ export default async function handler(
 
     const hackathons = await prisma.hackathon.findMany({
         where: {
-            ownerId: userId ?? undefined
+            OR: [
+                {
+                    ownerId: userId ?? undefined
+                },
+                {
+                    collaboratorIds: {
+                        has: userId
+                    }
+                }
+            ]
         }
     });
 

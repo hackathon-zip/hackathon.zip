@@ -1,1 +1,1 @@
-declare module 'number-to-words';
+declare module "number-to-words";

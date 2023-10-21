@@ -244,7 +244,16 @@ export const getServerSideProps = (async (context) => {
 
   const hackathons = await prisma.hackathon.findMany({
     where: {
-      ownerId: userId ?? undefined
+      OR: [
+        {
+          ownerId: userId ?? undefined
+        },
+        {
+          collaboratorIds: {
+            has: userId
+          }
+        }
+      ]
     },
     include: {
       attendees: true

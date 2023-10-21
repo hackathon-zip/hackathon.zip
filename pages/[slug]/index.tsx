@@ -10,8 +10,6 @@ import type { GetServerSideProps } from "next";
 
 import { NavbarTabs } from "@/components/layouts/organizer/Navbar";
 
-type DataPoint = {};
-
 import type {
   Attendee,
   AttendeeAttribute,
