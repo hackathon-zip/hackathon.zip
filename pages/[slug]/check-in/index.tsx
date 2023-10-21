@@ -1,46 +1,29 @@
-import {
-  Button,
-  Card,
-  Drawer,
-  Fieldset,
-  Grid,
-  Input,
-  Page,
-  Text,
-  Table,
-  Checkbox,
-  Progress,
-  useToasts
-} from "@geist-ui/core";
-import { getAuth } from "@clerk/nextjs/server";
-import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-import prisma from "@/lib/prisma";
-import { NextApiRequest } from "next";
-import { NextServerOptions } from "next/dist/server/next";
-import type { Attendee, Hackathon } from "@prisma/client";
-import { CheckSquare, Key, PlusCircle } from "@geist-ui/react-icons";
-import React, { useState } from "react";
-import type { ReactElement } from "react";
-import { Form } from "@/components/Form";
-import { delay } from "@/lib/utils";
-import Debug from "@/components/Debug";
-import Link from "next/link";
+import { css } from "@/components/CSS";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import FeatureInfo from "@/components/organizer/FeatureInfo";
-import { css } from "@/components/CSS";
-import EditableValue, { EditableHeader } from "@/components/EditableValue";
 import useViewport from "@/hooks/useViewport";
-import { orderedSort, sl } from "@/lib/utils";
-import { Plus, Trash2 } from "@geist-ui/react-icons";
+import { orderedSort } from "@/lib/utils";
+import {
+    Button,
+    Card,
+    Checkbox,
+    Grid,
+    Input,
+    Page,
+    Progress,
+    Table,
+    Text,
+    useToasts
+} from "@geist-ui/core";
+import { CheckSquare } from "@geist-ui/react-icons";
+import type { Attendee } from "@prisma/client";
 import md5 from "md5";
-import { useRouter } from "next/router";
-import { v4 as uuidv4 } from "uuid";
-const converter = require("number-to-words");
+import converter from "number-to-words";
+import type { ReactElement } from "react";
+import { useState } from "react";
+import { getServerSideProps as getServerSidePropsTemplate } from "../index";
 
-type HackathonWithAttendees = Hackathon & {
-  attendees: Attendee[];
-};
+import type { HackathonWithAttendees } from "@/lib/dbTypes";
 
 export type Column = {
   type: string;
@@ -325,46 +308,4 @@ Hackathon.getLayout = function getLayout(page: ReactElement) {
   return <HackathonLayout>{page}</HackathonLayout>;
 };
 
-export const getServerSideProps = (async (context) => {
-  const { userId } = getAuth(context.req);
-
-  if (context.params?.slug) {
-    const hackathon = await prisma.hackathon.findUnique({
-      where: {
-        slug: context.params?.slug.toString(),
-        OR: [
-          {
-            ownerId: userId ?? undefined
-          },
-          {
-            collaboratorIds: {
-              has: userId
-            }
-          }
-        ]
-      },
-      include: {
-        attendees: {
-          orderBy: [
-            {
-              createdAt: "desc"
-            }
-          ]
-        }
-      }
-    });
-    return {
-      props: {
-        hackathon
-      }
-    };
-  } else {
-    return {
-      props: {
-        hackathon: null
-      }
-    };
-  }
-}) satisfies GetServerSideProps<{
-  hackathon: null | HackathonWithAttendees;
-}>;
+export const getServerSideProps = getServerSidePropsTemplate

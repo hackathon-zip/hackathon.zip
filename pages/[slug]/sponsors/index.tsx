@@ -1,14 +1,12 @@
-import prisma from "@/lib/prisma";
-import { getAuth } from "@clerk/nextjs/server";
 import {
-  Button,
-  Modal,
-  Page,
-  Table,
-  useModal,
-  useToasts
+    Button,
+    Modal,
+    Page,
+    Table,
+    useModal,
+    useToasts
 } from "@geist-ui/core";
-import type { GetServerSideProps } from "next";
+import { getServerSideProps as getServerSidePropsTemplate } from "../index";
 
 import { Form } from "@/components/Form";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
@@ -257,39 +255,4 @@ Hackathon.getLayout = function getLayout(page: ReactElement) {
   return <HackathonLayout>{page}</HackathonLayout>;
 };
 
-export const getServerSideProps = (async (context) => {
-  const { userId } = getAuth(context.req);
-
-  console.log({ userId });
-
-  if (context.params?.slug) {
-    const hackathon = await prisma.hackathon.findUnique({
-      where: {
-        slug: context.params?.slug.toString(),
-        OR: [
-          {
-            ownerId: userId ?? undefined
-          },
-          {
-            collaboratorIds: {
-              has: userId
-            }
-          }
-        ]
-      }
-    });
-    return {
-      props: {
-        hackathon
-      }
-    };
-  } else {
-    return {
-      props: {
-        hackathon: null
-      }
-    };
-  }
-}) satisfies GetServerSideProps<{
-  hackathon: Hackathon | null;
-}>;
+export const getServerSideProps = getServerSidePropsTemplate

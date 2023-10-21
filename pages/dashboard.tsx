@@ -6,14 +6,11 @@ import type { GetServerSideProps } from "next";
 import { Form } from "@/components/Form";
 import DashboardLayout from "@/components/layouts/organizer/DashboardLayout";
 import { PlusCircle } from "@geist-ui/react-icons";
-import type { Attendee, Hackathon } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 import { ReactElement, useState } from "react";
 
-type HackathonWithAttendees = Hackathon & {
-  attendees: Attendee[];
-};
+import type { HackathonWithAttendees } from "@/lib/dbTypes";
 
 export default function Index({
   hackathons

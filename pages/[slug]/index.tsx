@@ -1,26 +1,24 @@
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
-import { Page, Text, Card, Grid, Link, Badge } from "@geist-ui/core";
+import { Badge, Card, Grid, Link, Page, Text } from "@geist-ui/core";
 
-import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
-import type { Hackathon, Attendee } from "@prisma/client";
-import type { ReactElement } from "react";
 import { css } from "@/components/CSS";
+import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
+import type { ReactElement } from "react";
 
 import type {
-  InferGetServerSidePropsType,
-  GetServerSideProps,
-  GetServerSidePropsContext,
-  GetServerSidePropsResult
+  GetServerSideProps
 } from "next";
 
 import { NavbarTabs } from "@/components/layouts/organizer/Navbar";
 
 type DataPoint = {};
 
-type HackathonWithAttendees = Hackathon & {
-  attendees: Attendee[];
-};
+import type { Attendee, AttendeeAttribute, AttendeeAttributeValue, BrandingItem, CustomPage, CustomPageCard, CustomPageLink, Device, Hackathon, Lead, Event as PrismaEvent, Project, ProjectAttribute, ProjectAttributeValue, ProjectSubmissionField, Schedule, SignupForm, SignupFormField, Sponsor, Track } from '@prisma/client';
+
+import type { HackathonWithAttendees } from "@/lib/dbTypes";
+
+import { HackathonPolicy } from "@/lib/permissions";
 
 export default function Hackathon({
   hackathon
@@ -163,40 +161,124 @@ Hackathon.getLayout = function getLayout(page: ReactElement) {
 
 export const getServerSideProps = (async (context) => {
   const { userId } = getAuth(context.req);
-
-  console.log({ userId });
-
-  if (context.params?.slug) {
-    const hackathon = await prisma.hackathon.findUnique({
-      where: {
-        slug: context.params?.slug.toString(),
-        OR: [
-          {
-            ownerId: userId ?? undefined
+  const hackathon = await prisma.hackathon.findUnique({
+    where: {
+      slug: context.params?.slug as string,
+      OR: [
+        {
+          ownerId: userId ?? undefined,
+        },
+        {
+          collaboratorIds: {
+            has: userId,
           },
-          {
-            collaboratorIds: {
-              has: userId
-            }
-          }
-        ]
+        },
+      ],
+    },
+    include: {
+      attendees: {
+        include: {
+          attributeValues: true,
+        },
       },
-      include: {
-        attendees: true
-      }
-    });
+      leads: true,
+      attendeeAttributes: {
+        include: {
+          values: true,
+        },
+      },
+      projectAttributes: {
+        include: {
+          values: true,
+        },
+      },
+      pages: {
+        include: {
+          cards: {
+            include: {
+              links: true,
+            },
+          },
+          links: true,
+        },
+      },
+      brandingItems: true,
+      sponsors: true,
+      signupForm: {
+        include: {
+          fields: true,
+        },
+      },
+      schedule: {
+        include: {
+          tracks: {
+            include: {
+              events: true,
+            },
+          },
+        },
+      },
+      devices: true,
+      projects: {
+        include: {
+          attributeValues: true,
+          collaborators: true,
+        },
+      },
+      projectSubmissionFields: true,
+    },
+  });
+  if(hackathon == null || userId == null || !(new HackathonPolicy(hackathon).canOrganizerAccess({id: userId}))){
     return {
       props: {
         hackathon
-      }
-    };
-  } else {
-    return {
-      props: {
-        hackathon: null
+      },
+      redirect: {
+        destination: '/',
+        permanent: false
       }
     };
   }
+  return {
+    props: {
+      hackathon
+    }
+  };
 }) satisfies GetServerSideProps<{
-  hackathon: Hackathon | null;
-}>;
+  hackathon: HackathonWithRelatedData | null;
+} >;
+
+type HackathonWithRelatedData = Hackathon & {
+  attendees: (Attendee & {
+    attributeValues: AttendeeAttributeValue[];
+  })[]
+  leads: Lead[];
+  attendeeAttributes: (AttendeeAttribute & {
+    values: AttendeeAttributeValue[];
+  })[];
+  projectAttributes: (ProjectAttribute & {
+    values: ProjectAttributeValue[];
+  })[];
+  pages: (CustomPage & {
+    cards: (CustomPageCard & {
+      links: CustomPageLink[];
+    })[];
+    links: CustomPageLink[];
+  })[];
+  brandingItems: BrandingItem[];
+  sponsors: Sponsor[];
+  signupForm: SignupForm & {
+    fields: SignupFormField[];
+  } | null;
+  schedule: Schedule & {
+    tracks: (Track & {
+      events: PrismaEvent[];
+    })[];
+  } | null;
+  devices: Device[];
+  projects: (Project & {
+    attributeValues: ProjectAttributeValue[];
+    collaborators: Attendee[];
+  })[];
+  projectSubmissionFields: ProjectSubmissionField[];
+};

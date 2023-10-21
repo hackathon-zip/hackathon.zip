@@ -1,30 +1,13 @@
 import {
-  Button,
-  Card,
-  Drawer,
-  Fieldset,
-  Grid,
-  Input,
-  Page,
-  Text
+    Page
 } from "@geist-ui/core";
-import { getAuth } from "@clerk/nextjs/server";
-import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-import prisma from "@/lib/prisma";
-import { NextApiRequest } from "next";
-import { NextServerOptions } from "next/dist/server/next";
+import { getServerSideProps as getServerSidePropsTemplate } from "../index";
 
-import type { Hackathon } from "@prisma/client";
-import { Package, PlusCircle } from "@geist-ui/react-icons";
-import React, { useState } from "react";
-import type { ReactElement } from "react";
-import { Form } from "@/components/Form";
-import { delay } from "@/lib/utils";
-import Debug from "@/components/Debug";
-import Link from "next/link";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import FeatureInfo from "@/components/organizer/FeatureInfo";
+import { Package } from "@geist-ui/react-icons";
+import type { Hackathon } from "@prisma/client";
+import type { ReactElement } from "react";
 
 export default function Hackathon({
   hackathon
@@ -78,39 +61,4 @@ Hackathon.getLayout = function getLayout(page: ReactElement) {
   return <HackathonLayout>{page}</HackathonLayout>;
 };
 
-export const getServerSideProps = (async (context) => {
-  const { userId } = getAuth(context.req);
-
-  console.log({ userId });
-
-  if (context.params?.slug) {
-    const hackathon = await prisma.hackathon.findUnique({
-      where: {
-        slug: context.params?.slug.toString(),
-        OR: [
-          {
-            ownerId: userId ?? undefined
-          },
-          {
-            collaboratorIds: {
-              has: userId
-            }
-          }
-        ]
-      }
-    });
-    return {
-      props: {
-        hackathon
-      }
-    };
-  } else {
-    return {
-      props: {
-        hackathon: null
-      }
-    };
-  }
-}) satisfies GetServerSideProps<{
-  hackathon: Hackathon | null;
-}>;
+export const getServerSideProps = getServerSidePropsTemplate

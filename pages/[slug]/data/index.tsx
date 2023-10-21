@@ -1,44 +1,34 @@
 import { css } from "@/components/CSS";
-import type { GetServerSideProps } from "next";
-
 import EditableValue, { EditableHeader } from "@/components/EditableValue";
 import { Form } from "@/components/Form";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import useViewport from "@/hooks/useViewport";
-import prisma from "@/lib/prisma";
 import { orderedSort, sl } from "@/lib/utils";
-import { getAuth } from "@clerk/nextjs/server";
 import {
-  Button,
-  Card,
-  Drawer,
-  Grid,
-  Page,
-  Table,
-  Text,
-  useToasts
+    Button,
+    Card,
+    Drawer,
+    Grid,
+    Page,
+    Table,
+    Text,
+    useToasts
 } from "@geist-ui/core";
 import { Plus, Trash2 } from "@geist-ui/react-icons";
 import type {
-  Attendee,
-  AttendeeAttribute,
-  AttendeeAttributeValue,
-  Hackathon
+    Attendee,
+    AttendeeAttribute,
+    AttendeeAttributeValue,
+    Hackathon
 } from "@prisma/client";
 import md5 from "md5";
 import { useRouter } from "next/router";
 import type { ReactElement } from "react";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { getServerSideProps as getServerSidePropsTemplate } from "../index";
 
-type AttendeeWithAttributes = Attendee & {
-  attributeValues: AttendeeAttributeValue[];
-};
-
-type HackathonWithAttendees = Hackathon & {
-  attendeeAttributes: AttendeeAttribute[];
-  attendees: AttendeeWithAttributes[];
-};
+import type { AttendeeWithAttributes, HackathonWithAttendeesAndAttributes } from "@/lib/dbTypes";
 
 export type Column = {
   type: string;
@@ -153,7 +143,7 @@ function EditDrawer({
 }: {
   drawer: DrawerData;
   attendeeAttributes: AttendeeAttribute[];
-  hackathon: Hackathon | HackathonWithAttendees;
+  hackathon: Hackathon | HackathonWithAttendeesAndAttributes;
   setAttendees: (attendees: AttendeeWithAttributes[]) => void;
   attendees: AttendeeWithAttributes[];
 }) {
@@ -316,7 +306,7 @@ function Data({
   attendees: defaultAttendees,
   attributes
 }: {
-  hackathon: HackathonWithAttendees;
+  hackathon: HackathonWithAttendeesAndAttributes;
   attendees: AttendeeWithAttributes[];
   attributes: AttendeeAttribute[];
 }) {
@@ -667,7 +657,7 @@ function DeleteButton({
 export default function Hackathon({
   hackathon
 }: {
-  hackathon: null | HackathonWithAttendees;
+  hackathon: null | HackathonWithAttendeesAndAttributes;
 }): any {
   if (!hackathon) {
     return (
@@ -779,7 +769,7 @@ export default function Hackathon({
         >
           <Data
             hackathon={hackathon}
-            attendees={hackathon.attendees}
+            attendees={hackathon.attendees as any}
             attributes={hackathon.attendeeAttributes}
           />
         </Card>
@@ -867,52 +857,4 @@ Hackathon.getLayout = function getLayout(page: ReactElement) {
   return <HackathonLayout>{page}</HackathonLayout>;
 };
 
-export const getServerSideProps = (async (context) => {
-  const { userId } = getAuth(context.req);
-
-  console.log({ userId });
-
-  if (context.params?.slug) {
-    const hackathon = await prisma.hackathon.findUnique({
-      where: {
-        slug: context.params?.slug.toString(),
-        OR: [
-          {
-            ownerId: userId ?? undefined
-          },
-          {
-            collaboratorIds: {
-              has: userId
-            }
-          }
-        ]
-      },
-      include: {
-        attendeeAttributes: true,
-        attendees: {
-          include: {
-            attributeValues: true
-          },
-          orderBy: [
-            {
-              createdAt: "desc"
-            }
-          ]
-        }
-      }
-    });
-    return {
-      props: {
-        hackathon
-      }
-    };
-  } else {
-    return {
-      props: {
-        hackathon: null
-      }
-    };
-  }
-}) satisfies GetServerSideProps<{
-  hackathon: null | HackathonWithAttendees;
-}>;
+export const getServerSideProps = getServerSidePropsTemplate
