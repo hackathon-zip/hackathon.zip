@@ -1,7 +1,4 @@
-import {
-    Grid,
-    Page
-} from "@geist-ui/core";
+import { Grid, Page } from "@geist-ui/core";
 import { getServerSideProps as getServerSidePropsTemplate } from "../index";
 
 import Debug from "@/components/Debug";
@@ -9,9 +6,9 @@ import type { FormSchema } from "@/components/Form";
 import { Form } from "@/components/Form";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import type {
-    AttendeeAttribute,
-    Hackathon,
-    SignupFormField
+  AttendeeAttribute,
+  Hackathon,
+  SignupFormField
 } from "@prisma/client";
 import type { ReactElement } from "react";
 import { useState } from "react";
@@ -221,4 +218,4 @@ Hackathon.getLayout = function getLayout(page: ReactElement) {
   return <HackathonLayout>{page}</HackathonLayout>;
 };
 
-export const getServerSideProps = getServerSidePropsTemplate
+export const getServerSideProps = getServerSidePropsTemplate;

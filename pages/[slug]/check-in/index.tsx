@@ -4,16 +4,16 @@ import FeatureInfo from "@/components/organizer/FeatureInfo";
 import useViewport from "@/hooks/useViewport";
 import { orderedSort } from "@/lib/utils";
 import {
-    Button,
-    Card,
-    Checkbox,
-    Grid,
-    Input,
-    Page,
-    Progress,
-    Table,
-    Text,
-    useToasts
+  Button,
+  Card,
+  Checkbox,
+  Grid,
+  Input,
+  Page,
+  Progress,
+  Table,
+  Text,
+  useToasts
 } from "@geist-ui/core";
 import { CheckSquare } from "@geist-ui/react-icons";
 import type { Attendee } from "@prisma/client";
@@ -308,4 +308,4 @@ Hackathon.getLayout = function getLayout(page: ReactElement) {
   return <HackathonLayout>{page}</HackathonLayout>;
 };
 
-export const getServerSideProps = getServerSidePropsTemplate
+export const getServerSideProps = getServerSidePropsTemplate;

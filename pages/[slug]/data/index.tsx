@@ -5,21 +5,21 @@ import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import useViewport from "@/hooks/useViewport";
 import { orderedSort, sl } from "@/lib/utils";
 import {
-    Button,
-    Card,
-    Drawer,
-    Grid,
-    Page,
-    Table,
-    Text,
-    useToasts
+  Button,
+  Card,
+  Drawer,
+  Grid,
+  Page,
+  Table,
+  Text,
+  useToasts
 } from "@geist-ui/core";
 import { Plus, Trash2 } from "@geist-ui/react-icons";
 import type {
-    Attendee,
-    AttendeeAttribute,
-    AttendeeAttributeValue,
-    Hackathon
+  Attendee,
+  AttendeeAttribute,
+  AttendeeAttributeValue,
+  Hackathon
 } from "@prisma/client";
 import md5 from "md5";
 import { useRouter } from "next/router";
@@ -28,7 +28,10 @@ import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { getServerSideProps as getServerSidePropsTemplate } from "../index";
 
-import type { AttendeeWithAttributes, HackathonWithAttendeesAndAttributes } from "@/lib/dbTypes";
+import type {
+  AttendeeWithAttributes,
+  HackathonWithAttendeesAndAttributes
+} from "@/lib/dbTypes";
 
 export type Column = {
   type: string;
@@ -857,4 +860,4 @@ Hackathon.getLayout = function getLayout(page: ReactElement) {
   return <HackathonLayout>{page}</HackathonLayout>;
 };
 
-export const getServerSideProps = getServerSidePropsTemplate
+export const getServerSideProps = getServerSidePropsTemplate;

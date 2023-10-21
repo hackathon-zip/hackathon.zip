@@ -1,6 +1,4 @@
-import {
-    Page
-} from "@geist-ui/core";
+import { Page } from "@geist-ui/core";
 import { getServerSideProps as getServerSidePropsTemplate } from "../index";
 
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
@@ -61,4 +59,4 @@ Hackathon.getLayout = function getLayout(page: ReactElement) {
   return <HackathonLayout>{page}</HackathonLayout>;
 };
 
-export const getServerSideProps = getServerSidePropsTemplate
+export const getServerSideProps = getServerSidePropsTemplate;

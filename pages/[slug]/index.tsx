@@ -6,15 +6,34 @@ import { css } from "@/components/CSS";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import type { ReactElement } from "react";
 
-import type {
-  GetServerSideProps
-} from "next";
+import type { GetServerSideProps } from "next";
 
 import { NavbarTabs } from "@/components/layouts/organizer/Navbar";
 
 type DataPoint = {};
 
-import type { Attendee, AttendeeAttribute, AttendeeAttributeValue, BrandingItem, CustomPage, CustomPageCard, CustomPageLink, Device, Hackathon, Lead, Event as PrismaEvent, Project, ProjectAttribute, ProjectAttributeValue, ProjectSubmissionField, Schedule, SignupForm, SignupFormField, Sponsor, Track } from '@prisma/client';
+import type {
+  Attendee,
+  AttendeeAttribute,
+  AttendeeAttributeValue,
+  BrandingItem,
+  CustomPage,
+  CustomPageCard,
+  CustomPageLink,
+  Device,
+  Hackathon,
+  Lead,
+  Event as PrismaEvent,
+  Project,
+  ProjectAttribute,
+  ProjectAttributeValue,
+  ProjectSubmissionField,
+  Schedule,
+  SignupForm,
+  SignupFormField,
+  Sponsor,
+  Track
+} from "@prisma/client";
 
 import type { HackathonWithAttendees } from "@/lib/dbTypes";
 
@@ -166,75 +185,79 @@ export const getServerSideProps = (async (context) => {
       slug: context.params?.slug as string,
       OR: [
         {
-          ownerId: userId ?? undefined,
+          ownerId: userId ?? undefined
         },
         {
           collaboratorIds: {
-            has: userId,
-          },
-        },
-      ],
+            has: userId
+          }
+        }
+      ]
     },
     include: {
       attendees: {
         include: {
-          attributeValues: true,
-        },
+          attributeValues: true
+        }
       },
       leads: true,
       attendeeAttributes: {
         include: {
-          values: true,
-        },
+          values: true
+        }
       },
       projectAttributes: {
         include: {
-          values: true,
-        },
+          values: true
+        }
       },
       pages: {
         include: {
           cards: {
             include: {
-              links: true,
-            },
+              links: true
+            }
           },
-          links: true,
-        },
+          links: true
+        }
       },
       brandingItems: true,
       sponsors: true,
       signupForm: {
         include: {
-          fields: true,
-        },
+          fields: true
+        }
       },
       schedule: {
         include: {
           tracks: {
             include: {
-              events: true,
-            },
-          },
-        },
+              events: true
+            }
+          }
+        }
       },
       devices: true,
       projects: {
         include: {
           attributeValues: true,
-          collaborators: true,
-        },
+          collaborators: true
+        }
       },
-      projectSubmissionFields: true,
-    },
+      projectSubmissionFields: true
+    }
   });
-  if(hackathon == null || userId == null || !(new HackathonPolicy(hackathon).canOrganizerAccess({id: userId}))){
+  if (
+    hackathon == null ||
+    userId == null ||
+    !new HackathonPolicy(hackathon).canOrganizerAccess({ id: userId })
+  ) {
     return {
       props: {
         hackathon
       },
       redirect: {
-        destination: '/',
+        destination: "/",
         permanent: false
       }
     };
@@ -246,12 +269,12 @@ export const getServerSideProps = (async (context) => {
   };
 }) satisfies GetServerSideProps<{
   hackathon: HackathonWithRelatedData | null;
-} >;
+}>;
 
 type HackathonWithRelatedData = Hackathon & {
   attendees: (Attendee & {
     attributeValues: AttendeeAttributeValue[];
-  })[]
+  })[];
   leads: Lead[];
   attendeeAttributes: (AttendeeAttribute & {
     values: AttendeeAttributeValue[];
@@ -267,14 +290,18 @@ type HackathonWithRelatedData = Hackathon & {
   })[];
   brandingItems: BrandingItem[];
   sponsors: Sponsor[];
-  signupForm: SignupForm & {
-    fields: SignupFormField[];
-  } | null;
-  schedule: Schedule & {
-    tracks: (Track & {
-      events: PrismaEvent[];
-    })[];
-  } | null;
+  signupForm:
+    | (SignupForm & {
+        fields: SignupFormField[];
+      })
+    | null;
+  schedule:
+    | (Schedule & {
+        tracks: (Track & {
+          events: PrismaEvent[];
+        })[];
+      })
+    | null;
   devices: Device[];
   projects: (Project & {
     attributeValues: ProjectAttributeValue[];

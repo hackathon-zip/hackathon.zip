@@ -60,4 +60,4 @@ Hackathon.getLayout = function getLayout(page: ReactElement) {
   return <HackathonLayout>{page}</HackathonLayout>;
 };
 
-export const getServerSideProps = getServerSidePropsTemplate
+export const getServerSideProps = getServerSidePropsTemplate;

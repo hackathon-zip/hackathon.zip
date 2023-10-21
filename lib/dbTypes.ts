@@ -1,4 +1,3 @@
-
 import type {
     Attendee,
     AttendeeAttribute,
@@ -9,7 +8,7 @@ import type {
 export type AttendeeWithAttributes = Attendee & {
     attributeValues: AttendeeAttributeValue[];
 };
-  
+
 export type HackathonWithAttendees = Hackathon & {
     attendees: Attendee[];
 };

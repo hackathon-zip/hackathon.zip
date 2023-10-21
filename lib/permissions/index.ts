@@ -28,20 +28,23 @@ let foo: [
     Hackathon & { attendees: Attendee[] }
 ][] = [];
 
-export class HackathonPolicy extends Permissions<Hackathon & { attendees: Attendee[] }>() {
-    get hackathon () {
+export class HackathonPolicy extends Permissions<
+    Hackathon & { attendees: Attendee[] }
+>() {
+    get hackathon() {
         return this.object;
     }
 
-    canOrganizerAccess (user: User) {
-        return user.id == this.hackathon.ownerId || this.hackathon.collaboratorIds.includes(user.id);
+    canOrganizerAccess(user: User) {
+        return (
+            user.id == this.hackathon.ownerId ||
+            this.hackathon.collaboratorIds.includes(user.id)
+        );
     }
 
-    canAttendeeAccess (attendee: Attendee) {
-        return this.hackathon.attendees.map(x => x.id).includes(attendee.id);
+    canAttendeeAccess(attendee: Attendee) {
+        return this.hackathon.attendees.map((x) => x.id).includes(attendee.id);
     }
 }
 
-export class AttendeePolicy extends Permissions<Attendee>() {
-    
-}
+export class AttendeePolicy extends Permissions<Attendee>() {}

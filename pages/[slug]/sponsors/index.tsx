@@ -1,10 +1,10 @@
 import {
-    Button,
-    Modal,
-    Page,
-    Table,
-    useModal,
-    useToasts
+  Button,
+  Modal,
+  Page,
+  Table,
+  useModal,
+  useToasts
 } from "@geist-ui/core";
 import { getServerSideProps as getServerSidePropsTemplate } from "../index";
 
@@ -255,4 +255,4 @@ Hackathon.getLayout = function getLayout(page: ReactElement) {
   return <HackathonLayout>{page}</HackathonLayout>;
 };
 
-export const getServerSideProps = getServerSidePropsTemplate
+export const getServerSideProps = getServerSidePropsTemplate;
