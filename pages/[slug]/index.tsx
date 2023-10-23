@@ -80,12 +80,12 @@ export default function Hackathon({
           <h3>
             {hackathon.startDate &&
               new Date(hackathon.startDate).toLocaleDateString("en-US", {
-                timeZone: hackathon.timezone ?? undefined
+                timeZone: hackathon.timezone || undefined
               })}
             {" to "}
             {hackathon.endDate &&
               new Date(hackathon.endDate).toLocaleDateString("en-US", {
-                timeZone: hackathon.timezone ?? undefined
+                timeZone: hackathon.timezone || undefined
               })}{" "}
           </h3>
           <div

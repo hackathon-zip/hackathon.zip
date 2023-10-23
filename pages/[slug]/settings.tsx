@@ -75,7 +75,7 @@ export default function Hackathon({
                             new Date(hackathon.startDate).toLocaleString(
                               "en-US",
                               {
-                                timeZone: hackathon.timezone ?? undefined
+                                timeZone: hackathon.timezone || undefined
                               }
                             )
                           )
@@ -92,7 +92,7 @@ export default function Hackathon({
                             new Date(hackathon.endDate).toLocaleString(
                               "en-US",
                               {
-                                timeZone: hackathon.timezone ?? undefined
+                                timeZone: hackathon.timezone || undefined
                               }
                             )
                           )
@@ -111,7 +111,7 @@ export default function Hackathon({
                     value: t
                   })),
                   placeholder: "America/Los_Angeles",
-                  defaultValue: hackathon.timezone ?? undefined
+                  defaultValue: hackathon.timezone || undefined
                 },
                 {
                   type: "text",
