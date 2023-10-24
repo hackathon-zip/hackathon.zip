@@ -9,12 +9,30 @@ export default async function handler(
 ) {
     try {
         const slug = await getHackathonSlug(req.query.slug as string);
-        let project = await prisma.project.delete({
+        let attendee = await prisma.attendee.findFirst({
             where: {
-                id: req.body.id
+                tokens: {
+                    some: {
+                        token: req.cookies[slug]
+                    }
+                }
             }
         });
-        console.log(project);
+        if (!attendee){
+            return res.status(400).json({
+                error: "Attendee does not exist."
+            });
+        }
+        await prisma.project.deleteMany({
+            where: {
+                id: req.body.id,
+                collaborators: {
+                    some: {
+                        id: attendee.id
+                    }
+                }
+            }
+        });
         return res.json({
             deleted: true
         });

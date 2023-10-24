@@ -18,11 +18,11 @@ export default async function handler(
                 }
             }
         });
-        if (!attendee)
+        if (!attendee){
             return res.status(400).json({
                 error: "Attendee does not exist."
             });
-
+        }
         let project = await prisma.project.create({
             data: {
                 name: req.body.name,
@@ -38,7 +38,6 @@ export default async function handler(
                 }
             }
         });
-        console.log(project);
         return res.json({
             project
         });
