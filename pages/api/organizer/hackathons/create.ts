@@ -27,8 +27,6 @@ export default async function handler(
             }
         });
 
-        console.log({ hackathon });
-
         res.redirect(`/${hackathon.slug}`);
     } catch (error) {
         console.error(error);

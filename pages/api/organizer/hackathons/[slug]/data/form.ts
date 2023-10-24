@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
 import { NextApiRequest, NextApiResponse } from "next";
-
+import { getHackathon } from "..";
 import type { AttendeeAttribute, Hackathon } from "@prisma/client";
 
 type HackathonWithAttributes = Hackathon & {
@@ -12,16 +12,8 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    const { userId } = getAuth(req);
-    if (!userId) return res.status(401).json({ error: "Unauthorized" });
-    let hackathon = (await prisma.hackathon.findUnique({
-        where: {
-            slug: req.query.slug as string
-        },
-        include: {
-            attendeeAttributes: true
-        }
-    })) as HackathonWithAttributes;
+    const hackathon = await getHackathon(req, res, {attendeeAttributes: true}) as HackathonWithAttributes | null
+    if (!hackathon) return res.status(401).json({ error: "Unauthorized" });
     let newData: any = {};
     Object.keys(req.body).map((x) => {
         let id = x.split("_")[0];

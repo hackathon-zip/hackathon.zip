@@ -6,6 +6,7 @@ import { getAuth } from "@clerk/nextjs/server";
 import type { AttendeeAttributeValue } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { v4 as uuidv4 } from "uuid";
+import { getHackathon } from "..";
 
 function c<T>(x: T): T {
     console.log(x);
@@ -16,8 +17,8 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    const { userId } = getAuth(req);
-    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    const hackathon = await getHackathon(req, res, {attendeeAttributes: true}) as HackathonWithAttributes | null
+    if (!hackathon) return res.status(401).json({ error: "Unauthorized" });
 
     try {
         let newData = req.body as { shape: Column[]; content: string[][] };
@@ -31,13 +32,7 @@ export default async function handler(
 
         if (hackathon == null) throw new Error("no hackathon!");
 
-        const attendeeAttributes = await prisma.attendeeAttribute.findMany({
-            where: {
-                hackathon: {
-                    slug: slug as string
-                }
-            }
-        });
+        const attendeeAttributes = hackathon.attendeeAttributes
 
         const toCreateAttributes = newData.shape
             .map((column, i) => ({
