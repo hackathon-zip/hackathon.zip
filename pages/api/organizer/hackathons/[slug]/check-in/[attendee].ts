@@ -7,7 +7,7 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    const hackathon = await getHackathon(req, res)
+    const hackathon = await getHackathon(req, res);
     if (!hackathon) return res.status(401).json({ error: "Unauthorized" });
 
     const { attendee, slug } = req.query;

@@ -13,7 +13,7 @@ export default async function handler(
         let slug = req.query.slug as string;
 
         slug = await getHackathonSlug(slug);
-        
+
         let attendee = await prisma.attendee.findFirst({
             where: {
                 tokens: {
@@ -26,7 +26,7 @@ export default async function handler(
                 }
             }
         });
-        if (!attendee){
+        if (!attendee) {
             return res.status(400).json({
                 error: "Attendee does not exist or is not a member of this project."
             });

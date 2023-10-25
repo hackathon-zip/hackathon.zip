@@ -58,6 +58,7 @@ model Hackathon {
   projects                Project[]
   projectAttributes       ProjectAttribute[]
   projectSubmissionFields ProjectSubmissionField[]
+  broadcasts Broadcast[]
 }
 
 model CustomPage {
@@ -225,7 +226,11 @@ model Attendee {
   name String
 
   attributeValues AttendeeAttributeValue[]
-  email           String                   @unique
+  email           String
+  phone           String?
+  parent Parent?
+  dateOfBirth DateTime
+
 
   checkedIn  Boolean @default(false)
   checkInKey String? @unique
@@ -235,8 +240,18 @@ model Attendee {
   projectId   String?
   project     Project?  @relation(fields: [projectId], references: [id])
   tokens      Token[]
+  broadcasts SentBroadcast[]
 
   createdAt DateTime @default(now())
+}
+
+model Parent {
+  id String @id @default(uuid())
+  name String
+  email String
+  phone String?
+  attendeeId String @unique
+  attendee Attendee @relation(fields: [attendeeId], references: [id])
 }
 
 model Project {
@@ -302,4 +317,22 @@ model Device {
   createdAt   DateTime   @default(now())
   hackathonId String?
   hackathon   Hackathon? @relation(fields: [hackathonId], references: [id])
+}
+
+model SentBroadcast {
+  id String @id @default(uuid())
+  messageId String
+  message Broadcast @relation(fields: [messageId], references: [id])
+  attendeeId String
+  attendee Attendee @relation(fields: [attendeeId], references: [id])
+}
+
+model Broadcast {
+  id String @id @default(uuid())
+  emailHTMLTemplate String
+  emailPlaintextTemplate String
+  smsTemplate String
+  sent SentBroadcast[]
+  hackathonId String
+  hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
 }

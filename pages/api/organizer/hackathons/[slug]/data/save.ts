@@ -17,7 +17,9 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    const hackathon = await getHackathon(req, res, {attendeeAttributes: true}) as HackathonWithAttributes | null
+    const hackathon = (await getHackathon(req, res, {
+        attendeeAttributes: true
+    })) as HackathonWithAttributes | null;
     if (!hackathon) return res.status(401).json({ error: "Unauthorized" });
 
     try {
@@ -32,7 +34,7 @@ export default async function handler(
 
         if (hackathon == null) throw new Error("no hackathon!");
 
-        const attendeeAttributes = hackathon.attendeeAttributes
+        const attendeeAttributes = hackathon.attendeeAttributes;
 
         const toCreateAttributes = newData.shape
             .map((column, i) => ({

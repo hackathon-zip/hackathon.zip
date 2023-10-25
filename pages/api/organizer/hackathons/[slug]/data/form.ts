@@ -12,7 +12,9 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
-    const hackathon = await getHackathon(req, res, {attendeeAttributes: true}) as HackathonWithAttributes | null
+    const hackathon = (await getHackathon(req, res, {
+        attendeeAttributes: true
+    })) as HackathonWithAttributes | null;
     if (!hackathon) return res.status(401).json({ error: "Unauthorized" });
     let newData: any = {};
     Object.keys(req.body).map((x) => {

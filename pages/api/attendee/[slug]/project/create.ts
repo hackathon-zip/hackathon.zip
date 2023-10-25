@@ -18,7 +18,7 @@ export default async function handler(
                 }
             }
         });
-        if (!attendee){
+        if (!attendee) {
             return res.status(400).json({
                 error: "Attendee does not exist."
             });
