@@ -3,8 +3,9 @@ import { useTheme } from "@/hooks/useTheme";
 import useUrlState from "@/hooks/useUrlState";
 import { ClerkLoaded, UserButton } from "@clerk/nextjs";
 import { Breadcrumbs, Input, Select, Tabs } from "@geist-ui/core";
-import { Moon, Search, Sun } from "@geist-ui/react-icons";
+import { Moon, Search, Sun, Users } from "@geist-ui/react-icons";
 import HomeIcon from "@geist-ui/react-icons/home";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { ReactNode, useRef, useState } from "react";
 
@@ -153,6 +154,21 @@ export default function Navbar({
             {/* <Breadcrumbs.Item href=""><Inbox /> Inbox</Breadcrumbs.Item>
                 <Breadcrumbs.Item>Page</Breadcrumbs.Item> */}
           </Breadcrumbs>
+
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer'
+          }}>
+            <Link href={`/${activeHackathonSlug}/team`} style={{
+              color: 'unset',
+              textDecoration: 'none',
+              display: 'flex',
+            }}>
+              <Users color={theme == 'light' ? '#888888' : '#cfcfcf'} size={20} />
+            </Link>
+          </div>
         </div>
         <div
           style={{
