@@ -5,6 +5,7 @@ import {
   Fieldset,
   Grid,
   Input,
+  Divider,
   Page,
   Text
 } from "@geist-ui/core";
@@ -39,7 +40,7 @@ import { compile } from "@mdx-js/mdx";
 export default function Attendee({
   hackathon,
   attendee,
-  broadcast
+  broadcasts
 }: {
   hackathon:
     | (Hackathon & {
@@ -61,7 +62,11 @@ export default function Attendee({
       })
     | null;
   attendee: Attendee | null;
-  broadcast: string | null;
+  broadcasts: {
+    content: string;
+    date: string;
+    title: string | null;
+  }[];
 }): any {
   if (!hackathon) {
     return (
@@ -70,46 +75,26 @@ export default function Attendee({
       </>
     );
   }
+  
+  console.log(broadcasts)
 
   return (
-    <>
+    <div style={{ width: "100%" }}>
       <div style={{ width: "100%" }}>
         <h1>{hackathon?.name}</h1>
-        {hackathon?.broadcasts.filter((x) => x.smsTemplate).length > 0 && (
-          <Card type={"dark"} width="100%" mb={1}>
-            {new Date(hackathon?.broadcasts[0].createdAt).toLocaleDateString()}:{" "}
-            {broadcast}
-          </Card>
-        )}
-        <Grid.Container gap={2}>
-          {hackathon?.dashboard?.links.map((link) => (
-            <Grid>
-              <Link href={link.url}>
-                <Button type="success">{link.text}</Button>
-              </Link>
-            </Grid>
-          ))}
-        </Grid.Container>
-        <Grid.Container gap={1.5} my={1}>
-          {hackathon?.dashboard?.cards.map((card) => (
-            <Grid xs={12}>
-              <Card width="100%">
-                <Text h4 my={0}>
-                  {card.header}
-                </Text>
-                <Text>{card.text}</Text>
-                {card.links.map((link) => (
-                  <Link href={link.url}>
-                    <Button>{link.text}</Button>
-                  </Link>
-                ))}
-              </Card>
-            </Grid>
-          ))}
-        </Grid.Container>
-        {hackathon?.dashboard && <Markdown code={hackathon?.dashboard?.body} />}
       </div>
-    </>
+      {broadcasts.map((broadcast) => (
+        <Card width="100%" mb={1}>
+          <Card.Content>
+            <Text b my={0}>
+              {broadcast.date}{broadcast.title && `: ${broadcast.title}`}
+            </Text>
+          </Card.Content>
+          <Divider h="1px" my={0} />
+          <Card.Content>{broadcast.content}</Card.Content>
+        </Card>
+      ))}
+    </div>
   );
 }
 
@@ -180,7 +165,7 @@ export const getServerSideProps = (async (
         (x) => x.slug == "dashboard"
       )[0];
       const token = context.req.cookies[hackathon?.slug as string];
-      let attendee = null;
+      let attendee: any = null;
       if (token) {
         attendee = await prisma.attendee.findFirst({
           where: {
@@ -201,35 +186,71 @@ export const getServerSideProps = (async (
         });
       }
       if (attendee) {
-        let broadcast = null;
-        if (
-          hackathon?.broadcasts
-            .sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1))
-            .filter((x) => x.smsTemplate).length > 0
-        ) {
-          let smsTemplate = ejs.compile(
-            hackathon?.broadcasts.filter((x) => x.smsTemplate)[0]
-              .smsTemplate as string,
-            {}
-          );
-          broadcast = smsTemplate({
-            ...attendee,
-            ...(attendee as any).attributeValues.reduce(
-              (
-                obj: any,
-                attribute: AttendeeAttributeValue & {
-                  formField: AttendeeAttribute;
-                }
-              ) => ((obj[attribute.formField.name] = attribute.value), obj),
+        let broadcasts: any[] = [];
+        hackathon.broadcasts.map((broadcast) => {
+          if (broadcast.emailHTMLTemplate) {
+            let htmlTemplate = ejs.compile(broadcast.emailHTMLTemplate, {});
+            broadcasts.push({
+              title: broadcast.emailTitle,
+              date: new Date(broadcast.createdAt).toLocaleDateString(),
+              content: htmlTemplate({
+                ...attendee,
+                ...(attendee as any).attributeValues.reduce(
+                  (
+                    obj: any,
+                    attribute: AttendeeAttributeValue & {
+                      formField: AttendeeAttribute;
+                    }
+                  ) => ((obj[attribute.formField.name] = attribute.value), obj),
+                  {}
+                )
+              })
+            });
+          } else if (broadcast.emailPlaintextTemplate) {
+            let plainTextTemplate = ejs.compile(
+              broadcast.emailPlaintextTemplate,
               {}
-            )
-          });
-        }
+            );
+            broadcasts.push({
+              title: broadcast.emailTitle,
+              date: new Date(broadcast.createdAt).toLocaleDateString(),
+              content: plainTextTemplate({
+                ...attendee,
+                ...(attendee as any).attributeValues.reduce(
+                  (
+                    obj: any,
+                    attribute: AttendeeAttributeValue & {
+                      formField: AttendeeAttribute;
+                    }
+                  ) => ((obj[attribute.formField.name] = attribute.value), obj),
+                  {}
+                )
+              })
+            });
+          } else if (broadcast.smsTemplate) {
+            let smsTemplate = ejs.compile(broadcast.smsTemplate, {});
+            broadcasts.push({
+              date: new Date(broadcast.createdAt).toLocaleDateString(),
+              content: smsTemplate({
+                ...attendee,
+                ...(attendee as any).attributeValues.reduce(
+                  (
+                    obj: any,
+                    attribute: AttendeeAttributeValue & {
+                      formField: AttendeeAttribute;
+                    }
+                  ) => ((obj[attribute.formField.name] = attribute.value), obj),
+                  {}
+                )
+              })
+            });
+          }
+        });
         return {
           props: {
             hackathon: hackathon,
             attendee: attendee,
-            broadcast: broadcast
+            broadcasts: broadcasts
           }
         };
       }

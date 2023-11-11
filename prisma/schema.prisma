@@ -329,10 +329,12 @@ model SentBroadcast {
 
 model Broadcast {
   id                     String          @id @default(uuid())
-  emailHTMLTemplate      String
-  emailPlaintextTemplate String
-  smsTemplate            String
+  emailHTMLTemplate      String?
+  emailPlaintextTemplate String?
+  emailTitle String?
+  smsTemplate            String?
   sent                   SentBroadcast[]
   hackathonId            String
   hackathon              Hackathon       @relation(fields: [hackathonId], references: [id])
+  createdAt              DateTime        @default(now())
 }

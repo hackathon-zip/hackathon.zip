@@ -438,9 +438,7 @@ function Data({
         ) : (
           <Button
             type="error"
-            loading={
-              stagedForDeletion.includes(rowData.$project.id) && loading
-            }
+            loading={stagedForDeletion.includes(rowData.$project.id) && loading}
             auto
             scale={1 / 3}
             font="12px"
@@ -642,23 +640,6 @@ export default function Hackathon({
     );
   }
   const [drawerOpen, setDrawerOpen] = useState(false);
-  
-  if (!hackathon.shipEnabled)
-  return (
-    <Page>
-      <FeatureInfo
-        featureKey="shipEnabled"
-        featureName="Ship"
-        featureDescription={
-          <>
-            Gather project submissions from hackers and manage&nbsp;judging.
-          </>
-        }
-        featureIcon={Package}
-        hackathonSlug={hackathon.slug}
-      />
-    </Page>
-  );
 
   const properties = (attribute: ProjectAttribute) => {
     return [
@@ -744,6 +725,23 @@ export default function Hackathon({
       .map((attribute) => properties(attribute))
       .flat()
   ]);
+
+  if (!hackathon.shipEnabled)
+    return (
+      <Page>
+        <FeatureInfo
+          featureKey="shipEnabled"
+          featureName="Ship"
+          featureDescription={
+            <>
+              Gather project submissions from hackers and manage&nbsp;judging.
+            </>
+          }
+          featureIcon={Package}
+          hackathonSlug={hackathon.slug}
+        />
+      </Page>
+    );
 
   return (
     <>

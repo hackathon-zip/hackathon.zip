@@ -3,6 +3,7 @@ import ejs from "ejs";
 import MarkdownIt from "markdown-it";
 import { NextApiRequest, NextApiResponse } from "next";
 import { getHackathon } from ".";
+import prisma from "@/lib/prisma";
 
 export default async function handler(
     req: NextApiRequest,
@@ -42,7 +43,8 @@ export default async function handler(
                         ),
                         {}
                     )
-                })
+                }),
+                attendeeId: attendee.id
             });
         }
         if (smsTemplate) {
@@ -62,8 +64,31 @@ export default async function handler(
                         ),
                         {}
                     )
-                })
+                }),
+                attendeeId: attendee.id
             });
+        }
+    });
+    await prisma.broadcast.create({
+        data: {
+            emailHTMLTemplate: emailHTML,
+            emailPlaintextTemplate: emailPlaintext,
+            smsTemplate: sms,
+            emailTitle: emailTitle,
+            hackathon: {
+                connect: {
+                    slug: req.query.slug as string
+                }
+            },
+            sent: {
+                create: Array.from(
+                    new Set(
+                        [...emailsToSend, ...smsToSend].map((x) => x.attendeeId)
+                    )
+                ).map((attendeeId) => ({
+                    attendeeId
+                }))
+            }
         }
     });
     res.json({ emailsToSend, smsToSend });
