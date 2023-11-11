@@ -229,7 +229,7 @@ model Attendee {
   email           String
   phone           String?
   parent Parent?
-  dateOfBirth DateTime
+  dateOfBirth DateTime?
 
 
   checkedIn  Boolean @default(false)
