@@ -19,15 +19,15 @@ model Hackathon {
   attendeeAttributes AttendeeAttribute[]
 
   // event info
-  location   String
-  startDate  DateTime?
-  endDate    DateTime?
-  timezone   String?
-  schedule   Schedule?
-  signupForm SignupForm?
-  pages      CustomPage[]
-  sponsors   Sponsor[]
-  leads      Lead[]
+  location      String
+  startDate     DateTime?
+  endDate       DateTime?
+  timezone      String?
+  schedule      Schedule?
+  signupForm    SignupForm?
+  pages         CustomPage[]
+  sponsors      Sponsor[]
+  leads         Lead[]
   brandingItems BrandingItem[]
 
   // branding
@@ -58,7 +58,7 @@ model Hackathon {
   projects                Project[]
   projectAttributes       ProjectAttribute[]
   projectSubmissionFields ProjectSubmissionField[]
-  broadcasts Broadcast[]
+  broadcasts              Broadcast[]
 }
 
 model CustomPage {
@@ -68,7 +68,7 @@ model CustomPage {
   title       String
   cards       CustomPageCard[]
   links       CustomPageLink[]
-  hackathonId String           
+  hackathonId String
   hackathon   Hackathon        @relation(fields: [hackathonId], references: [id])
 }
 
@@ -139,11 +139,11 @@ enum LeadType {
 }
 
 model BrandingItem {
-  id String @id @default(uuid())
+  id          String @id @default(uuid())
   hackathonId String
 
   fileName String
-  url String
+  url      String
 
   type BrandingItemType
 
@@ -228,30 +228,29 @@ model Attendee {
   attributeValues AttendeeAttributeValue[]
   email           String
   phone           String?
-  parent Parent?
-  dateOfBirth DateTime?
-
+  parent          Parent?
+  dateOfBirth     DateTime?
 
   checkedIn  Boolean @default(false)
   checkInKey String? @unique
 
   hackathonId String
-  hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
+  hackathon   Hackathon       @relation(fields: [hackathonId], references: [id])
   projectId   String?
-  project     Project?  @relation(fields: [projectId], references: [id])
+  project     Project?        @relation(fields: [projectId], references: [id])
   tokens      Token[]
-  broadcasts SentBroadcast[]
+  broadcasts  SentBroadcast[]
 
   createdAt DateTime @default(now())
 }
 
 model Parent {
-  id String @id @default(uuid())
-  name String
-  email String
-  phone String?
-  attendeeId String @unique
-  attendee Attendee @relation(fields: [attendeeId], references: [id])
+  id         String   @id @default(uuid())
+  name       String
+  email      String
+  phone      String?
+  attendeeId String   @unique
+  attendee   Attendee @relation(fields: [attendeeId], references: [id])
 }
 
 model Project {
@@ -261,6 +260,7 @@ model Project {
   hackathon       Hackathon               @relation(fields: [hackathonId], references: [id])
   attributeValues ProjectAttributeValue[]
   collaborators   Attendee[]
+  createdAt       DateTime                @default(now())
 }
 
 model ProjectAttribute {
@@ -320,19 +320,19 @@ model Device {
 }
 
 model SentBroadcast {
-  id String @id @default(uuid())
-  messageId String
-  message Broadcast @relation(fields: [messageId], references: [id])
+  id         String    @id @default(uuid())
+  messageId  String
+  message    Broadcast @relation(fields: [messageId], references: [id])
   attendeeId String
-  attendee Attendee @relation(fields: [attendeeId], references: [id])
+  attendee   Attendee  @relation(fields: [attendeeId], references: [id])
 }
 
 model Broadcast {
-  id String @id @default(uuid())
-  emailHTMLTemplate String
+  id                     String          @id @default(uuid())
+  emailHTMLTemplate      String
   emailPlaintextTemplate String
-  smsTemplate String
-  sent SentBroadcast[]
-  hackathonId String
-  hackathon   Hackathon @relation(fields: [hackathonId], references: [id])
+  smsTemplate            String
+  sent                   SentBroadcast[]
+  hackathonId            String
+  hackathon              Hackathon       @relation(fields: [hackathonId], references: [id])
 }
