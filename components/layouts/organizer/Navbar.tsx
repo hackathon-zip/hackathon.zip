@@ -154,21 +154,30 @@ export default function Navbar({
             {/* <Breadcrumbs.Item href=""><Inbox /> Inbox</Breadcrumbs.Item>
                 <Breadcrumbs.Item>Page</Breadcrumbs.Item> */}
           </Breadcrumbs>
-
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer'
-          }}>
-            <Link href={`/${activeHackathonSlug}/team`} style={{
-              color: 'unset',
-              textDecoration: 'none',
-              display: 'flex',
-            }}>
-              <Users color={theme == 'light' ? '#888888' : '#cfcfcf'} size={20} />
-            </Link>
-          </div>
+          {activeHackathonSlug != "dashboard" && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer"
+              }}
+            >
+              <Link
+                href={`/${activeHackathonSlug}/team`}
+                style={{
+                  color: "unset",
+                  textDecoration: "none",
+                  display: "flex"
+                }}
+              >
+                <Users
+                  color={theme == "light" ? "#888888" : "#cfcfcf"}
+                  size={20}
+                />
+              </Link>
+            </div>
+          )}
         </div>
         <div
           style={{

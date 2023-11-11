@@ -67,7 +67,8 @@ const builtInAttributes: BuiltInColumn[] = [
     type: "Date m-d-y",
     name: "Date of Birth",
     id: "dateOfBirth",
-    fromAttendee: (attendee: Attendee) => attendee.dateOfBirth.toLocaleDateString(),
+    fromAttendee: (attendee: Attendee) =>
+      attendee.dateOfBirth?.toLocaleDateString() || "",
     readOnly: false
   },
   {
