@@ -439,13 +439,13 @@ function Data({
           <Button
             type="error"
             loading={
-              stagedForDeletion.includes(rowData.$attendee.id) && loading
+              stagedForDeletion.includes(rowData.$project.id) && loading
             }
             auto
             scale={1 / 3}
             font="12px"
             className={
-              stagedForDeletion.includes(rowData.$attendee.id)
+              stagedForDeletion.includes(rowData.$project.id)
                 ? "staged-button"
                 : ""
             }
@@ -453,15 +453,15 @@ function Data({
               event.stopPropagation();
 
               setStagedForDeletion((old) => {
-                if (old.includes(rowData.$attendee.id)) {
-                  return old.filter((x) => x != rowData.$attendee.id);
+                if (old.includes(rowData.$project.id)) {
+                  return old.filter((x) => x != rowData.$project.id);
                 } else {
-                  return [rowData.$attendee.id, ...stagedForDeletion];
+                  return [rowData.$project.id, ...stagedForDeletion];
                 }
               });
             }}
           >
-            {stagedForDeletion.includes(rowData.$attendee.id)
+            {stagedForDeletion.includes(rowData.$project.id)
               ? "Staged"
               : "Delete"}
           </Button>
@@ -667,7 +667,7 @@ export default function Hackathon({
         miniLabel: "Property Name:",
         label: attribute.name == "" ? attribute.id : attribute.name, // @ts-ignore
         name: `${attribute.id}_name`,
-        mt: hackathon.projectAttributes[0].id == attribute.id ? 0.5 : 1.5,
+        mt: hackathon.projectAttributes[0]?.id == attribute.id ? 0.5 : 1.5,
         mb: 0.5,
         defaultValue: attribute["name"],
         visible: (data: { [key: string]: { value: string } }) => {
