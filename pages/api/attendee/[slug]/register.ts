@@ -7,7 +7,7 @@ export default async function handler(
     res: NextApiResponse
 ) {
     try {
-        const { name, email } = req.body;
+        const { name, email, dateOfBirth } = req.body;
 
         let slug = req.query.slug as string;
 
@@ -17,6 +17,7 @@ export default async function handler(
             data: {
                 name,
                 email,
+                dateOfBirth: new Date(dateOfBirth),
                 hackathon: {
                     connect: {
                         slug

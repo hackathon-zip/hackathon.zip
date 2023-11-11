@@ -13,7 +13,7 @@ export default async function handler(
 ) {
     try {
         const slug = await getHackathonSlug(req.query.slug as string);
-        let attendee = await prisma.attendee.findUnique({
+        let attendee = await prisma.attendee.findFirst({
             where: {
                 email: req.body.email,
                 hackathon: {
@@ -29,10 +29,7 @@ export default async function handler(
                 data: {
                     attendee: {
                         connect: {
-                            email: req.body.email,
-                            hackathon: {
-                                slug
-                            }
+                            id: attendee.id
                         }
                     }
                 },

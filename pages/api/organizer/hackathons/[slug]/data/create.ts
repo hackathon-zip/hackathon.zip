@@ -14,6 +14,7 @@ export default async function handler(
         data: {
             email: req.body.email,
             name: req.body.name,
+            dateOfBirth: req.body.dateOfBirth,
             hackathon: {
                 connect: {
                     slug: req.query.slug as string

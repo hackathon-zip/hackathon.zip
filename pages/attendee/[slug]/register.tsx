@@ -83,6 +83,13 @@ export default function Attendee({
                 placeholder: "fiona@hackathon.zip",
                 required: true
               },
+              {
+                type: "date",
+                label: "Date of Birth",
+                name: "dateOfBirth",
+                placeholder: "03/21/2005",
+                required: true
+              },
               ...(hackathon.signupForm?.fields?.map(
                 (x) =>
                   ({

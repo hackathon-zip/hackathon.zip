@@ -65,6 +65,13 @@ const builtInAttributes: BuiltInColumn[] = [
   },
   {
     type: "Date m-d-y",
+    name: "Date of Birth",
+    id: "dateOfBirth",
+    fromAttendee: (attendee: Attendee) => attendee.dateOfBirth.toLocaleDateString(),
+    readOnly: false
+  },
+  {
+    type: "Date m-d-y",
     name: "Registered At",
     id: "built-in",
     fromAttendee: (attendee: Attendee) =>
@@ -340,14 +347,6 @@ function Data({
 
       return md5A.localeCompare(md5B);
     }
-  );
-
-  sl("Attendees vs. sortedAttendees", "#bada55");
-
-  console.log(
-    sortedAttendees.map((a: any) => {
-      return (new Date(a.createdAt) as Date).getUTCMilliseconds();
-    })
   );
 
   const tableData = sortedAttendees.map(
