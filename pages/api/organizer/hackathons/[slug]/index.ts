@@ -11,7 +11,7 @@ export async function getHackathon(
     const { userId } = getAuth(req);
     if (!userId) return null;
     const { slug } = req.query;
-    const hackathon = await prisma.hackathon.delete({
+    const hackathon = await prisma.hackathon.findFirst({
         where: {
             slug: slug as string
         },
