@@ -5,7 +5,7 @@ import {
   Fieldset,
   Grid,
   Input,
-  Divider,
+  Image,
   Page,
   Text
 } from "@geist-ui/core";
@@ -19,6 +19,7 @@ import type {
 import prisma from "@/lib/prisma";
 import { NextApiRequest } from "next";
 import { NextServerOptions } from "next/dist/server/next";
+import { css } from "@/components/CSS";
 
 import type {
   Hackathon,
@@ -28,7 +29,10 @@ import type {
   AttendeeAttributeValue,
   AttendeeAttribute,
   CustomPageLink,
-  Broadcast
+  Broadcast,
+  Project,
+  ProjectAttributeValue,
+  ProjectAttribute
 } from "@prisma/client";
 import React, { useState } from "react";
 import type { ReactElement } from "react";
@@ -40,11 +44,12 @@ import { compile } from "@mdx-js/mdx";
 export default function Attendee({
   hackathon,
   attendee,
-  broadcasts
+  project
 }: {
   hackathon:
     | (Hackathon & {
         broadcasts: Broadcast[];
+        projects: Project[];
         pages: (CustomPage & {
           cards: (CustomPageCard & {
             links: CustomPageLink[];
@@ -62,11 +67,11 @@ export default function Attendee({
       })
     | null;
   attendee: Attendee | null;
-  broadcasts: {
-    content: string;
-    date: string;
-    title: string | null;
-  }[];
+  project: Project & {
+    attributeValues: (ProjectAttributeValue & {
+      attribute: ProjectAttribute
+    })[]
+  };
 }): any {
   if (!hackathon) {
     return (
@@ -77,23 +82,34 @@ export default function Attendee({
   }
 
   return (
-    <div style={{ width: "100%" }}>
+    <>
       <div style={{ width: "100%" }}>
-        <h1>{hackathon?.name}</h1>
-      </div>
-      {broadcasts.map((broadcast) => (
-        <Card width="100%" mb={1}>
-          <Card.Content>
-            <Text b my={0}>
-              {broadcast.date}
-              {broadcast.title && `: ${broadcast.title}`}
+        <h1>{project.name}</h1>
+        {project.coverImage && <img
+          src={project.coverImage}
+          style={{
+            height: "200px",
+            borderRadius: "4px",
+            width: "100%",
+            objectFit: "cover",
+            objectPosition: 'center'
+          }}
+        />}
+        {project.description && <Markdown code={project.description} />}
+        {project.attributeValues.length > 0 && <Card width="100%">
+            <Text h4 my={0}>
+              Additional Information
+              {project.attributeValues.map(attribute => (
+                <p>
+                  <b>{attribute.attribute.name}:</b> {attribute.value}
+                </p>
+              ))
+              }
             </Text>
-          </Card.Content>
-          <Divider h="1px" my={0} />
-          <Card.Content>{broadcast.content}</Card.Content>
-        </Card>
-      ))}
-    </div>
+          </Card>}
+        
+      </div>
+    </>
   );
 }
 
@@ -128,6 +144,15 @@ export const getServerSideProps = (async (
       },
       include: {
         broadcasts: true,
+        projects: {
+          include: {
+            attributeValues: {
+              include: {
+                attribute: true
+              }
+            }
+          }
+        },
         pages: {
           include: {
             links: true,
@@ -142,6 +167,7 @@ export const getServerSideProps = (async (
     })) as
       | (Hackathon & {
           broadcasts: Broadcast[];
+          projects: Project[];
           pages: (CustomPage & {
             cards: (CustomPageCard & {
               links: CustomPageLink[];
@@ -164,7 +190,7 @@ export const getServerSideProps = (async (
         (x) => x.slug == "dashboard"
       )[0];
       const token = context.req.cookies[hackathon?.slug as string];
-      let attendee: any = null;
+      let attendee = null;
       if (token) {
         attendee = await prisma.attendee.findFirst({
           where: {
@@ -185,71 +211,14 @@ export const getServerSideProps = (async (
         });
       }
       if (attendee) {
-        let broadcasts: any[] = [];
-        hackathon.broadcasts.map((broadcast) => {
-          if (broadcast.emailHTMLTemplate) {
-            let htmlTemplate = ejs.compile(broadcast.emailHTMLTemplate, {});
-            broadcasts.push({
-              title: broadcast.emailTitle,
-              date: new Date(broadcast.createdAt).toLocaleDateString(),
-              content: htmlTemplate({
-                ...attendee,
-                ...(attendee as any).attributeValues.reduce(
-                  (
-                    obj: any,
-                    attribute: AttendeeAttributeValue & {
-                      formField: AttendeeAttribute;
-                    }
-                  ) => ((obj[attribute.formField.name] = attribute.value), obj),
-                  {}
-                )
-              })
-            });
-          } else if (broadcast.emailPlaintextTemplate) {
-            let plainTextTemplate = ejs.compile(
-              broadcast.emailPlaintextTemplate,
-              {}
-            );
-            broadcasts.push({
-              title: broadcast.emailTitle,
-              date: new Date(broadcast.createdAt).toLocaleDateString(),
-              content: plainTextTemplate({
-                ...attendee,
-                ...(attendee as any).attributeValues.reduce(
-                  (
-                    obj: any,
-                    attribute: AttendeeAttributeValue & {
-                      formField: AttendeeAttribute;
-                    }
-                  ) => ((obj[attribute.formField.name] = attribute.value), obj),
-                  {}
-                )
-              })
-            });
-          } else if (broadcast.smsTemplate) {
-            let smsTemplate = ejs.compile(broadcast.smsTemplate, {});
-            broadcasts.push({
-              date: new Date(broadcast.createdAt).toLocaleDateString(),
-              content: smsTemplate({
-                ...attendee,
-                ...(attendee as any).attributeValues.reduce(
-                  (
-                    obj: any,
-                    attribute: AttendeeAttributeValue & {
-                      formField: AttendeeAttribute;
-                    }
-                  ) => ((obj[attribute.formField.name] = attribute.value), obj),
-                  {}
-                )
-              })
-            });
-          }
-        });
+        let project = hackathon.projects.filter(
+          (x) => x.id == context.params?.project
+        )[0];
         return {
           props: {
             hackathon: hackathon,
             attendee: attendee,
-            broadcasts: broadcasts
+            project
           }
         };
       }
@@ -258,7 +227,8 @@ export const getServerSideProps = (async (
   return {
     props: {
       hackathon: null,
-      attendee: null
+      attendee: null,
+      project: null
     },
     redirect: {
       destination:

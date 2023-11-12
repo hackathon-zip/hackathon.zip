@@ -15,7 +15,10 @@ export default async function handler(
             id: req.query.project as string
         },
         data: {
-            ...permitParams<Project>(["name", "coverImage", "description"], req.body)
+            ...permitParams<Project>(
+                ["name", "coverImage", "description"],
+                req.body
+            )
         },
         include: {
             attributeValues: true

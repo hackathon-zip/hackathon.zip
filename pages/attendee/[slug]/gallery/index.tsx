@@ -5,7 +5,7 @@ import {
   Fieldset,
   Grid,
   Input,
-  Divider,
+  Image,
   Page,
   Text
 } from "@geist-ui/core";
@@ -19,7 +19,7 @@ import type {
 import prisma from "@/lib/prisma";
 import { NextApiRequest } from "next";
 import { NextServerOptions } from "next/dist/server/next";
-
+import { css } from "@/components/CSS";
 import type {
   Hackathon,
   Attendee,
@@ -28,7 +28,8 @@ import type {
   AttendeeAttributeValue,
   AttendeeAttribute,
   CustomPageLink,
-  Broadcast
+  Broadcast,
+  Project
 } from "@prisma/client";
 import React, { useState } from "react";
 import type { ReactElement } from "react";
@@ -36,15 +37,17 @@ import Link from "next/link";
 import Markdown from "@/components/Markdown";
 import AttendeeLayout from "@/components/layouts/attendee/AttendeeLayout";
 import { compile } from "@mdx-js/mdx";
+import { useRouter } from "next/router";
 
 export default function Attendee({
   hackathon,
   attendee,
-  broadcasts
+  broadcast
 }: {
   hackathon:
     | (Hackathon & {
         broadcasts: Broadcast[];
+        projects: Project[];
         pages: (CustomPage & {
           cards: (CustomPageCard & {
             links: CustomPageLink[];
@@ -62,12 +65,17 @@ export default function Attendee({
       })
     | null;
   attendee: Attendee | null;
-  broadcasts: {
-    content: string;
-    date: string;
-    title: string | null;
-  }[];
+  broadcast: string | null;
 }): any {
+  const router = useRouter();
+  const transformURL = (path: string) =>
+    router.asPath.startsWith("/attendee/")
+      ? `/attendee/${hackathon?.slug}${path}`
+      : path;
+  const transformAPIURL = (path: string) =>
+    router.asPath.startsWith("/attendee/")
+      ? `/api/attendee/${hackathon?.slug}${path}`
+      : `/api/${path}`;
   if (!hackathon) {
     return (
       <>
@@ -77,23 +85,51 @@ export default function Attendee({
   }
 
   return (
-    <div style={{ width: "100%" }}>
+    <>
       <div style={{ width: "100%" }}>
-        <h1>{hackathon?.name}</h1>
+        <h1>Project Gallery</h1>
+        <Grid.Container gap={1.5} my={1} style={{width: '100%'}}>
+          {hackathon?.projects
+            ?.filter((x) => x.coverImage && x.description)
+            .map((project) => (
+              <Grid xs={24}>
+                <Link href={transformURL(`/gallery/${project.id}`)}>
+                  <Card width="100%" className="projectImage" hoverable style={{cursor: 'pointer!important'}}>
+                    <Image
+                      src={project.coverImage as string}
+                      style={{ objectFit: "cover" }}
+                      height="200px"
+                      width="100%"
+                      draggable={false}
+                    />
+                    <Text h4 my={0}>
+                      {project.name}
+                    </Text>
+                    <Text>{project.description}</Text>
+                  </Card>
+                </Link>
+              </Grid>
+            ))}
+          {css`
+            .attendees-data-table {
+              --table-font-size: calc(1 * 11pt) !important;
+            }
+            .attendees-data-table-row {
+              cursor: pointer;
+            }
+            .attendees-data-table-row:has(.staged-button) {
+              background-color: #ec899355;
+            }
+            .attendees-data-table-row:hover:has(.staged-button) {
+              background-color: #ec899369 !important;
+            }
+            .attendees-data-table-row > td > div.cell {
+              min-height: calc(2.525 * var(--table-font-size));
+            }
+          `}
+        </Grid.Container>
       </div>
-      {broadcasts.map((broadcast) => (
-        <Card width="100%" mb={1}>
-          <Card.Content>
-            <Text b my={0}>
-              {broadcast.date}
-              {broadcast.title && `: ${broadcast.title}`}
-            </Text>
-          </Card.Content>
-          <Divider h="1px" my={0} />
-          <Card.Content>{broadcast.content}</Card.Content>
-        </Card>
-      ))}
-    </div>
+    </>
   );
 }
 
@@ -128,6 +164,7 @@ export const getServerSideProps = (async (
       },
       include: {
         broadcasts: true,
+        projects: true,
         pages: {
           include: {
             links: true,
@@ -142,6 +179,7 @@ export const getServerSideProps = (async (
     })) as
       | (Hackathon & {
           broadcasts: Broadcast[];
+          projects: Project[];
           pages: (CustomPage & {
             cards: (CustomPageCard & {
               links: CustomPageLink[];
@@ -164,7 +202,7 @@ export const getServerSideProps = (async (
         (x) => x.slug == "dashboard"
       )[0];
       const token = context.req.cookies[hackathon?.slug as string];
-      let attendee: any = null;
+      let attendee = null;
       if (token) {
         attendee = await prisma.attendee.findFirst({
           where: {
@@ -185,71 +223,10 @@ export const getServerSideProps = (async (
         });
       }
       if (attendee) {
-        let broadcasts: any[] = [];
-        hackathon.broadcasts.map((broadcast) => {
-          if (broadcast.emailHTMLTemplate) {
-            let htmlTemplate = ejs.compile(broadcast.emailHTMLTemplate, {});
-            broadcasts.push({
-              title: broadcast.emailTitle,
-              date: new Date(broadcast.createdAt).toLocaleDateString(),
-              content: htmlTemplate({
-                ...attendee,
-                ...(attendee as any).attributeValues.reduce(
-                  (
-                    obj: any,
-                    attribute: AttendeeAttributeValue & {
-                      formField: AttendeeAttribute;
-                    }
-                  ) => ((obj[attribute.formField.name] = attribute.value), obj),
-                  {}
-                )
-              })
-            });
-          } else if (broadcast.emailPlaintextTemplate) {
-            let plainTextTemplate = ejs.compile(
-              broadcast.emailPlaintextTemplate,
-              {}
-            );
-            broadcasts.push({
-              title: broadcast.emailTitle,
-              date: new Date(broadcast.createdAt).toLocaleDateString(),
-              content: plainTextTemplate({
-                ...attendee,
-                ...(attendee as any).attributeValues.reduce(
-                  (
-                    obj: any,
-                    attribute: AttendeeAttributeValue & {
-                      formField: AttendeeAttribute;
-                    }
-                  ) => ((obj[attribute.formField.name] = attribute.value), obj),
-                  {}
-                )
-              })
-            });
-          } else if (broadcast.smsTemplate) {
-            let smsTemplate = ejs.compile(broadcast.smsTemplate, {});
-            broadcasts.push({
-              date: new Date(broadcast.createdAt).toLocaleDateString(),
-              content: smsTemplate({
-                ...attendee,
-                ...(attendee as any).attributeValues.reduce(
-                  (
-                    obj: any,
-                    attribute: AttendeeAttributeValue & {
-                      formField: AttendeeAttribute;
-                    }
-                  ) => ((obj[attribute.formField.name] = attribute.value), obj),
-                  {}
-                )
-              })
-            });
-          }
-        });
         return {
           props: {
             hackathon: hackathon,
-            attendee: attendee,
-            broadcasts: broadcasts
+            attendee: attendee
           }
         };
       }
