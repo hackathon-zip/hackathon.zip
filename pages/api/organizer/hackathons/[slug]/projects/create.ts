@@ -13,6 +13,8 @@ export default async function handler(
     let project: Project = await prisma.project.create({
         data: {
             name: req.body.name,
+            coverImage: req.body.coverImage,
+            description: req.body.description,
             hackathon: {
                 connect: {
                     slug: req.query.slug as string

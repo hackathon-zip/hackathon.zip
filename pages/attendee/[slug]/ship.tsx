@@ -100,6 +100,20 @@ export default function Attendee({
                     defaultValue: project.name,
                     required: true
                   },
+                  {
+                    type: "textarea",
+                    label: "Description",
+                    name: "description",
+                    defaultValue: project.description,
+                    required: true
+                  },
+                  {
+                    type: "text",
+                    label: "Cover Image",
+                    name: "coverImage",
+                    defaultValue: project.coverImage,
+                    required: true
+                  },
                   ...(hackathon.projectSubmissionFields?.map(
                     (x) =>
                       ({

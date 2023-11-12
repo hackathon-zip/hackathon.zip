@@ -43,10 +43,10 @@ export type Column = {
 };
 
 export type BuiltInColumn = Column & {
-  fromProject: (attendee: Project) => string;
+  fromProject: (project: Project) => string;
   customRender?: (
     value: string,
-    attendee?: Project | ProjectWithAttributes
+    project?: Project | ProjectWithAttributes
   ) => JSX.Element | string;
 };
 
@@ -57,16 +57,21 @@ const builtInAttributes: BuiltInColumn[] = [
     id: "name",
     fromProject: (project: Project) => project.name,
     readOnly: false
+  },
+  {
+    type: "text",
+    name: "Cover Image",
+    id: "coverImage",
+    fromProject: (project: Project) => project.coverImage || "",
+    readOnly: false
+  },
+  {
+    type: "text",
+    name: "Description",
+    id: "description",
+    fromProject: (project: Project) => project.description || "",
+    readOnly: false
   }
-  /*{
-    type: "checkbox",
-    name: "Checked In",
-    id: "built-in",
-    fromAttendee: (attendee: Attendee) =>
-      attendee.checkedIn ? "true" : "false",
-    customRender: (value: string) => value,
-    readOnly: true
-  }*/
 ]; // these are separated that way we can use them when setting column settings
 
 class DrawerData {
@@ -101,11 +106,11 @@ class DrawerData {
     this.#setIsOpen(false);
   }
 
-  setProject(attendee: ProjectWithAttributes) {
-    this.#setProject(attendee);
+  setProject(project: ProjectWithAttributes) {
+    this.#setProject(project);
   }
 
-  clearAttendee() {
+  clearProject() {
     this.#setProject(undefined as any);
   }
 }
@@ -251,7 +256,7 @@ function EditDrawer({
                       },
                       body: JSON.stringify({
                         attributeId: id,
-                        attendeeId: project?.id,
+                        projectId: project?.id,
                         value
                       })
                     }

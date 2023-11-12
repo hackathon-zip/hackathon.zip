@@ -256,6 +256,8 @@ model Parent {
 model Project {
   id              String                  @id @default(uuid())
   name            String
+  coverImage      String?
+  description     String?
   hackathonId     String
   hackathon       Hackathon               @relation(fields: [hackathonId], references: [id])
   attributeValues ProjectAttributeValue[]
@@ -331,7 +333,7 @@ model Broadcast {
   id                     String          @id @default(uuid())
   emailHTMLTemplate      String?
   emailPlaintextTemplate String?
-  emailTitle String?
+  emailTitle             String?
   smsTemplate            String?
   sent                   SentBroadcast[]
   hackathonId            String

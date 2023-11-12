@@ -8,7 +8,7 @@ export default async function handler(
     res: NextApiResponse
 ) {
     try {
-        const { name, id } = req.body;
+        const { name, coverImage, description, id } = req.body;
 
         let slug = req.query.slug as string;
 
@@ -37,11 +37,15 @@ export default async function handler(
                 id
             },
             data: {
-                name
+                name,
+                coverImage,
+                description
             }
         });
 
         delete req.body.name;
+        delete req.body.coverImage;
+        delete req.body.description;
         delete req.body.id;
 
         await prisma.$transaction(
