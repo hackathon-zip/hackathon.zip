@@ -88,13 +88,18 @@ export default function Attendee({
     <>
       <div style={{ width: "100%" }}>
         <h1>Project Gallery</h1>
-        <Grid.Container gap={1.5} my={1} style={{width: '100%'}}>
+        <Grid.Container gap={1.5} my={1} style={{ width: "100%" }}>
           {hackathon?.projects
             ?.filter((x) => x.coverImage && x.description)
             .map((project) => (
               <Grid xs={24}>
                 <Link href={transformURL(`/gallery/${project.id}`)}>
-                  <Card width="100%" className="projectImage" hoverable style={{cursor: 'pointer!important'}}>
+                  <Card
+                    width="100%"
+                    className="projectImage"
+                    hoverable
+                    style={{ cursor: "pointer!important" }}
+                  >
                     <Image
                       src={project.coverImage as string}
                       style={{ objectFit: "cover" }}

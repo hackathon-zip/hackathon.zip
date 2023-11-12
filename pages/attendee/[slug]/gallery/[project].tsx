@@ -69,8 +69,8 @@ export default function Attendee({
   attendee: Attendee | null;
   project: Project & {
     attributeValues: (ProjectAttributeValue & {
-      attribute: ProjectAttribute
-    })[]
+      attribute: ProjectAttribute;
+    })[];
   };
 }): any {
   if (!hackathon) {
@@ -85,29 +85,31 @@ export default function Attendee({
     <>
       <div style={{ width: "100%" }}>
         <h1>{project.name}</h1>
-        {project.coverImage && <img
-          src={project.coverImage}
-          style={{
-            height: "200px",
-            borderRadius: "4px",
-            width: "100%",
-            objectFit: "cover",
-            objectPosition: 'center'
-          }}
-        />}
+        {project.coverImage && (
+          <img
+            src={project.coverImage}
+            style={{
+              height: "200px",
+              borderRadius: "4px",
+              width: "100%",
+              objectFit: "cover",
+              objectPosition: "center"
+            }}
+          />
+        )}
         {project.description && <Markdown code={project.description} />}
-        {project.attributeValues.length > 0 && <Card width="100%">
+        {project.attributeValues.length > 0 && (
+          <Card width="100%">
             <Text h4 my={0}>
               Additional Information
-              {project.attributeValues.map(attribute => (
+              {project.attributeValues.map((attribute) => (
                 <p>
                   <b>{attribute.attribute.name}:</b> {attribute.value}
                 </p>
-              ))
-              }
+              ))}
             </Text>
-          </Card>}
-        
+          </Card>
+        )}
       </div>
     </>
   );
