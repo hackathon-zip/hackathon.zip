@@ -71,22 +71,22 @@ export const NavbarTabs = [
     label: "Ship",
     value: "ship"
   },
-  {
+  /*{
     label: "Sponsors",
     value: "sponsors"
   },
   {
     label: "Leads",
     value: "leads"
-  },
+  },*/
   {
     label: "Integrations",
     value: "integrate"
   },
-  {
+  /*{
     label: "Finances",
     value: "finance"
-  },
+  },*/
   {
     label: "Settings",
     value: "settings"
