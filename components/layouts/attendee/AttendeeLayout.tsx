@@ -145,13 +145,15 @@ export default function AttendeeLayout({
                     </Text>
                   </Card.Content>
                   <Divider h="1px" my={0} />
-                  <Card.Content>
-                    <Text b my={0}>
-                      <Link color underline href={transformURL("/gallery")}>
-                        Gallery
-                      </Link>
-                    </Text>
-                  </Card.Content>
+                  {hackathon?.projectsPublicized && 
+                    <Card.Content>
+                      <Text b my={0}>
+                        <Link color underline href={transformURL("/gallery")}>
+                          Gallery
+                        </Link>
+                      </Text>
+                    </Card.Content>
+                  }
                   <Divider h="1px" my={0} />
                   {hackathon?.pages
                     .filter((x) => x.slug != "dashboard")

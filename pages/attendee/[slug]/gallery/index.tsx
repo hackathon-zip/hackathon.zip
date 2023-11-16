@@ -203,6 +203,19 @@ export const getServerSideProps = (async (
       | null;
 
     if (hackathon) {
+      if(!hackathon.projectsPublicized){
+        return {
+          props: {
+            hackathon: null,
+            attendee: null
+          },
+          redirect: {
+            destination:
+              new URL(("https://example.com" + context.req.url) as string).pathname.replace("/gallery", ""),
+            permanent: false
+          }
+        };
+      }
       hackathon.dashboard = hackathon?.pages.filter(
         (x) => x.slug == "dashboard"
       )[0];
@@ -244,8 +257,7 @@ export const getServerSideProps = (async (
     },
     redirect: {
       destination:
-        new URL(("https://example.com" + context.req.url) as string).pathname +
-        "/register",
+        new URL(("https://example.com" + context.req.url) as string).pathname.replace("/gallery", "/register"),
       permanent: false
     }
   };

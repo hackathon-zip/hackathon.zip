@@ -54,11 +54,14 @@ model Hackathon {
   ownerId         String
   collaboratorIds String[]
 
-  devices                 Device[]
+  devices Device[]
+
   projects                Project[]
   projectAttributes       ProjectAttribute[]
   projectSubmissionFields ProjectSubmissionField[]
-  broadcasts              Broadcast[]
+  projectsPublicized      Boolean                  @default(false)
+
+  broadcasts Broadcast[]
 }
 
 model CustomPage {

@@ -3,7 +3,7 @@ import EditableValue, { EditableHeader } from "@/components/EditableValue";
 import { Form } from "@/components/Form";
 import HackathonLayout from "@/components/layouts/organizer/OrganizerLayout";
 import FeatureInfo from "@/components/organizer/FeatureInfo";
-import { Package } from "@geist-ui/react-icons";
+import { Package, Eye, EyeOff } from "@geist-ui/react-icons";
 import useViewport from "@/hooks/useViewport";
 import { orderedSort, sl } from "@/lib/utils";
 import {
@@ -12,6 +12,7 @@ import {
   Drawer,
   Grid,
   Page,
+  Link,
   Table,
   Text,
   useToasts
@@ -751,11 +752,29 @@ export default function Hackathon({
   return (
     <>
       <Page>
-        <Grid.Container justify="space-between" alignItems="center" mb={1}>
-          <h1>Projects</h1>
+        <Grid.Container
+          justify="space-between"
+          alignItems="center"
+          mb={1}
+          style={{ gap: "8px" }}
+        >
+          <h1 style={{ flexGrow: "1" }}>Projects</h1>
           <Button type="success" onClick={() => setDrawerOpen(true)}>
             Edit Schema
           </Button>
+          <Link href={`/api/hackathons/${hackathon.slug}/projects/public`}>
+            {!hackathon.projectsPublicized ? (
+              <Button type="success">
+                <Eye size={16} />{" "}
+                <span style={{ marginLeft: "8px" }}>Show Projects</span>
+              </Button>
+            ) : (
+              <Button type="success">
+                <EyeOff size={16} />{" "}
+                <span style={{ marginLeft: "8px" }}>Hide Projects</span>
+              </Button>
+            )}
+          </Link>
         </Grid.Container>
         <Card
           style={{

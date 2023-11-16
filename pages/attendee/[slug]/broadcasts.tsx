@@ -262,8 +262,7 @@ export const getServerSideProps = (async (
     },
     redirect: {
       destination:
-        new URL(("https://example.com" + context.req.url) as string).pathname +
-        "/register",
+        new URL(("https://example.com" + context.req.url) as string).pathname.replace("/broadcasts", "/register"),
       permanent: false
     }
   };
