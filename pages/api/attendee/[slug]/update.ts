@@ -73,12 +73,12 @@ export default async function handler(
                         id: attribute
                     },
                     attendee: {
-                        id: attendee.id
+                        id: attendee?.id
                     },
                     id: attendeeAttributeIds[attribute] || "none"
                 },
                 create: {
-                    value: req.body[attribute],
+                    value: req.body[attribute], // @ts-ignore
                     attendeeId: attendee.id,
                     formFieldId: attribute
                 },

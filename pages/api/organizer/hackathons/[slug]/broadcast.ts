@@ -26,7 +26,7 @@ export default async function handler(
     let smsToSend: any = [];
     hackathon.attendees.map((attendee) => {
         if (emailHTMLTemplate && emailPlaintextTemplate && emailTitle) {
-            emailsToSend.push({
+            emailsToSend.push({ // @ts-ignore
                 to: attendee.email,
                 title: emailTitle,
                 html: emailHTMLTemplate({
@@ -48,7 +48,7 @@ export default async function handler(
             });
         }
         if (smsTemplate) {
-            smsToSend.push({
+            smsToSend.push({ // @ts-ignore
                 to: attendee.phone,
                 text: smsTemplate({
                     ...attendee,
