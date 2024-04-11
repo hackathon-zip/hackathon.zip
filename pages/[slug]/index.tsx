@@ -248,7 +248,7 @@ export const getServerSideProps = (async (context) => {
   });
   if (
     hackathon == null ||
-    userId == null ||
+    userId == null || // @ts-ignore
     !new HackathonPolicy(hackathon).canOrganizerAccess({ id: userId })
   ) {
     return {

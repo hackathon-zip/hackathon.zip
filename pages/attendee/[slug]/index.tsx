@@ -32,7 +32,8 @@ import type {
   AttendeeAttribute,
   CustomPageLink,
   Broadcast,
-  SignupFormField
+  SignupFormField,
+  SignupForm
 } from "@prisma/client";
 import React, { useState } from "react";
 import type { ReactElement } from "react";
@@ -45,6 +46,13 @@ type DashboardProps = {
   hackathon:
     | (Hackathon & {
         broadcasts: Broadcast[];
+        signupForm: SignupForm & {
+          fields: (SignupFormField &
+            {
+              attribute: AttendeeAttribute
+            }
+          )[]
+        }
         pages: (CustomPage & {
           cards: (CustomPageCard & {
             links: CustomPageLink[];
@@ -94,7 +102,9 @@ export function AttendeeView({ hackathon, attendee, broadcast}: DashboardProps):
           ))}
         </Grid.Container>
         <Grid.Container gap={1.5} my={1}>
-          {hackathon?.dashboard?.cards.map((card : CustomPageCard) => (
+          {hackathon?.dashboard?.cards.map((card : (CustomPageCard & {
+              links: CustomPageLink[];
+            })) => (
             <Grid xs={12}>
               <Card width="100%">
                 <Text h4 my={0}>
@@ -148,7 +158,7 @@ export function ApplicationView({ hackathon, attendee}: DashboardProps): any {
                 name: "name",
                 placeholder: "Fiona Hackworth",
                 required: true,
-                defaultValue: attendee.name
+                defaultValue: attendee?.name
               },
               {
                 type: "email",
@@ -156,7 +166,7 @@ export function ApplicationView({ hackathon, attendee}: DashboardProps): any {
                 name: "email",
                 placeholder: "fiona@hackathon.zip",
                 required: true,
-                defaultValue: attendee.email
+                defaultValue: attendee?.email
               },
               {
                 type: "text",
@@ -165,15 +175,18 @@ export function ApplicationView({ hackathon, attendee}: DashboardProps): any {
                 defaultValue: "false",
                 visible: () => false
               },
-              ...(hackathon.signupForm?.fields?.map((x: SignupFormField) => ({
+              ...(hackathon.signupForm?.fields?.map((x: SignupFormField &
+                {
+                  attribute: AttendeeAttribute
+                }) => ({
                   ...x.attribute,
                   ...x,
                   label: x.label,
                   placeholder: x.plaecholder,
                   description: x.description,
                   name: x.attribute.id,
-                  type: x.attribute.type,
-                  defaultValue: attendee.attributeValues.filter((a: AttendeeAttributeValue) => a.formFieldId == x.attributeId)[0]?.value
+                  type: x.attribute.type, // @ts-ignore
+                  defaultValue: attendee?.attributeValues.filter((a: AttendeeAttributeValue) => a.formFieldId == x.attributeId)[0]?.value
                 }) as FormElement
               ) || [])
             ]
@@ -217,7 +230,7 @@ export function ApplicationView({ hackathon, attendee}: DashboardProps): any {
 }
 
 export default function Index({ hackathon, attendee, broadcast}: DashboardProps) {
-  switch (attendee.status) {
+  switch (attendee?.status) {
     case 'Pending':
       return <ApplicationView hackathon={hackathon} attendee={attendee} broadcast={broadcast} />
       break;
