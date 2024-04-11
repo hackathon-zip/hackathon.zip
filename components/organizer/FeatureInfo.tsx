@@ -14,7 +14,8 @@ type FeatureKey =
   | "integrateEnabled"
   | "financeEnabled"
   | "sponsorsEnabled"
-  | "leadsEnabled";
+  | "leadsEnabled"
+  | "applicationsEnabled";
 
 export default function FeatureInfo({
   beforeSubmit,

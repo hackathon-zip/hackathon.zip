@@ -76,12 +76,14 @@ export default async function handler(
                     order: 1,
                     required: false,
                     plaecholder: newData[x].plaecholder,
-                    description: newData[x].description
+                    description: newData[x].description,
+                    stage: newData[x].stage
                 },
                 update: {
                     label: newData[x].label,
                     plaecholder: newData[x].plaecholder,
-                    description: newData[x].description
+                    description: newData[x].description,
+                    stage: newData[x].stage
                 }
             })
         )

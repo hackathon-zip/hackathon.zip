@@ -201,7 +201,8 @@ export const getServerSideProps = (async (context) => {
       leads: true,
       attendeeAttributes: {
         include: {
-          values: true
+          values: true,
+          signupFormField: true
         }
       },
       projectAttributes: {

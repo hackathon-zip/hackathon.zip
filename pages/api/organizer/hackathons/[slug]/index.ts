@@ -16,7 +16,8 @@ export async function getHackathon(
             slug: slug as string
         },
         include: {
-            attendees: true
+            attendees: true,
+            ...(include || {})
         }
     });
     if (

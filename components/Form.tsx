@@ -188,6 +188,7 @@ export type FormElement =
 export interface FormSchema {
   elements: Array<FormElement>;
   submitText?: string;
+  secondarySubmitText?: string;
 }
 
 interface FormValue {
@@ -285,7 +286,6 @@ export const Form = React.forwardRef(
           Array.isArray(old[name]?.value) && !Array.isArray(value)!
             ? value.split(",")
             : value;
-        console.log(value);
         if (element.required) {
           if (value) {
             if (element.validate) {
@@ -728,6 +728,26 @@ export const Form = React.forwardRef(
             >
               {schema.submitText ?? "Submit"}
             </Button>
+            {
+              schema.secondarySubmitText && <Button
+                loading={loading}
+                type={"secondary"}
+                htmlType="submit"
+                disabled={submitDisabledUntilValid && invalidFields.length > 0}
+                onClick={(e) => {
+                  if (invalidFields.length) {
+                    for (const invalidField of invalidFields) {
+                      warnValue(invalidField);
+                    }
+                    e.preventDefault();
+                  }
+                  updateValue("applied", "true")
+                }}
+                style={{ flexGrow: 1 }}
+              >
+                {schema.secondarySubmitText ?? "Submit"}
+              </Button>
+            }
             {additionalButtons}
             {!additionalButtons &&
               Object.values(values).filter((value: any) => value.showWarning)

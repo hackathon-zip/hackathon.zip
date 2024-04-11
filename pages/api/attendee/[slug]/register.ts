@@ -17,7 +17,6 @@ export default async function handler(
             data: {
                 name,
                 email,
-                dateOfBirth: new Date(dateOfBirth),
                 hackathon: {
                     connect: {
                         slug
@@ -37,7 +36,7 @@ export default async function handler(
             }))
         });
 
-        res.redirect(`/api/sign-in`);
+        res.redirect(`/api/attendee/${slug}/sign-in`);
     } catch (error) {
         console.error(error);
         return res.status(400).json({ error });

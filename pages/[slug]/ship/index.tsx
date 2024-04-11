@@ -308,8 +308,6 @@ function Data({
 
   const [projects, setProjects] = useState(defaultProjects);
 
-  console.log("Data table rendered!", { projects, attributes });
-
   const drawer = useDrawer();
 
   const sortedProjects = orderedSort(
@@ -569,7 +567,6 @@ function Data({
           data={[...tableData, createNew]}
           rowClassName={() => "attendees-data-table-row"}
           onRow={(e) => {
-            console.log(e, "@");
             if (e.$i === undefined) {
               return setDrawerOpen(true);
             }

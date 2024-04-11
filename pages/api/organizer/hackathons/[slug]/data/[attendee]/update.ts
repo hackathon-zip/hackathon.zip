@@ -10,12 +10,13 @@ export default async function handler(
 ) {
     const { userId } = getAuth(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
+    console.log(req.body)
     let attendee = await prisma.attendee.update({
         where: {
             id: req.query.attendee as string
         },
         data: {
-            ...permitParams<Attendee>(["email", "name"], req.body)
+            ...permitParams<Attendee>(["email", "name", "status"], req.body)
         },
         include: {
             attributeValues: true

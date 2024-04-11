@@ -64,6 +64,10 @@ export const NavbarTabs = [
     value: "broadcast"
   },
   {
+    label: "Applications",
+    value: "applications"
+  },
+  {
     label: "Schedule",
     value: "schedule"
   },

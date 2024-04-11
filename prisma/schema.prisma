@@ -46,6 +46,7 @@ model Hackathon {
   sponsorsEnabled  Boolean @default(false)
   leadsEnabled     Boolean @default(false)
   brandingEnabled  Boolean @default(false)
+  applicationsEnabled  Boolean @default(false)
 
   hcbId String?
 
@@ -167,6 +168,11 @@ model SignupForm {
   hackathon   Hackathon         @relation(fields: [hackathonId], references: [id])
 }
 
+enum SignupFormStage {
+  Initial
+  Supplementary
+}
+
 model SignupFormField {
   id          String            @id @default(uuid())
   attributeId String            @unique
@@ -177,6 +183,8 @@ model SignupFormField {
   description String?
   plaecholder String?
   order       Int
+  
+  stage       SignupFormStage @default(Initial)
 
   signupFormId String?
   signupForm   SignupForm? @relation(fields: [signupFormId], references: [id])
@@ -224,6 +232,15 @@ model AttendeeAttributeValue {
   formField   AttendeeAttribute @relation(fields: [formFieldId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
+enum AttendeeStatus {
+  Pending
+  Applied
+  MarkedAccepted
+  MarkedRejected
+  Accepted
+  Rejected
+}
+
 model Attendee {
   id   String @id @default(uuid())
   name String
@@ -243,6 +260,10 @@ model Attendee {
   project     Project?        @relation(fields: [projectId], references: [id])
   tokens      Token[]
   broadcasts  SentBroadcast[]
+  
+  // 
+  
+  status    AttendeeStatus @default(Pending)
 
   createdAt DateTime @default(now())
 }

@@ -120,6 +120,18 @@ export default function AttendeeLayout({
                 </Text>
               </div>
               {attendee && (
+                ["Pending", "Applied", "MarkedAccepted", "MarkedRejected"].includes(attendee.status) ? 
+                <>
+                  <Card.Content>
+                    <Text b my={0}>
+                      <Link color underline href={transformURL("/")}>
+                        Application Portal
+                      </Link>
+                    </Text>
+                  </Card.Content>
+                  <Divider h="1px" my={0} />
+                </> 
+              : (
                 <>
                   <Card.Content>
                     <Text b my={0}>
@@ -182,7 +194,7 @@ export default function AttendeeLayout({
                   </Card.Content>
                   <Divider h="1px" my={0} />
                 </>
-              )}
+              ))}
               {!attendee && (
                 <>
                   <Card.Content>

@@ -64,11 +64,10 @@ const builtInAttributes: BuiltInColumn[] = [
     readOnly: false
   },
   {
-    type: "Date m-d-y",
-    name: "Date of Birth",
-    id: "dateOfBirth",
-    fromAttendee: (attendee: Attendee) =>
-      attendee.dateOfBirth?.toLocaleDateString() || "",
+    type: "text",
+    name: "Status",
+    id: "status",
+    fromAttendee: (attendee: Attendee) => attendee.status,
     readOnly: false
   },
   {
@@ -221,6 +220,8 @@ function EditDrawer({
                   name={attribute.name}
                   initialValue={attendee ? (attendee as any)[attribute.id] : ""}
                   save={async (value) => {
+                    let body : any = {}
+                    body[attribute.name.toLowerCase()] = value
                     await fetch(
                       `/api/hackathons/${hackathon.slug}/data/${attendee?.id}/update`,
                       {
@@ -228,16 +229,15 @@ function EditDrawer({
                         headers: {
                           "Content-Type": "application/json"
                         },
-                        body: JSON.stringify({
-                          email: value
-                        })
+                        body: JSON.stringify(body)
                       }
-                    );
+                    ).then(res => res.json());
 
-                    const newAttendee = {
+                    let newAttendee = {
                       ...(drawer.attendee as any),
-                      email: value
                     };
+                    
+                    newAttendee[attribute.name.toLowerCase()] = value
 
                     drawer.setAttendee(newAttendee);
 
@@ -389,11 +389,11 @@ function Data({
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "8px"
+            gap: "8px",
+            fontWeight: 800
           }}
         >
-          <Plus size={20} />
-          Create New Attendee
+          New Attendee
         </span>
       ) : (
         ""

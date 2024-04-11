@@ -103,14 +103,30 @@ export default function Hackathon({
           return data[`${attribute.id}_enabled_on_form`].value.includes(
             "Display on form?"
           );
-        }
+        },
+      },
+      {
+        type: "select",
+        options: ["Initial", "Supplementary"],
+        miniLabel: "Stage",
+        name: `${attribute.id}_stage`,
+        mb: 0.3, // @ts-ignore
+        defaultValue: attribute.signupFormField != null
+            ? hackathon.applicationsEnabled ? attribute.signupFormField.stage : "Initial"
+            : "",
+        visible: (data: { [key: string]: { value: string[] } }) => {
+          return data[`${attribute.id}_enabled_on_form`].value.includes(
+            "Display on form?"
+          ) && hackathon.applicationsEnabled;
+        },
+        required: true
       }
     ];
   };
 
   const [formData, setFormData] = useState({});
 
-  const generatePreviewFields = (data: any) => {
+  const generatePreviewFields = (data: any, stage: string) => {
     let object = (() => {
       let newData: any = {};
       Object.keys(formData).map((x) => {
@@ -136,15 +152,15 @@ export default function Hackathon({
         type: object[x].attribute.type,
         enabled: object[x].enabled.includes("Display on form?")
       }))
-      .filter((x) => x.enabled);
+      .filter((x) => x.enabled && x.stage == stage);
   };
 
   return (
     <>
       <Page>
-        <h2>Configure Your Registration Form</h2>
+        <h2>Configure Your Registration {hackathon.applicationsEnabled && "/ Application"} Form</h2>
         <Grid.Container gap={2} justify="center">
-          <Grid xs={12}>
+          <Grid xs={!hackathon.applicationsEnabled ? 12 : 8}>
             <Form
               submission={{
                 onSubmit: async (data) => {
@@ -160,7 +176,6 @@ export default function Hackathon({
                       })
                     }
                   ).then((r) => r.json());
-                  console.log(res);
                 },
                 type: "controlled"
               }}
@@ -173,7 +188,7 @@ export default function Hackathon({
               setData={setFormData}
             />
           </Grid>
-          <Grid xs={12}>
+          <Grid xs={!hackathon.applicationsEnabled ? 12 : 8}>
             <iframe
               src={`/${hackathon?.slug}/register/form-preview/${encodeURIComponent(
                 JSON.stringify({
@@ -192,7 +207,27 @@ export default function Hackathon({
                       placeholder: "fiona@hackathon.zip",
                       required: true
                     },
-                    ...generatePreviewFields(formData)
+                    ...generatePreviewFields(formData, "Initial")
+                  ]
+                })
+              )}`}
+              width="100%"
+              height="1000px"
+              style={{
+                border: "1px solid #333",
+                borderRadius: "8px",
+                padding: "16px",
+                background: "#fff",
+                marginTop: "24px"
+              }}
+            />
+          </Grid>
+          <Grid xs={!hackathon.applicationsEnabled ? 0 : 8}>
+            <iframe
+              src={`/${hackathon?.slug}/register/form-preview/${encodeURIComponent(
+                JSON.stringify({
+                  elements: [
+                    ...generatePreviewFields(formData, "Supplementary")
                   ]
                 })
               )}`}
@@ -208,7 +243,6 @@ export default function Hackathon({
             />
           </Grid>
         </Grid.Container>
-        <Debug data={{ formData: generatePreviewFields(formData) }} />
       </Page>
     </>
   );

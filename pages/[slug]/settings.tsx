@@ -118,7 +118,7 @@ export default function Hackathon({
                   label: "Venue & Location",
                   name: "location",
                   defaultValue: hackathon.location
-                }
+                },
               ],
               submitText: "Save"
             }}

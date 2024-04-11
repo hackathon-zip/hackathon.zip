@@ -57,6 +57,7 @@ export default async function handler(
                         "website",
                         "leadsEnabled",
                         "sponsorsEnabled",
+                        "applicationsEnabled",
                         "customDomain",
                         "timezone"
                     ],
