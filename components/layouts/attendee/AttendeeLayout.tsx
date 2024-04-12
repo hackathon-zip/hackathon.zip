@@ -129,6 +129,13 @@ export default function AttendeeLayout({
                       </Link>
                     </Text>
                   </Card.Content>
+                  <Card.Content>
+                    <Text b my={0}>
+                      <Link color underline href={transformAPIURL("/sign-out")}>
+                        Sign Out
+                      </Link>
+                    </Text>
+                  </Card.Content>
                   <Divider h="1px" my={0} />
                 </> 
               : (
