@@ -678,7 +678,7 @@ export default function Hackathon({
         miniLabel: "Property Name:",
         label: attribute.name == "" ? attribute.id : attribute.name, // @ts-ignore
         name: `${attribute.id}_name`,
-        mt: hackathon.attendeeAttributes[0].id == attribute.id ? 0.5 : 1.5,
+        mt: hackathon.attendeeAttributes[0]?.id == attribute.id ? 0.5 : 1.5,
         mb: 0.5,
         defaultValue: attribute["name"],
         visible: (data: { [key: string]: { value: string } }) => {
