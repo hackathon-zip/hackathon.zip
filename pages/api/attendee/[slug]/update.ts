@@ -56,7 +56,7 @@ export default async function handler(
             },
             data: {
                 ...permitParams<Attendee>(["email", "name"], req.body),
-                ...(req.body.applied ? {status: "Applied"} : [])
+                ...(req.body.applied == "true" ? {status: "Applied"} : [])
             }
         })
         
